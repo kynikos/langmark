@@ -1,0 +1,132 @@
+::tags tag1 tag2
+::translation ring
+
+= Heading 1
+
+=========
+Heading 1
+=========
+
+== Heading 2
+
+---------
+Heading 2
+=========
+
+Heading 2
+=========
+
+=== Heading 3
+
+==== Heading 4
+
+===== Heading 5
+
+====== Heading 6
+
+Paragraph1
+
+Paragraph2 line1
+Paragraph2 line2
+
+Paragraph3 line1`
+Paragraph3 line1
+
+**bold** //italic// ##plaincode## %%formattedcode%% ,,sub,, ^^sup^^ ~~strike~~ ;;smaller;;
+
+\**escape*\* `**escape*`* {{nowiki}}escaped{{!nowiki}}
+
+@@reference1@@ [[smartlink||url]] [[[link||url]]]
+
+@ reference1 link
+
+ indented
+   indented
+  indented
+
+* list
+  * list
+  * list
+* list
+* list
+  * list
+    * list
+      ####
+      code
+      ####
+  * list
+
+# list
+# list
+  & list
+# list
+& list
+  & list
+4. list
+5. list
+
++ done
++ done
+  - todo
+- todo
+
+> quote
+>> quote
+> quote
+
+####
+plain code
+plain code
+####
+
+%%%%
+formatted code
+formatted code
+%%%%
+
+{{code config}}
+code
+code
+{{!code}}
+
+{{transclude page 1=arg cc=arg}}
+{{arg 1}}
+{{arg cc}}
+
+{{image path}}
+{{gallery path}}
+{{extension}}{{!extension}}
+
+https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#tables
+http://docutils.sourceforge.net/docs/user/rst/quickref.html#tables
+
++------------+------------+-----------+
+| Header 1   | Header 2   | Header 3  |
++============+============+===========+
+| body row 1 | column 2   | column 3  |
++------------+------------+-----------+
+| body row 2 | Cells may span columns.|
++------------+------------+-----------+
+| body row 3 | Cells may  | - Cells   |
++------------+ span rows. | - contain |
+| body row 4 |            | - blocks. |
++------------+------------+-----------+
+
+=====  =====  ======
+   Inputs     Output
+------------  ------
+  A      B    A or B
+=====  =====  ======
+False  False  False
+True   False  True
+False  True   True
+True   True   True
+=====  =====  ======
+
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+
+Another option is only support simple tables, and use tags like {{tr}} and {{td}} to create complex tables, and {{style class...}} to add style to rows and cells
