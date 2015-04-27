@@ -1,0 +1,5 @@
+/eventdispatcher.py
+/textparser.py
+__pycache__
+*.pyo
+*.pyc
