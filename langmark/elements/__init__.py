@@ -529,6 +529,7 @@ class _InlineElementContainingText(_InlineElement):
     """
     Base class for inline elements containing plain text.
     """
+    START_MARK = None
     END_MARK = None
 
     def make_inline_bindings(self):
