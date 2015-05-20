@@ -65,6 +65,23 @@ class Header:
         return ''
 
 
+class RawText:
+    def __init__(self, text):
+        self.text = text
+
+    def __bool__(self):
+        return len(self.text) > 0
+
+    def append(self, text):
+        self.text = ''.join((self.text, text))
+
+    def convert_to_html(self):
+        # "&" must be escaped *before* everything else
+        text = self.text.replace('&', '&amp;')
+        text = text.replace('<', '&lt;')
+        return text
+
+
 class _BlockElementStartNotMatched(Exception):
     """
     Internal exception used to communicate to the parent that the parsed line
@@ -109,6 +126,12 @@ class _Element:
 
     def set_parent(self, element):
         self.parent = element
+
+    @staticmethod
+    def _trim_last_break(text):
+        if text.endswith('\n'):
+            return text[:-1]
+        return text
 
     def convert_to_html(self):
         # TODO: Convert to HTML *while* building the tree, not afterwards
@@ -173,7 +196,7 @@ class _InlineElement(_Element):
 
     def _make_inline_handler(self, Element):
         def handler(event):
-            self.children.append(event.parsed_text)
+            self.children.append(RawText(event.parsed_text))
             element = Element(self.inline_parser)
             self.children.append(element)
             element.set_parent(self)
@@ -185,10 +208,10 @@ class _InlineElement(_Element):
         self.inline_parser.bind_to_parse_end(self._handle_inline_parse_end)
 
     def _handle_inline_parse_end(self, event):
-        self.children.append(event.remainder_text)
+        self.children.append(RawText(event.remainder_text))
 
     def _handle_inline_end_mark(self, event):
-        self.children.append(event.parsed_text)
+        self.children.append(RawText(event.parsed_text))
         self.parent.take_inline_control()
 
 
@@ -245,11 +268,11 @@ class _BlockElementNotContainingBlock(_BlockElement):
     Base class for elements not containing block elements.
     """
     def __init__(self, line):
-        self.rawtext = ''
+        self.rawtext = RawText('')
         _BlockElement.__init__(self, line)
 
     def _add_raw_line(self, line):
-        self.rawtext += line[self.indentation_external:]
+        self.rawtext.append(line[self.indentation_external:])
 
     def check_last_line(self, line):
         raise NotImplementedError()
@@ -264,7 +287,7 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
             self.check_last_line(line)
         except (_BlockElementStartMatched, _BlockElementEndConsumed,
                 _BlockElementEndNotConsumed):
-            inline_parser = textparser.TextParser(self.rawtext)
+            inline_parser = textparser.TextParser(self.rawtext.text)
             dummyelement = _InlineElementContainingInline_Dummy(inline_parser)
             dummyelement.take_inline_control()
             inline_parser.parse()
@@ -274,14 +297,8 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
             self._add_raw_line(line)
 
     def convert_to_html(self):
-        html = ''
-        for child in self.children:
-            try:
-                html += child.convert_to_html()
-            except AttributeError:
-                html += child
-        if html.endswith('\n'):
-            html = html[:-1]
+        html = self._trim_last_break(''.join(
+                        child.convert_to_html() for child in self.children))
         return html.join(self.HTML_TAGS)
 
 
@@ -294,10 +311,8 @@ class _BlockElementContainingText(_BlockElementNotContainingBlock):
         self._add_raw_line(line)
 
     def convert_to_html(self):
-        html = self.rawtext
-        if html.endswith('\n'):
-            html = html[:-1]
-        return html.join(self.HTML_TAGS)
+        return self._trim_last_break(self.rawtext.convert_to_html()).join(
+                                                                self.HTML_TAGS)
 
 
 class Root(_BlockElementContainingBlock):
@@ -461,14 +476,8 @@ class Paragraph(_BlockElementContainingInline):
         super(Paragraph, self)._add_raw_line(line)
 
     def convert_to_html(self):
-        html = ''
-        for child in self.children:
-            try:
-                html += child.convert_to_html()
-            except AttributeError:
-                html += child
-        if html.endswith('\n'):
-            html = html[:-1]
+        html = self._trim_last_break(''.join(child.convert_to_html()
+                                             for child in self.children))
         if len(self.parent.children) > 1:
             return html.join(self.HTML_TAGS)
         else:
@@ -511,14 +520,8 @@ class _InlineElementContainingInline(_InlineElement):
         return inline_bindings
 
     def convert_to_html(self):
-        html = ''
-        for child in self.children:
-            try:
-                html += child.convert_to_html()
-            except AttributeError:
-                html += child
-        if html.endswith('\n'):
-            html = html[:-1]
+        html = self._trim_last_break(''.join(child.convert_to_html()
+                                             for child in self.children))
         return html.join(self.HTML_TAGS)
 
 
@@ -532,7 +535,8 @@ class _InlineElementContainingText(_InlineElement):
         return {self.END_MARK: self._handle_inline_end_mark}
 
     def convert_to_html(self):
-        return ''.join(self.children).join(self.HTML_TAGS)
+        return ''.join(child.convert_to_html() for child in self.children
+                                                        ).join(self.HTML_TAGS)
 
 
 class _InlineElementContainingInline_Dummy(_InlineElement):
