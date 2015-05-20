@@ -516,7 +516,8 @@ class _InlineElementContainingInline(_InlineElement):
         inline_bindings = {
                         Element.START_MARK: self._make_inline_handler(Element)
                         for Element in self.INSTALLED_INLINE_ELEMENTS}
-        inline_bindings.update({self.END_MARK: self._handle_inline_end_mark})
+        del inline_bindings[self.START_MARK]
+        inline_bindings[self.END_MARK] = self._handle_inline_end_mark
         return inline_bindings
 
     def convert_to_html(self):
