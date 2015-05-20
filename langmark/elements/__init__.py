@@ -21,8 +21,6 @@ import itertools
 import textparser
 
 
-
-
 class Marks:
     """
     The regular expressions used to detect start and end of elements.
@@ -214,6 +212,8 @@ class _BlockElementContainingBlock(_BlockElement):
         else:
             self._add_child(element)
             try:
+                # The item's children (but not the descendants) should inherit the list... ********
+                element.INSTALLED_BLOCK_ELEMENTS = self.INSTALLED_BLOCK_ELEMENTS  # ***************
                 element.parse_lines()
             except _BlockElementStartMatched as exc:
                 self._parse_element(exc.element)
@@ -317,6 +317,50 @@ class Root(_BlockElementContainingBlock):
                                     for child in self.children)
 
 
+class _BlockElementContainingBlock_Prefix_Group(_BlockElementContainingBlock):
+    """
+    Base class for groups of block elements identified by a prefix.
+
+    START_MARK's first capturing group will be used as the first line of
+    content.`
+    """
+    START_MARK = None
+
+    def parse_first_line(self, line):
+        match = self.START_MARK.fullmatch(line)
+        if not match:
+            raise _BlockElementStartNotMatched()
+        indent = len(match.group(2))
+        return (indent, indent, line[indent:])
+
+    def parse_line(self, line):
+        # Overriding _BlockElementContainingBlock ****************************************
+        element = self.find_element_start(line)
+        if not element:
+            raise _BlockElementEndNotConsumed(line)
+        self._parse_element(element)
+
+    def _parse_element(self, element):
+        # Overriding/duplicating _BlockElementContainingBlock ****************************************
+        if element.__class__ not in self.INSTALLED_BLOCK_ELEMENTS:
+            self.parent._parse_element(element)
+            return
+        if element.indentation_external < self.indentation_internal:
+            self.parent._parse_element(element)
+        else:
+            self._add_child(element)
+            try:
+                element.parse_lines()
+            except _BlockElementStartMatched as exc:
+                self._parse_element(exc.element)
+                return
+            except _BlockElementEndConsumed:
+                return
+            except _BlockElementEndNotConsumed as exc:
+                self.parse_line(exc.line)
+                return
+
+
 class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
     """
     Base class for block elements identified by a prefix.
@@ -331,39 +375,6 @@ class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
         if not match:
             raise _BlockElementStartNotMatched()
         return (len(match.group(2)), len(match.group(1)), match.group(3))
-
-
-class _BlockElementContainingBlock_Prefix_Grouped(
-                                        _BlockElementContainingBlock_Prefix):
-    """
-    Base class for block elements identified by a prefix that must be grouped
-    inside an additional HTML element.
-    """
-    # TODO: This class should be made a mixin, but it's hard because of the
-    #       super calls
-    HTML_OUTER_TAGS = None
-
-    def __init__(self, line):
-        super(_BlockElementContainingBlock_Prefix_Grouped, self).__init__(line)
-        self.group_item_number = 0
-        self.group_item_last = True
-
-    def set_parent(self, element):
-        super(_BlockElementContainingBlock_Prefix_Grouped, self).set_parent(
-                                                                    element)
-        previous = element.children[-1]
-        if previous.__class__ == self.__class__:
-            self.group_item_number = previous.group_item_number + 1
-            previous.group_item_last = False
-
-    def convert_to_html(self):
-        html = super(_BlockElementContainingBlock_Prefix_Grouped,
-                     self).convert_to_html()
-        if self.group_item_number == 0:
-            html = self.HTML_BREAK.join((self.HTML_OUTER_TAGS[0], html))
-        if self.group_item_last is True:
-            html = self.HTML_BREAK.join((html, self.HTML_OUTER_TAGS[1]))
-        return html
 
 
 class _BlockElementContainingInline_OneLine(_BlockElementContainingInline):

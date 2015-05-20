@@ -28,7 +28,7 @@ BLOCK_ELEMENTS = [headings.Heading1Alt,
                   headings.Heading3,
                   headings.Heading2,
                   headings.Heading1,
-                  lists.UnorderedListItem,
+                  lists.UnorderedList,
                   code.FormattableCodeBlock,
                   code.PlainCodeBlock]
 INLINE_ELEMENTS = [formatting.Emphasis,

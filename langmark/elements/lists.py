@@ -26,15 +26,35 @@ class Marks(langmark.elements.Marks):
     UNORDEREDLISTITEM_START = re.compile(r'^(([ \t]*)\*[ \t]+)(.*\n)')
 
 
-class UnorderedListItem(
-                langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
+class UnorderedListItem(langmark.elements._BlockElementContainingBlock_Prefix):
     """
     An unordered list item.::
 
         * List item
     """
+    START_MARK = Marks.UNORDEREDLISTITEM_START
+    HTML_TAGS = ('<li>', '</li>')
+
+    def __init__(self, *args, **kwargs):
+        # Generalize ***********************************************************************
+        # Execute *before* instantiating ********************************************
+        self.INSTALLED_BLOCK_ELEMENTS = self.INSTALLED_BLOCK_ELEMENTS.copy()
+        i = self.INSTALLED_BLOCK_ELEMENTS.index(UnorderedList)
+        self.INSTALLED_BLOCK_ELEMENTS[i:i + 1] = [UnorderedListItem]
+        super(UnorderedListItem, self).__init__(*args, **kwargs)
+
+
+class UnorderedList(
+                langmark.elements._BlockElementContainingBlock_Prefix_Group):
+    """
+    An unordered list.::
+
+        * List item
+        * List item
+        * List item
+    """
     # TODO: For the moment it's impossible to have two separate lists without
     #       other elements between them
-    START_MARK = Marks.UNORDEREDLISTITEM_START
-    HTML_OUTER_TAGS = ('<ul>', '</ul>')
-    HTML_TAGS = ('<li>', '</li>')
+    START_MARK = Marks.UNORDEREDLISTITEM_START  # Generalize *****************************
+    INSTALLED_BLOCK_ELEMENTS = [UnorderedListItem, ]
+    HTML_TAGS = ('<ul>', '</ul>')
