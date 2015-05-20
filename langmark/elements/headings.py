@@ -17,39 +17,38 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from langmark import elements
+import langmark
 
 # TODO: Implement "sections", i.e. containers of a heading and its subelements
 #       and subheadings. Sections can thus be nested.
 #       Make it possible to disable them.
 #       In HTML sections should be enclosed in <div> tags
 #       Perhaps implement them only when converting to HTML
-# TODO: Allow normal "= H1" and "== H2" headings, maybe optionally?
-
-# INSTALLER is defined at the *bottom* of the module
-INSTALLER = None
 
 
-class Marks(elements.Marks):
-    HEADING1_START = re.compile(r'^\=+ *\n', flags=re.MULTILINE)
-    HEADING1_END = re.compile(r'\n\=+ *\n', flags=re.MULTILINE)
-    HEADING2_START = re.compile(r'^\-+ *\n', flags=re.MULTILINE)
-    HEADING2_END = re.compile(r'\n\=+ *\n', flags=re.MULTILINE)
-    HEADING3_START = re.compile(r'^\={3} *(?![ \=\n])', flags=re.MULTILINE)
-    HEADING4_START = re.compile(r'^\={4} *(?![ \=\n])', flags=re.MULTILINE)
-    HEADING5_START = re.compile(r'^\={5} *(?![ \=\n])', flags=re.MULTILINE)
-    HEADING6_START = re.compile(r'^\={6} *(?![ \=\n])', flags=re.MULTILINE)
+class Marks(langmark.elements.Marks):
+    HEADING1ALT_START = re.compile(r'^()\={3,}[ \t]*\n')
+    HEADING1ALT_END = re.compile(r'^()\=*[ \t]*\n')
+    HEADING2ALT_START = re.compile(r'^()[\=\-]{3,}[ \t]*\n')
+    HEADING2ALT_END = re.compile(r'^()[\=\-]*[ \t]*\n')
+    HEADING1 = re.compile(r'^()\={1}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                           '[ \t]*\=*[ \t]*\n')
+    HEADING2 = re.compile(r'^()\={2}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                           '[ \t]*\=*[ \t]*\n')
+    HEADING5 = re.compile(r'^()\={5}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                           '[ \t]*\=*[ \t]*\n')
+    HEADING3 = re.compile(r'^()\={3}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                           '[ \t]*\=*[ \t]*\n')
+    HEADING4 = re.compile(r'^()\={4}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                           '[ \t]*\=*[ \t]*\n')
+    HEADING6 = re.compile(r'^()\={6,}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                           '[ \t]*\=*[ \t]*\n')
 
 
-class _Heading(elements._TreeElement):
-    def _handle_headingend(self, event):
-        self.children.append(event.parsed_text)
-        self.parent.take_control()
-
-
-class Heading1(_Heading):
+class Heading1Alt(
+        langmark.elements._BlockElementContainingInline_LineMarkOptionalEnd):
     """
-    A level-1 heading.::
+    A level-1 heading (multiline syntax).::
 
         =====
         Title
@@ -60,15 +59,15 @@ class Heading1(_Heading):
     start of the line to the line break. The heading must have an empty line
     below itself.
     """
+    START_MARK = Marks.HEADING1ALT_START
+    END_MARK = Marks.HEADING1ALT_END
     HTML_TAGS = ('<h1>', '</h1>')
 
-    def init_bindings(self):
-        return {Marks.HEADING1_END: self._handle_headingend}
 
-
-class Heading2(_Heading):
+class Heading2Alt(
+        langmark.elements._BlockElementContainingInline_LineMarkOptionalEnd):
     """
-    A level-2 heading.::
+    A level-2 heading (multiline syntax).::
 
         -----
         Title
@@ -80,18 +79,46 @@ class Heading2(_Heading):
     start of the line to the line break. The heading must have an empty line
     below itself.
     """
+    # TODO: Try to recognize headings with only equal signs below (maybe
+    #       reading the preceding empty line):
+    #
+    #     Title
+    #     =====
+    #
+    START_MARK = Marks.HEADING2ALT_START
+    END_MARK = Marks.HEADING2ALT_END
     HTML_TAGS = ('<h2>', '</h2>')
 
-    def init_bindings(self):
-        return {Marks.HEADING2_END: self._handle_headingend}
+
+class Heading1(langmark.elements._BlockElementContainingInline_OneLine):
+    """
+    A level-1 heading (one-line syntax).::
+
+        === Title
+
+    There must be one space between the equal sign and the title. The
+    rest of the line is taken literally as the title until the line break. The
+    heading must have an empty line below itself.
+    """
+    START_MARK = Marks.HEADING1
+    HTML_TAGS = ('<h1>', '</h1>')
 
 
-class _Heading3456(_Heading):
-    def init_bindings(self):
-        return {Marks.LINE_BREAK: self._handle_headingend}
+class Heading2(langmark.elements._BlockElementContainingInline_OneLine):
+    """
+    A level-2 heading (one-line syntax).::
+
+        === Title
+
+    There must be one space between the second equal sign and the title. The
+    rest of the line is taken literally as the title until the line break. The
+    heading must have an empty line below itself.
+    """
+    START_MARK = Marks.HEADING2
+    HTML_TAGS = ('<h2>', '</h2>')
 
 
-class Heading3(_Heading3456):
+class Heading3(langmark.elements._BlockElementContainingInline_OneLine):
     """
     A level-3 heading.::
 
@@ -101,10 +128,11 @@ class Heading3(_Heading3456):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
+    START_MARK = Marks.HEADING3
     HTML_TAGS = ('<h3>', '</h3>')
 
 
-class Heading4(_Heading3456):
+class Heading4(langmark.elements._BlockElementContainingInline_OneLine):
     """
     A level-4 heading.::
 
@@ -114,10 +142,11 @@ class Heading4(_Heading3456):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
+    START_MARK = Marks.HEADING4
     HTML_TAGS = ('<h4>', '</h4>')
 
 
-class Heading5(_Heading3456):
+class Heading5(langmark.elements._BlockElementContainingInline_OneLine):
     """
     A level-5 heading.::
 
@@ -127,10 +156,11 @@ class Heading5(_Heading3456):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
+    START_MARK = Marks.HEADING5
     HTML_TAGS = ('<h5>', '</h5>')
 
 
-class Heading6(_Heading3456):
+class Heading6(langmark.elements._BlockElementContainingInline_OneLine):
     """
     A level-6 heading.::
 
@@ -140,11 +170,5 @@ class Heading6(_Heading3456):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
+    START_MARK = Marks.HEADING6
     HTML_TAGS = ('<h6>', '</h6>')
-
-INSTALLER = {Marks.HEADING1_START: Heading1,
-             Marks.HEADING2_START: Heading2,
-             Marks.HEADING3_START: Heading3,
-             Marks.HEADING4_START: Heading4,
-             Marks.HEADING5_START: Heading5,
-             Marks.HEADING6_START: Heading6}

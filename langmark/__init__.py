@@ -16,19 +16,48 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-import textparser
-from .elements import headings
+from .elements import (headings, lists, code, formatting)
 
-ROOT_ELEMENTS = [headings, ]
+# The order of the elements is important: put the most likey elements first;
+#  some elements may rely on the fact that others have been discarded
+BLOCK_ELEMENTS = [headings.Heading1Alt,
+                  headings.Heading2Alt,
+                  headings.Heading6,
+                  headings.Heading5,
+                  headings.Heading4,
+                  headings.Heading3,
+                  headings.Heading2,
+                  headings.Heading1,
+                  lists.UnorderedListItem,
+                  code.FormattableCodeBlock,
+                  code.PlainCodeBlock]
+INLINE_ELEMENTS = [formatting.Emphasis,
+                   formatting.Strong,
+                   formatting.Superscript,
+                   formatting.Subscript,
+                   formatting.Small,
+                   formatting.Strikethrough,
+                   code.PlainCode,
+                   code.FormattableCode]
+# Extension modules should insert their Element classes in the lists above;
+#  they must thus be imported *after* importing langmark, but *before*
+#  instantiating the Langmark class
 
 
 class Langmark:
-    def __init__(self, text, root_elements=ROOT_ELEMENTS):
+    def __init__(self, stream):
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
-        parser = textparser.TextParser(text)
-        self.etree = elements.Root(parser, root_elements=root_elements)
-        self.header = elements.Header(parser, self.etree)
-        self.header.take_control()
-        remainder_text = parser.parse()
-        self.meta = self.header.keys
+        # TODO: Support passing a string instead of a stream
+
+        elements._BlockElement.STREAM = stream
+
+        # Install additional elements here
+        elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
+        elements._InlineElement.INSTALLED_INLINE_ELEMENTS = INLINE_ELEMENTS
+
+        header = elements.Header()
+        line = header.parse(stream)
+        self.meta = header.keys
+        self.etree = elements.Root(line)
+        self.etree.parse_lines()

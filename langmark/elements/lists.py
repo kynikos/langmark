@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Langmark - A hypertext markup language with a powerful and extensible parser.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
@@ -18,27 +16,25 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse
-from langmark import Langmark
+import re
+import langmark
 
 
-def _parse_cli_args():
-    cliparser = argparse.ArgumentParser(description="Langmark parser.",
-                                        add_help=True)
-    cliparser.add_argument('format', choices=['html'], metavar='FORMAT',
-                        help='the output format, chosen among [%(choices)s]')
-    cliparser.add_argument('source', metavar='SOURCE',
-                        help='the file to be parsed')
-    return cliparser.parse_args()
+class Marks(langmark.elements.Marks):
+    # Without the space after the * there would be a clash with bold text at
+    #  the start of a line
+    UNORDEREDLISTITEM_START = re.compile(r'^(([ \t]*)\*[ \t]+)(.*\n)')
 
 
-def main():
-    cliargs = _parse_cli_args()
-    with open(cliargs.source, 'r') as stream:
-        doc = Langmark(stream)
-    print({
-        'html': doc.etree.convert_to_html,
-    }[cliargs.format]())
+class UnorderedListItem(
+                langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
+    """
+    An unordered list item.::
 
-if __name__ == '__main__':
-    main()
+        * List item
+    """
+    # TODO: For the moment it's impossible to have two separate lists without
+    #       other elements between them
+    START_MARK = Marks.UNORDEREDLISTITEM_START
+    HTML_OUTER_TAGS = ('<ul>', '</ul>')
+    HTML_TAGS = ('<li>', '</li>')

@@ -1,60 +1,84 @@
-::tags tag1 tag2
-::translation ring
-
-= Heading 1
-
-=========
-Heading 1
-=========
-
-== Heading 2
-
----------
-Heading 2
-=========
-
-Heading 2
-=========
-
-=== Heading 3
-
-==== Heading 4
-
-===== Heading 5
-
-====== Heading 6
-
-Paragraph1
-
-Paragraph2 line1
-Paragraph2 line2
 
 Paragraph3 line1`
 Paragraph3 line1
 
-**bold** //italic// ##plaincode## %%formattedcode%% ,,sub,, ^^sup^^ ~~strike~~ ;;smaller;;
+If a line ends in an odd number of `, the last one is changed to a line break,
+while the others are halved; if a line ends in an even number of `, no line
+break is created, and half of the source backticks are rendered.
 
-\**escape*\* `**escape*`* {{nowiki}}escaped{{!nowiki}}
+`italic` *italic* ''italic'' ^italic^ /italic/ |italic| //italic// __italic__
+``italic`italic`italic`` __italic_italic_italic__
 
-@@reference1@@ [[smartlink||url]] [[[link||url]]]
+*bold* **bold*bold*bold**
 
-@ reference1 link
+#[code]# \\code\\ :[code]: `code` |formattedcode| ``plaincode`` ||plaincode||
 
- indented
-   indented
+[link]
+[[[link||url]]]
+[[smartlink||url]]
+@@reference1@@
+http://plain.link.com/
+@[link|url]
+_link _text_
+__link_text__
+
+@reference1(hidden) url
+@ reference1(visible) url
+
+\**notbold*\*
+`**notbold*`*
+* notbold*
+** notbold**
+*bold *stillbold*
+**bold **stillbold**
+
+Maybe escape all inline start marks if followed by a space, and inline end
+  marks if preceeded by a space
+Also still consider the escape-by-doubling technique (*bold**stillbold*)
+
+{{nowiki}}escaped{{!nowiki}}
+\\\escaped///
+///escaped\\\
+\/\escaped/\/
+|!|escaped|!|
+
+The nowiki mode should also be used when in need for adding raw HTML code
+
+'quote' -> ‘quote’
+"quote" -> “quote”
+en--dash -> en–dash
+em---dash -> em—dash
+ellipsis... -> ellipsis…
+
+ code
   indented
+   code
+    indented
 
-* list
-  * list
-  * list
-* list
-* list
-  * list
-    * list
-      ####
-      code
-      ####
-  * list
+) indented
+)) indented
+) indented
+
+. indented
+.. indented
+. indented
+
+: indented
+:: indented
+: indented
+
+~ indented
+~~ idented
+~ indented
+
+> quote
+> > quote
+>> quote
+> quote
+
+!Note: text
+!Warning: text
+!Tip: text
 
 # list
 # list
@@ -69,20 +93,6 @@ Paragraph3 line1
 + done
   - todo
 - todo
-
-> quote
->> quote
-> quote
-
-####
-plain code
-plain code
-####
-
-%%%%
-formatted code
-formatted code
-%%%%
 
 {{code config}}
 code
@@ -99,6 +109,10 @@ code
 
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#tables
 http://docutils.sourceforge.net/docs/user/rst/quickref.html#tables
+
+With this style I could use the first line's and first column's plus signs
+to recognize how many rows and columns are needed; to find spanning cells I
+could look at the presence of minus/pipe signs where a cell border should be
 
 +------------+------------+-----------+
 | Header 1   | Header 2   | Header 3  |
