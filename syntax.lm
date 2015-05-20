@@ -1,4 +1,27 @@
 
+
+\**notbold*\*
+`**notbold*`*
+* notbold*
+** notbold**
+*bold *stillbold*
+**bold **stillbold**
+
+Single-character start marks could be escaped if followed by a space, and end
+  marks if preceeded by a space
+Double-character marks could be escaped by separating them with a space
+Also still consider the escape-by-doubling technique (*bold**stillbold*)
+
+
+{{nowiki}}escaped{{!nowiki}}
+\\\escaped///
+///escaped\\\
+\/\escaped/\/
+|!|escaped|!|
+
+The nowiki mode should also be used when in need for adding raw HTML code
+
+
 Paragraph3 line1`
 Paragraph3 line1
 
@@ -6,12 +29,14 @@ If a line ends in an odd number of `, the last one is changed to a line break,
 while the others are halved; if a line ends in an even number of `, no line
 break is created, and half of the source backticks are rendered.
 
+
 `italic` *italic* ''italic'' ^italic^ /italic/ |italic| //italic// __italic__
 ``italic`italic`italic`` __italic_italic_italic__
 
 *bold* **bold*bold*bold**
 
 #[code]# \\code\\ :[code]: `code` |formattedcode| ``plaincode`` ||plaincode||
+
 
 [link]
 [[[link||url]]]
@@ -25,30 +50,13 @@ __link_text__
 @reference1(hidden) url
 @ reference1(visible) url
 
-\**notbold*\*
-`**notbold*`*
-* notbold*
-** notbold**
-*bold *stillbold*
-**bold **stillbold**
-
-Maybe escape all inline start marks if followed by a space, and inline end
-  marks if preceeded by a space
-Also still consider the escape-by-doubling technique (*bold**stillbold*)
-
-{{nowiki}}escaped{{!nowiki}}
-\\\escaped///
-///escaped\\\
-\/\escaped/\/
-|!|escaped|!|
-
-The nowiki mode should also be used when in need for adding raw HTML code
 
 'quote' -> ‘quote’
 "quote" -> “quote”
 en--dash -> en–dash
 em---dash -> em—dash
 ellipsis... -> ellipsis…
+
 
  code
   indented
@@ -76,10 +84,6 @@ ellipsis... -> ellipsis…
 >> quote
 > quote
 
-!Note: text
-!Warning: text
-!Tip: text
-
 # list
 # list
   & list
@@ -94,6 +98,12 @@ ellipsis... -> ellipsis…
   - todo
 - todo
 
+
+!Note: text
+!Warning: text
+!Tip: text
+
+
 {{code config}}
 code
 code
@@ -106,6 +116,7 @@ code
 {{image path}}
 {{gallery path}}
 {{extension}}{{!extension}}
+
 
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#tables
 http://docutils.sourceforge.net/docs/user/rst/quickref.html#tables
@@ -142,5 +153,3 @@ True   True   True
 | col 3 is      | right-aligned | $1600 |
 | col 2 is      | centered      |   $12 |
 | zebra stripes | are neat      |    $1 |
-
-Another option is only support simple tables, and use tags like {{tr}} and {{td}} to create complex tables, and {{style class...}} to add style to rows and cells
