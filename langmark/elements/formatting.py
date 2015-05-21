@@ -19,14 +19,7 @@
 import re
 import langmark
 
-
-class Marks(langmark.elements.Marks):
-    EMPHASIS = re.compile(r'\'\'')
-    STRONG = re.compile(r'\*\*')
-    SUPERSCRIPT = re.compile(r'\^\^')
-    SUBSCRIPT = re.compile(r',,')
-    SMALL = re.compile(r';;')
-    STRIKETHROUGH = re.compile(r'~~')
+# Inline elements are installed at the bottom of this module
 
 
 class Emphasis(langmark.elements._InlineElementContainingInline):
@@ -35,8 +28,6 @@ class Emphasis(langmark.elements._InlineElementContainingInline):
 
         ''emphasized''
     """
-    START_MARK = Marks.EMPHASIS
-    END_MARK = Marks.EMPHASIS
     HTML_TAGS = ('<em>', '</em>')
 
 
@@ -46,8 +37,6 @@ class Strong(langmark.elements._InlineElementContainingInline):
 
         **strong**
     """
-    START_MARK = Marks.STRONG
-    END_MARK = Marks.STRONG
     HTML_TAGS = ('<strong>', '</strong>')
 
 
@@ -57,8 +46,6 @@ class Superscript(langmark.elements._InlineElementContainingInline):
 
         ^^superscript^^
     """
-    START_MARK = Marks.SUPERSCRIPT
-    END_MARK = Marks.SUPERSCRIPT
     HTML_TAGS = ('<sup>', '</sup>')
 
 
@@ -68,8 +55,6 @@ class Subscript(langmark.elements._InlineElementContainingInline):
 
         **subscript**
     """
-    START_MARK = Marks.SUBSCRIPT
-    END_MARK = Marks.SUBSCRIPT
     HTML_TAGS = ('<sub>', '</sub>')
 
 
@@ -79,8 +64,6 @@ class Small(langmark.elements._InlineElementContainingInline):
 
         **subscript**
     """
-    START_MARK = Marks.SMALL
-    END_MARK = Marks.SMALL
     HTML_TAGS = ('<small>', '</small>')
 
 
@@ -90,6 +73,11 @@ class Strikethrough(langmark.elements._InlineElementContainingInline):
 
         **subscript**
     """
-    START_MARK = Marks.STRIKETHROUGH
-    END_MARK = Marks.STRIKETHROUGH
     HTML_TAGS = ('<del>', '</del>')
+
+langmark.INLINE_ELEMENTS.update({Emphasis: (r'\'\'', ),
+                                 Strong: (r'\*\*', ),
+                                 Superscript: (r'\^\^', ),
+                                 Subscript: (r',,', ),
+                                 Small: (r';;', ),
+                                 Strikethrough: (r'~~', )})

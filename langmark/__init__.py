@@ -16,10 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
+
+# Inline elements must be installed by updating the following dictionary
+#  directly from extension modules; for this reason they must be imported
+#  *after* declaring it
+INLINE_ELEMENTS = {}
+
 from .elements import (headings, lists, code, formatting)
 
-# The order of the elements is important: put the most likey elements first;
-#  some elements may rely on the fact that others have been discarded
+# The order of the block elements is important: put the most likey elements
+#  first; some elements may rely on the fact that others have been discarded
+# Additional extension modules should insert their block element classes in the
+#  list below; they must thus be imported *after* importing langmark, but
+#  *before* instantiating the Langmark class
 BLOCK_ELEMENTS = [headings.Heading1Alt,
                   headings.Heading2Alt,
                   headings.Heading6,
@@ -31,17 +41,6 @@ BLOCK_ELEMENTS = [headings.Heading1Alt,
                   lists.UnorderedListItem,
                   code.FormattableCodeBlock,
                   code.PlainCodeBlock]
-INLINE_ELEMENTS = [formatting.Emphasis,
-                   formatting.Strong,
-                   formatting.Superscript,
-                   formatting.Subscript,
-                   formatting.Small,
-                   formatting.Strikethrough,
-                   code.PlainCode,
-                   code.FormattableCode]
-# Extension modules should insert their Element classes in the lists above;
-#  they must thus be imported *after* importing langmark, but *before*
-#  instantiating the Langmark class
 
 
 class Langmark:
@@ -51,13 +50,30 @@ class Langmark:
         # TODO: Support passing a string instead of a stream
 
         elements._BlockElement.STREAM = stream
-
-        # Install additional elements here
         elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
-        elements._InlineElement.INSTALLED_INLINE_ELEMENTS = INLINE_ELEMENTS
+        self.install_inline_elements()
 
         header = elements.Header()
         line = header.parse(stream)
         self.meta = header.keys
         self.etree = elements.Root(line)
         self.etree.parse_lines()
+
+    def install_inline_elements(self):
+        start_mark_to_element = {}
+        element_to_compiled_marks = {}
+        for Element in INLINE_ELEMENTS:
+            marks = INLINE_ELEMENTS[Element]
+            start_mark = re.compile(marks[0])
+            try:
+                end_mark = re.compile(marks[1])
+            except IndexError:
+                end_mark = start_mark
+            start_mark_to_element[start_mark] = Element
+            element_to_compiled_marks[Element] = (start_mark, end_mark)
+        element_to_compiled_marks[elements.DummyInlineElement] = (None, None)
+        # The first loop builds the dictionaries, which have to be installed
+        #  in a separate loop
+        for Element in element_to_compiled_marks:
+            Element.install_marks(start_mark_to_element.copy(),
+                                  *element_to_compiled_marks[Element])

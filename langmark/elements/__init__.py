@@ -183,36 +183,40 @@ class _InlineElement(_Element):
     """
     Base class for inline elements.
     """
-    INSTALLED_INLINE_ELEMENTS = None
+    START_MARK_TO_INLINE_ELEMENT = None
+    END_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
     def __init__(self, inline_parser):
         self.inline_parser = inline_parser
-        self.inline_bindings = self.make_inline_bindings()
+        self.inline_bindings = {start_mark: self._handle_inline_start_mark
+                        for start_mark in self.START_MARK_TO_INLINE_ELEMENT}
+        if self.END_MARK:
+            self.inline_bindings[self.END_MARK] = self._handle_inline_end_mark
         _Element.__init__(self)
 
-    def make_inline_bindings(self):
+    @classmethod
+    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
         raise NotImplementedError()
-
-    def _make_inline_handler(self, Element):
-        def handler(event):
-            self.children.append(RawText(event.parsed_text))
-            element = Element(self.inline_parser)
-            self.children.append(element)
-            element.set_parent(self)
-            element.take_inline_control()
-        return handler
 
     def take_inline_control(self):
         self.inline_parser.reset_bindings(self.inline_bindings)
         self.inline_parser.bind_to_parse_end(self._handle_inline_parse_end)
 
-    def _handle_inline_parse_end(self, event):
-        self.children.append(RawText(event.remainder_text))
+    def _handle_inline_start_mark(self, event):
+        self.children.append(RawText(event.parsed_text))
+        element = self.START_MARK_TO_INLINE_ELEMENT[event.regex](
+                                                            self.inline_parser)
+        self.children.append(element)
+        element.set_parent(self)
+        element.take_inline_control()
 
     def _handle_inline_end_mark(self, event):
         self.children.append(RawText(event.parsed_text))
         self.parent.take_inline_control()
+
+    def _handle_inline_parse_end(self, event):
+        self.children.append(RawText(event.remainder_text))
 
 
 class _BlockElementContainingBlock(_BlockElement):
@@ -288,7 +292,7 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
         except (_BlockElementStartMatched, _BlockElementEndConsumed,
                 _BlockElementEndNotConsumed):
             inline_parser = textparser.TextParser(self.rawtext.text)
-            dummyelement = _InlineElementContainingInline_Dummy(inline_parser)
+            dummyelement = DummyInlineElement(inline_parser)
             dummyelement.take_inline_control()
             inline_parser.parse()
             self.children = dummyelement.children
@@ -509,16 +513,11 @@ class _InlineElementContainingInline(_InlineElement):
     """
     Base class for inline elements containing inline elements.
     """
-    START_MARK = None
-    END_MARK = None
-
-    def make_inline_bindings(self):
-        inline_bindings = {
-                        Element.START_MARK: self._make_inline_handler(Element)
-                        for Element in self.INSTALLED_INLINE_ELEMENTS}
-        del inline_bindings[self.START_MARK]
-        inline_bindings[self.END_MARK] = self._handle_inline_end_mark
-        return inline_bindings
+    @classmethod
+    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
+        del start_mark_to_element[start_mark]
+        cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
+        cls.END_MARK = end_mark
 
     def convert_to_html(self):
         html = self._trim_last_break(''.join(child.convert_to_html()
@@ -530,21 +529,21 @@ class _InlineElementContainingText(_InlineElement):
     """
     Base class for inline elements containing plain text.
     """
-    START_MARK = None
-    END_MARK = None
-
-    def make_inline_bindings(self):
-        return {self.END_MARK: self._handle_inline_end_mark}
+    @classmethod
+    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
+        cls.START_MARK_TO_INLINE_ELEMENT = {}
+        cls.END_MARK = end_mark
 
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children
                                                         ).join(self.HTML_TAGS)
 
 
-class _InlineElementContainingInline_Dummy(_InlineElement):
+class DummyInlineElement(_InlineElement):
     """
     Dummy inline element for parsing other inline elements.
     """
-    def make_inline_bindings(self):
-        return {Element.START_MARK: self._make_inline_handler(Element)
-                for Element in self.INSTALLED_INLINE_ELEMENTS}
+    @classmethod
+    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
+        cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
+        cls.END_MARK = None
