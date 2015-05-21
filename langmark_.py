@@ -34,8 +34,9 @@ def _parse_cli_args():
 
 def main():
     cliargs = _parse_cli_args()
+    doc = Langmark()
     with open(cliargs.source, 'r') as stream:
-        doc = Langmark(stream)
+        doc.parse(stream)
     print({
         'html': doc.etree.convert_to_html,
     }[cliargs.format]())

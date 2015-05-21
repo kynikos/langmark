@@ -44,22 +44,13 @@ BLOCK_ELEMENTS = [headings.Heading1Alt,
 
 
 class Langmark:
-    def __init__(self, stream):
+    def __init__(self):
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
-        # TODO: Support passing a string instead of a stream
-
-        elements._BlockElement.STREAM = stream
         elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
-        self.install_inline_elements()
+        self._install_inline_elements()
 
-        header = elements.Header()
-        line = header.parse(stream)
-        self.meta = header.keys
-        self.etree = elements.Root(line)
-        self.etree.parse_lines()
-
-    def install_inline_elements(self):
+    def _install_inline_elements(self):
         start_mark_to_element = {}
         element_to_compiled_marks = {}
         for Element in INLINE_ELEMENTS:
@@ -77,3 +68,14 @@ class Langmark:
         for Element in element_to_compiled_marks:
             Element.install_marks(start_mark_to_element.copy(),
                                   *element_to_compiled_marks[Element])
+
+    def parse(self, stream):
+        # The parameters for parse must reflect the attributes set through
+        # argparse by the launcher script
+        # TODO: Support passing a string instead of a stream
+        elements._BlockElement.STREAM = stream
+        header = elements.Header()
+        line = header.parse(stream)
+        self.meta = header.keys
+        self.etree = elements.Root(line)
+        self.etree.parse_lines()
