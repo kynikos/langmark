@@ -44,9 +44,9 @@ Text.
 * itemA
   itemB *bold* itemBB
 
-  |||
+  ###
   code
-  |||
+  ###
 
   itemC
 
@@ -58,7 +58,7 @@ Text.
 
 ``Text starting with backtick.
 `Es`cap`ing` more backticks here, but not here``.
-Plain code |` should ` allow ` single ` backticks `|.
+Plain code #` should ` allow ` single ` backticks `#.
 
 =======
 Title 1c
@@ -73,8 +73,8 @@ Ggg ^hhh^ iii.
 Jjj ;kkk; lll.
 Jjj :kkk: lll.
 Jjj ~kkk~ lll.
-Jjj !kkk<&>``! lll.
 Jjj |kkk<&>``| lll.
+Jjj #kkk<&>``# lll.
 Jjj \kkk<&>``\ lll.
 Aaa __ _bbb_ __ ccc.
 Ddd ** *eee* ** fff.
@@ -82,12 +82,12 @@ Ggg ^^ ^hhh^ ^^ iii.
 Jjj ;; ;kkk; ;; lll.
 Jjj :: :kkk: :: lll.
 Jjj ~~ ~kkk~ ~~ lll.
-Jjj !! !kkk<&>``! !! lll.
 Jjj || |kkk<&>``| || lll.
+Jjj ## #kkk<&>``# ## lll.
 Jjj \\ \kkk<&>``\ \\ lll.
 Mmm _*nnn*_ ooo.
-Jjj !*kkk*! lll.
 Jjj |*kkk*| lll.
+Jjj #*kkk*# lll.
 Ááá *ééé*
 Ppp *qqq
 rrr* sss.
@@ -110,21 +110,21 @@ Text.
 
 Text.
 
-!!!
+|||
 code
 *code*
 _code*more*_
 <br />
 code
-!!!
+|||
 
-|||
+###
 code
 *code*
 _code*more*_
 <br />
 code
-|||
+###
 
 \\\
 code
@@ -134,11 +134,11 @@ _code*more*_
 code
 \\\
 
-!!
+||
 notcode
 *notcode*
 notcode
-!!
+||
 
 ====== Title 6
 

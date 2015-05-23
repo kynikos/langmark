@@ -24,9 +24,9 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
     """
     Inline formattable monospace text.::
 
-        !code!
+        |code|
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('!')
+    INLINE_MARK = langmark.elements.InlineMarkSimple('|')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -34,9 +34,9 @@ class PlainCode(langmark.elements._InlineElementContainingText):
     """
     Inline preformatted monospace text.::
 
-        |code|
+        #code#
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('|')
+    INLINE_MARK = langmark.elements.InlineMarkSimple('#')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -55,12 +55,12 @@ class FormattableCodeBlock(
     """
     A block of formattable monospace text.::
 
-        !!!
+        |||
         Formatted code
-        !!!
+        |||
     """
-    START_MARK =re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
-    END_MARK = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
+    START_MARK =re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -68,12 +68,12 @@ class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
     """
     A block of preformatted monospace text.::
 
-        |||
+        ###
         Plain code
-        |||
+        ###
     """
-    START_MARK = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
-    END_MARK = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
+    START_MARK = re.compile(r'^([ \t]*)\#{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^([ \t]*)\#{3,}[ \t]*\n')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
