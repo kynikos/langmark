@@ -27,7 +27,6 @@ class _Regexs:
     """
     Auxiliary regular expressions.
     """
-    METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
     BLANK_LINE = re.compile(r'^[ \t]*\n')
     PARAGRAPH_INDENTATION = re.compile(r'^[ \t]*')
     # If an inline mark has overlapping matches with an inline mark, **which
@@ -35,6 +34,40 @@ class _Regexs:
     #  block mark leaving the inline mark intact; if an escape character is
     #  added at the beginning of a line, it will always escape both.
     ESCAPE_CHAR = re.compile('`.')
+
+
+class Header:
+    """
+    The header of the document, hosting the meta data.::
+
+        ::key value
+        ::key value
+        ::key value
+
+    All the lines must start with ``::``.
+    Spaces between ``::`` and the key are ignored.
+    The key cannot contain spaces.
+    A value string is optional and is considered to start after the first
+    sequence of spaces after the key string.
+    Multiline values are not supported yet.
+    The header ends as soon as a line that does not start with ``::`` is found.
+    """
+    # TODO: Support multiline metadata (using indentation for the continuation
+    #       lines)
+    METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
+
+    def __init__(self):
+        self.keys = {}
+
+    def parse(self, stream):
+        for line in stream:
+            match = self.METADATA.fullmatch(line)
+            if match:
+                self.keys[match.group(1)] = match.group(2)
+            else:
+                return line
+        # Never return None
+        return ''
 
 
 class _InlineMarkFactory:
@@ -81,38 +114,6 @@ class InlineMarkSimple(_InlineMarkFactory):
     @classmethod
     def make_end_text_spaced(cls, parsed_text):
         return parsed_text + cls.END_SPACED
-
-
-class Header:
-    """
-    The header of the document, hosting the meta data.::
-
-        ::key value
-        ::key value
-        ::key value
-
-    All the lines must start with ``::``.
-    Spaces between ``::`` and the key are ignored.
-    The key cannot contain spaces.
-    A value string is optional and is considered to start after the first
-    sequence of spaces after the key string.
-    Multiline values are not supported yet.
-    The header ends as soon as a line that does not start with ``::`` is found.
-    """
-    # TODO: Support multiline metadata (using indentation for the continuation
-    #       lines)
-    def __init__(self):
-        self.keys = {}
-
-    def parse(self, stream):
-        for line in stream:
-            match = _Regexs.METADATA.fullmatch(line)
-            if match:
-                self.keys[match.group(1)] = match.group(2)
-            else:
-                return line
-        # Never return None
-        return ''
 
 
 class RawText:
