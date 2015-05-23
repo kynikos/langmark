@@ -19,10 +19,11 @@
 import re
 import langmark
 
-# Inline elements are installed at the bottom of this module
-
 
 class Marks(langmark.elements.Marks):
+    FORMATTABLECODE = '!'
+    PLAINCODE = '|'
+    PLAINTEXT = '\\'
     FORMATTABLECODEBLOCK_START = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
     FORMATTABLECODEBLOCK_END = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
     PLAINCODEBLOCK_START = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
@@ -37,6 +38,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
 
         !code!
     """
+    MARK = Marks.FORMATTABLECODE
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -46,6 +48,7 @@ class PlainCode(langmark.elements._InlineElementContainingText):
 
         |code|
     """
+    MARK = Marks.PLAINCODE
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -55,6 +58,7 @@ class PlainText(langmark.elements._InlineElementContainingRaw):
 
         \text\
     """
+    MARK = Marks.PLAINTEXT
     HTML_TAGS = ('<span>', '</span>')
 
 
@@ -96,7 +100,3 @@ class PlainTextBlock(langmark.elements._BlockElementContainingRaw_LineMarks):
     START_MARK = Marks.PLAINTEXTBLOCK_START
     END_MARK = Marks.PLAINTEXTBLOCK_END
     HTML_TAGS = ('<div>', '</div>')
-
-langmark.INLINE_ELEMENTS_SIMPLE.update({'!': FormattableCode,
-                                        '|': PlainCode,
-                                        '\\': PlainText})

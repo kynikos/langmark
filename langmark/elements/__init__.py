@@ -573,6 +573,8 @@ class _InlineElementContainingInline(_InlineElement):
     """
     Base class for inline elements containing inline elements.
     """
+    MARK = None
+
     @classmethod
     def install_marks(cls, start_mark_to_element, start_mark,
                       start_mark_spaced_to_element, start_mark_spaced):
@@ -604,6 +606,8 @@ class _InlineElementContainingText(_InlineElementNotContainingInline):
     """
     Base class for inline elements containing plain text.
     """
+    MARK = None
+
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children
                                                         ).join(self.HTML_TAGS)
@@ -613,6 +617,8 @@ class _InlineElementContainingRaw(_InlineElementNotContainingInline):
     """
     Base class for inline elements containing raw text.
     """
+    MARK = None
+
     def convert_to_html(self):
         return ''.join(child.get_raw_text() for child in self.children
                                                         ).join(self.HTML_TAGS)

@@ -17,12 +17,6 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-
-# Inline elements must be installed by updating the following dictionary
-#  directly from extension modules; for this reason they must be imported
-#  *after* declaring it
-INLINE_ELEMENTS_SIMPLE = {}
-
 from .elements import (headings, lists, code, formatting)
 
 # The order of the block elements is important: put the most likey elements
@@ -43,6 +37,20 @@ BLOCK_ELEMENTS = [headings.Heading1Alt,
                   code.PlainCodeBlock,
                   code.PlainTextBlock]
 
+# The order of the inline elements is instead not important
+# Additional extension modules should insert their inline element classes in
+#  the list below; they must thus be imported *after* importing langmark, but
+#  *before* instantiating the Langmark class
+INLINE_ELEMENTS_SIMPLE = [formatting.Emphasis,
+                          formatting.Strong,
+                          formatting.Superscript,
+                          formatting.Subscript,
+                          formatting.Small,
+                          formatting.Strikethrough,
+                          code.FormattableCode,
+                          code.PlainCode,
+                          code.PlainText]
+
 
 class Langmark:
     def __init__(self):
@@ -55,8 +63,8 @@ class Langmark:
         start_mark_to_element = {}
         start_mark_spaced_to_element = {}
         element_to_compiled_marks = {}
-        for mark in INLINE_ELEMENTS_SIMPLE:
-            Element = INLINE_ELEMENTS_SIMPLE[mark]
+        for Element in INLINE_ELEMENTS_SIMPLE:
+            mark = Element.MARK
             start_mark = re.compile(
                 elements.Marks.INLINE_START_SIMPLE.format(
                                                 escaped_mark=re.escape(mark)))

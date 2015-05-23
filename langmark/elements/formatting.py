@@ -19,7 +19,14 @@
 import re
 import langmark
 
-# Inline elements are installed at the bottom of this module
+
+class Marks(langmark.elements.Marks):
+    EMPHASIS = '_'
+    STRONG = '*'
+    SUPERSCRIPT = '^'
+    SUBSCRIPT = ';'
+    SMALL = ':'
+    STRIKETHROUGH = '~'
 
 
 class Emphasis(langmark.elements._InlineElementContainingInline):
@@ -28,6 +35,7 @@ class Emphasis(langmark.elements._InlineElementContainingInline):
 
         _emphasized_
     """
+    MARK = Marks.EMPHASIS
     HTML_TAGS = ('<em>', '</em>')
 
 
@@ -37,6 +45,7 @@ class Strong(langmark.elements._InlineElementContainingInline):
 
         *strong*
     """
+    MARK = Marks.STRONG
     HTML_TAGS = ('<strong>', '</strong>')
 
 
@@ -46,6 +55,7 @@ class Superscript(langmark.elements._InlineElementContainingInline):
 
         ^superscript^
     """
+    MARK = Marks.SUPERSCRIPT
     HTML_TAGS = ('<sup>', '</sup>')
 
 
@@ -55,6 +65,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
 
         ;subscript;
     """
+    MARK = Marks.SUBSCRIPT
     HTML_TAGS = ('<sub>', '</sub>')
 
 
@@ -64,6 +75,7 @@ class Small(langmark.elements._InlineElementContainingInline):
 
         :small:
     """
+    MARK = Marks.SMALL
     HTML_TAGS = ('<small>', '</small>')
 
 
@@ -73,11 +85,5 @@ class Strikethrough(langmark.elements._InlineElementContainingInline):
 
         ~strikethrough~
     """
+    MARK = Marks.STRIKETHROUGH
     HTML_TAGS = ('<del>', '</del>')
-
-langmark.INLINE_ELEMENTS_SIMPLE.update({'_': Emphasis,
-                                        '*': Strong,
-                                        '^': Superscript,
-                                        ';': Subscript,
-                                        ':': Small,
-                                        '~': Strikethrough})
