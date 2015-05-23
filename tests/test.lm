@@ -57,6 +57,9 @@ Non item.
 Text.
 
 ``Text starting with backtick.
+`Es`cap`ing` more backticks here, but not here``.
+I'm using a backslash here \ and everything should be ok.
+Plain code ##` should ` allow ` single ` backticks `##.
 
 =======
 Title 1c

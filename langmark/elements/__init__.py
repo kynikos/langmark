@@ -30,7 +30,11 @@ class Marks:
     METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
     BLANK_LINE = re.compile(r'^[ \t]*\n')
     PARAGRAPH_INDENTATION = re.compile(r'^[ \t]*')
-    BLOCK_ESCAPE = '`'
+    # If an inline mark has overlapping matches with an inline mark, **which
+    #  should never happen by design**, it's impossible to only escape the
+    #  block mark leaving the inline mark intact; if an escape character is
+    #  added at the beginning of a line, it will always escape both.
+    ESCAPE_CHAR = re.compile('`.')
 
 
 class Header:
@@ -185,6 +189,7 @@ class _InlineElement(_Element):
     """
     START_MARK_TO_INLINE_ELEMENT = None
     END_MARK = None
+    ESCAPE_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
     def __init__(self, inline_parser):
@@ -193,6 +198,8 @@ class _InlineElement(_Element):
                         for start_mark in self.START_MARK_TO_INLINE_ELEMENT}
         if self.END_MARK:
             self.inline_bindings[self.END_MARK] = self._handle_inline_end_mark
+        if self.ESCAPE_MARK:
+            self.inline_bindings[self.ESCAPE_MARK] = self._handle_inline_escape
         _Element.__init__(self)
 
     @classmethod
@@ -202,6 +209,10 @@ class _InlineElement(_Element):
     def take_inline_control(self):
         self.inline_parser.reset_bindings(self.inline_bindings)
         self.inline_parser.bind_to_parse_end(self._handle_inline_parse_end)
+
+    def _handle_inline_escape(self, event):
+        self.children.append(RawText(event.parsed_text +
+                                     event.mark.group()[1]))
 
     def _handle_inline_start_mark(self, event):
         self.children.append(RawText(event.parsed_text))
@@ -474,10 +485,19 @@ class Paragraph(_BlockElementContainingInline):
         if Marks.BLANK_LINE.fullmatch(line):
             raise _BlockElementEndConsumed()
 
-    def _add_raw_line(self, line):
-        if line.startswith(Marks.BLOCK_ESCAPE):
-            line = line[1:]
-        super(Paragraph, self)._add_raw_line(line)
+    # If an inline mark has overlapping matches with an inline mark, **which
+    #  should never happen by design**, it's impossible to only escape the
+    #  block mark leaving the inline mark intact; if an escape character is
+    #  added at the beginning of a line, it will always escape both.
+    #  In theory the following overriding method would allow escaping the block
+    #  mark with 1 escape character, escaping the inline mark with 2, and
+    #  starting a line with an escaped escape character with 3, but all this
+    #  would not feel natural. As said above, all marks, both block and inline,
+    #  should be designed to never overlap.
+    #def _add_raw_line(self, line):
+    #    if Marks.ESCAPE_CHAR.match(line):
+    #        line = line[1:]
+    #    super(Paragraph, self)._add_raw_line(line)
 
     def convert_to_html(self):
         html = self._trim_last_break(''.join(child.convert_to_html()
@@ -518,6 +538,7 @@ class _InlineElementContainingInline(_InlineElement):
         del start_mark_to_element[start_mark]
         cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
         cls.END_MARK = end_mark
+        cls.ESCAPE_MARK = Marks.ESCAPE_CHAR
 
     def convert_to_html(self):
         html = self._trim_last_break(''.join(child.convert_to_html()
@@ -533,6 +554,7 @@ class _InlineElementContainingText(_InlineElement):
     def install_marks(cls, start_mark_to_element, start_mark, end_mark):
         cls.START_MARK_TO_INLINE_ELEMENT = {}
         cls.END_MARK = end_mark
+        cls.ESCAPE_MARK = None
 
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children
@@ -547,3 +569,4 @@ class DummyInlineElement(_InlineElement):
     def install_marks(cls, start_mark_to_element, start_mark, end_mark):
         cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
         cls.END_MARK = None
+        cls.ESCAPE_MARK = Marks.ESCAPE_CHAR
