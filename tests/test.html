@@ -37,7 +37,6 @@ itemB <strong>bold</strong> itemBB</p>
 <p>Text.</p>
 <p>`Text starting with backtick.
 Escaping more backticks here, but not here`.
-I'm using a backslash here \ and everything should be ok.
 Plain code <code>` should ` allow ` single ` backticks `</code>.</p>
 <h1>Title 1c</h1>
 <p>Text.</p>
@@ -48,16 +47,27 @@ Ggg <sup>hhh</sup> iii.
 Jjj <sub>kkk</sub> lll.
 Jjj <small>kkk</small> lll.
 Jjj <del>kkk</del> lll.
-Jjj <code>kkk</code> lll.
-Jjj <code>kkk</code> lll.
+Jjj <code>kkk&lt;&amp;>`</code> lll.
+Jjj <code>kkk&lt;&amp;>``</code> lll.
+Jjj <span>kkk<&>``</span> lll.
+Aaa <em>_bbb_</em> ccc.
+Ddd <strong>*eee*</strong> fff.
+Ggg <sup>^hhh^</sup> iii.
+Jjj <sub>;kkk;</sub> lll.
+Jjj <small>:kkk:</small> lll.
+Jjj <del>~kkk~</del> lll.
+Jjj <code>!kkk&lt;&amp;>`!</code> lll.
+Jjj <code>|kkk&lt;&amp;>``|</code> lll.
+Jjj <span>\kkk<&>``\</span> lll.
 Mmm <em><strong>nnn</strong></em> ooo.
-Jjj <code>**kkk**</code> lll.
+Jjj <code><strong>kkk</strong></code> lll.
+Jjj <code>*kkk*</code> lll.
 Ááá <strong>ééé</strong>
 Ppp <strong>qqq
 rrr</strong> sss.
-Ttt <em><strong>uuu<em>vvv<strong> www.
-Xxx <em>yyy<sub> zzz.
-ñññ.</sub></em></strong></em></strong></em></p>
+Ttt <em><strong>uuu<em>vvv* www.
+Xxx _yyy; zzz.
+ñññ.</em></strong></em></p>
 <p>Text.</p>
 <h4>Title <strong>4a</strong></h4>
 <p>Text &lt;escap&amp;this>.</p>
@@ -69,14 +79,22 @@ Xxx <em>yyy<sub> zzz.
 <pre>code
 <strong>code</strong>
 <em>code<strong>more</strong></em>
+&lt;br />
 code</pre>
 <pre>code
-**code**
-''code**more**''
+*code*
+_code*more*_
+&lt;br />
 code</pre>
-<p><code>
+<div>code
+*code*
+_code*more*_
+<br />
+code</div>
+<p>!!
 notcode
 <strong>notcode</strong>
-notcode</code></p>
+notcode
+!!</p>
 <h6>Title 6</h6>
 <p>Text.</p>

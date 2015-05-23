@@ -26,7 +26,7 @@ class Emphasis(langmark.elements._InlineElementContainingInline):
     """
     Emphasized text (usually rendered with italic formatting).::
 
-        ''emphasized''
+        _emphasized_
     """
     HTML_TAGS = ('<em>', '</em>')
 
@@ -35,7 +35,7 @@ class Strong(langmark.elements._InlineElementContainingInline):
     """
     Important text (usually rendered with bold formatting).::
 
-        **strong**
+        *strong*
     """
     HTML_TAGS = ('<strong>', '</strong>')
 
@@ -44,7 +44,7 @@ class Superscript(langmark.elements._InlineElementContainingInline):
     """
     Superscript text.::
 
-        ^^superscript^^
+        ^superscript^
     """
     HTML_TAGS = ('<sup>', '</sup>')
 
@@ -53,7 +53,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
     """
     Subscript text.::
 
-        ,,subscript,,
+        ;subscript;
     """
     HTML_TAGS = ('<sub>', '</sub>')
 
@@ -62,7 +62,7 @@ class Small(langmark.elements._InlineElementContainingInline):
     """
     Small text.::
 
-        ;;small;;
+        :small:
     """
     HTML_TAGS = ('<small>', '</small>')
 
@@ -71,13 +71,13 @@ class Strikethrough(langmark.elements._InlineElementContainingInline):
     """
     Strikethrough text.::
 
-        ~~strikethrough~~
+        ~strikethrough~
     """
     HTML_TAGS = ('<del>', '</del>')
 
-langmark.INLINE_ELEMENTS.update({Emphasis: (r'\'\'', ),
-                                 Strong: (r'\*\*', ),
-                                 Superscript: (r'\^\^', ),
-                                 Subscript: (r',,', ),
-                                 Small: (r';;', ),
-                                 Strikethrough: (r'~~', )})
+langmark.INLINE_ELEMENTS_SIMPLE.update({'_': Emphasis,
+                                        '*': Strong,
+                                        '^': Superscript,
+                                        ';': Subscript,
+                                        ':': Small,
+                                        '~': Strikethrough})

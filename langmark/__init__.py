@@ -21,7 +21,7 @@ import re
 # Inline elements must be installed by updating the following dictionary
 #  directly from extension modules; for this reason they must be imported
 #  *after* declaring it
-INLINE_ELEMENTS = {}
+INLINE_ELEMENTS_SIMPLE = {}
 
 from .elements import (headings, lists, code, formatting)
 
@@ -40,7 +40,8 @@ BLOCK_ELEMENTS = [headings.Heading1Alt,
                   headings.Heading1,
                   lists.UnorderedListItem,
                   code.FormattableCodeBlock,
-                  code.PlainCodeBlock]
+                  code.PlainCodeBlock,
+                  code.PlainTextBlock]
 
 
 class Langmark:
@@ -48,26 +49,33 @@ class Langmark:
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
         elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
-        self._install_inline_elements()
+        self._install_simple_inline_elements()
 
-    def _install_inline_elements(self):
+    def _install_simple_inline_elements(self):
         start_mark_to_element = {}
+        start_mark_spaced_to_element = {}
         element_to_compiled_marks = {}
-        for Element in INLINE_ELEMENTS:
-            marks = INLINE_ELEMENTS[Element]
-            start_mark = re.compile(marks[0])
-            try:
-                end_mark = re.compile(marks[1])
-            except IndexError:
-                end_mark = start_mark
+        for mark in INLINE_ELEMENTS_SIMPLE:
+            Element = INLINE_ELEMENTS_SIMPLE[mark]
+            start_mark = re.compile(
+                elements.Marks.INLINE_START_SIMPLE.format(
+                                                escaped_mark=re.escape(mark)))
             start_mark_to_element[start_mark] = Element
-            element_to_compiled_marks[Element] = (start_mark, end_mark)
-        element_to_compiled_marks[elements.DummyInlineElement] = (None, None)
+            start_mark_spaced = re.compile(
+                elements.Marks.INLINE_START_SIMPLE_SPACED.format(
+                                                escaped_mark=re.escape(mark)))
+            start_mark_spaced_to_element[start_mark_spaced] = Element
+            element_to_compiled_marks[Element] = (start_mark,
+                                                  start_mark_spaced)
+        element_to_compiled_marks[elements.BaseInlineElement] = (None, None)
         # The first loop builds the dictionaries, which have to be installed
         #  in a separate loop
         for Element in element_to_compiled_marks:
+            start_mark, start_mark_spaced = element_to_compiled_marks[Element]
             Element.install_marks(start_mark_to_element.copy(),
-                                  *element_to_compiled_marks[Element])
+                                  start_mark,
+                                  start_mark_spaced_to_element.copy(),
+                                  start_mark_spaced)
 
     def parse(self, stream):
         # The parameters for parse must reflect the attributes set through

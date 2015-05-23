@@ -23,17 +23,19 @@ import langmark
 
 
 class Marks(langmark.elements.Marks):
-    FORMATTABLECODEBLOCK_START = re.compile(r'^([ \t]*)\%{3,}[ \t]*\n')
-    FORMATTABLECODEBLOCK_END = re.compile(r'^([ \t]*)\%{3,}[ \t]*\n')
-    PLAINCODEBLOCK_START = re.compile(r'^([ \t]*)\#{3,}[ \t]*\n')
-    PLAINCODEBLOCK_END = re.compile(r'^([ \t]*)\#{3,}[ \t]*\n')
+    FORMATTABLECODEBLOCK_START = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
+    FORMATTABLECODEBLOCK_END = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
+    PLAINCODEBLOCK_START = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
+    PLAINCODEBLOCK_END = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
+    PLAINTEXTBLOCK_START = re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
+    PLAINTEXTBLOCK_END = re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
 
 
 class FormattableCode(langmark.elements._InlineElementContainingInline):
     """
     Inline formattable monospace text.::
 
-        %%code%%
+        !code!
     """
     HTML_TAGS = ('<code>', '</code>')
 
@@ -42,9 +44,18 @@ class PlainCode(langmark.elements._InlineElementContainingText):
     """
     Inline preformatted monospace text.::
 
-        ##code##
+        |code|
     """
     HTML_TAGS = ('<code>', '</code>')
+
+
+class PlainText(langmark.elements._InlineElementContainingRaw):
+    """
+    Inline plain, unescaped text.::
+
+        \text\
+    """
+    HTML_TAGS = ('<span>', '</span>')
 
 
 class FormattableCodeBlock(
@@ -52,9 +63,9 @@ class FormattableCodeBlock(
     """
     A block of formattable monospace text.::
 
-        %%%
+        !!!
         Formatted code
-        %%%
+        !!!
     """
     START_MARK = Marks.FORMATTABLECODEBLOCK_START
     END_MARK = Marks.FORMATTABLECODEBLOCK_END
@@ -65,13 +76,27 @@ class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
     """
     A block of preformatted monospace text.::
 
-        ###
+        |||
         Plain code
-        ###
+        |||
     """
     START_MARK = Marks.PLAINCODEBLOCK_START
     END_MARK = Marks.PLAINCODEBLOCK_END
     HTML_TAGS = ('<pre>', '</pre>')
 
-langmark.INLINE_ELEMENTS.update({FormattableCode: (r'%%', ),
-                                 PlainCode: (r'##', )})
+
+class PlainTextBlock(langmark.elements._BlockElementContainingRaw_LineMarks):
+    """
+    A block of plain, unescaped text.::
+
+        \\\
+        Plain text
+        \\\
+    """
+    START_MARK = Marks.PLAINTEXTBLOCK_START
+    END_MARK = Marks.PLAINTEXTBLOCK_END
+    HTML_TAGS = ('<div>', '</div>')
+
+langmark.INLINE_ELEMENTS_SIMPLE.update({'!': FormattableCode,
+                                        '|': PlainCode,
+                                        '\\': PlainText})

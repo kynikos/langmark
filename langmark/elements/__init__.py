@@ -35,6 +35,11 @@ class Marks:
     #  block mark leaving the inline mark intact; if an escape character is
     #  added at the beginning of a line, it will always escape both.
     ESCAPE_CHAR = re.compile('`.')
+    # Note how marks at the end of lines are ignored
+    INLINE_START_SIMPLE = (r'(^{escaped_mark}+[ \t]*|{escaped_mark}+)'
+                            '(?![ \t\n]|{escaped_mark})')
+    # Note how marks at the end of lines are ignored
+    INLINE_START_SIMPLE_SPACED = (r'(?<!^)[ \t]+{escaped_mark}+[ \t]+(?!\n)')
 
 
 class Header:
@@ -78,6 +83,9 @@ class RawText:
 
     def append(self, text):
         self.text = ''.join((self.text, text))
+
+    def get_raw_text(self):
+        return self.text
 
     def convert_to_html(self):
         # "&" must be escaped *before* everything else
@@ -188,22 +196,29 @@ class _InlineElement(_Element):
     Base class for inline elements.
     """
     START_MARK_TO_INLINE_ELEMENT = None
-    END_MARK = None
-    ESCAPE_MARK = None
+    START_MARK_SPACED_TO_INLINE_ELEMENT = None
+    ENABLE_ESCAPE = True
     HTML_TAGS = ('<span>', '</span>')
 
-    def __init__(self, inline_parser):
+    def __init__(self, parent, inline_parser, end_mark):
         self.inline_parser = inline_parser
         self.inline_bindings = {start_mark: self._handle_inline_start_mark
                         for start_mark in self.START_MARK_TO_INLINE_ELEMENT}
-        if self.END_MARK:
-            self.inline_bindings[self.END_MARK] = self._handle_inline_end_mark
-        if self.ESCAPE_MARK:
-            self.inline_bindings[self.ESCAPE_MARK] = self._handle_inline_escape
+        self.inline_bindings.update(
+            {start_mark_spaced: self._handle_inline_start_mark_spaced
+            for start_mark_spaced in self.START_MARK_SPACED_TO_INLINE_ELEMENT})
+        # BaseInlineElement passes None as end_mark
+        if end_mark:
+            self.inline_bindings[end_mark] = self._handle_inline_end_mark
+        if self.ENABLE_ESCAPE:
+            self.inline_bindings[Marks.ESCAPE_CHAR] = \
+                                                    self._handle_inline_escape
         _Element.__init__(self)
+        self.set_parent(parent)
 
     @classmethod
-    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
+    def install_marks(cls, start_mark_to_element, start_mark,
+                      start_mark_spaced_to_element, start_mark_spaced):
         raise NotImplementedError()
 
     def take_inline_control(self):
@@ -215,11 +230,22 @@ class _InlineElement(_Element):
                                      event.mark.group()[1]))
 
     def _handle_inline_start_mark(self, event):
-        self.children.append(RawText(event.parsed_text))
-        element = self.START_MARK_TO_INLINE_ELEMENT[event.regex](
-                                                            self.inline_parser)
+        end_mark = re.compile(r'(?<![ \t])' + re.escape(event.mark.group()))
+        element = self.START_MARK_TO_INLINE_ELEMENT[event.regex](self,
+                                                self.inline_parser, end_mark)
+        self._append_element(event.parsed_text, element)
+
+    def _handle_inline_start_mark_spaced(self, event):
+        # Don't match the last space ([:-1]), so that it's added after the
+        #  closing HTML tag
+        end_mark = re.compile(re.escape(event.mark.group()[:-1]))
+        element = self.START_MARK_SPACED_TO_INLINE_ELEMENT[event.regex](self,
+                                                self.inline_parser, end_mark)
+        self._append_element(event.parsed_text + ' ', element)
+
+    def _append_element(self, parsed_text, element):
+        self.children.append(RawText(parsed_text))
         self.children.append(element)
-        element.set_parent(self)
         element.take_inline_control()
 
     def _handle_inline_end_mark(self, event):
@@ -303,7 +329,7 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
         except (_BlockElementStartMatched, _BlockElementEndConsumed,
                 _BlockElementEndNotConsumed):
             inline_parser = textparser.TextParser(self.rawtext.text)
-            dummyelement = DummyInlineElement(inline_parser)
+            dummyelement = BaseInlineElement(self, inline_parser, None)
             dummyelement.take_inline_control()
             inline_parser.parse()
             self.children = dummyelement.children
@@ -315,19 +341,6 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
         html = self._trim_last_break(''.join(
                         child.convert_to_html() for child in self.children))
         return html.join(self.HTML_TAGS)
-
-
-class _BlockElementContainingText(_BlockElementNotContainingBlock):
-    """
-    Base class for elements containing plain text.
-    """
-    def parse_line(self, line):
-        self.check_last_line(line)
-        self._add_raw_line(line)
-
-    def convert_to_html(self):
-        return self._trim_last_break(self.rawtext.convert_to_html()).join(
-                                                                self.HTML_TAGS)
 
 
 class Root(_BlockElementContainingBlock):
@@ -508,10 +521,11 @@ class Paragraph(_BlockElementContainingInline):
             return html
 
 
-class _BlockElementContainingText_LineMarks(_BlockElementContainingText):
+class _BlockElementNotContainingInline_LineMarks(
+                                            _BlockElementNotContainingBlock):
     """
-    A block element, containing plain text, that starts and ends with full-line
-    marks.
+    Base class for elements containing neither inline nor block elements, that
+    starts and ends with full-line marks.
     """
     START_MARK = None
     END_MARK = None
@@ -523,10 +537,36 @@ class _BlockElementContainingText_LineMarks(_BlockElementContainingText):
         indent = len(match.group(1))
         return (indent, indent, None)
 
+    def parse_line(self, line):
+        self.check_last_line(line)
+        self._add_raw_line(line)
+
     def check_last_line(self, line):
         match = self.END_MARK.fullmatch(line)
         if match:
             raise _BlockElementEndConsumed()
+
+
+class _BlockElementContainingText_LineMarks(
+                                _BlockElementNotContainingInline_LineMarks):
+    """
+    A block element, containing plain text, that starts and ends with full-line
+    marks.
+    """
+    def convert_to_html(self):
+        return self._trim_last_break(self.rawtext.convert_to_html()).join(
+                                                                self.HTML_TAGS)
+
+
+class _BlockElementContainingRaw_LineMarks(
+                                _BlockElementNotContainingInline_LineMarks):
+    """
+    A block element, containing raw text, that starts and ends with full-line
+    marks.
+    """
+    def convert_to_html(self):
+        return self._trim_last_break(self.rawtext.get_raw_text()).join(
+                                                                self.HTML_TAGS)
 
 
 class _InlineElementContainingInline(_InlineElement):
@@ -534,11 +574,13 @@ class _InlineElementContainingInline(_InlineElement):
     Base class for inline elements containing inline elements.
     """
     @classmethod
-    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
+    def install_marks(cls, start_mark_to_element, start_mark,
+                      start_mark_spaced_to_element, start_mark_spaced):
         del start_mark_to_element[start_mark]
+        del start_mark_spaced_to_element[start_mark_spaced]
         cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
-        cls.END_MARK = end_mark
-        cls.ESCAPE_MARK = Marks.ESCAPE_CHAR
+        cls.START_MARK_SPACED_TO_INLINE_ELEMENT = start_mark_spaced_to_element
+        cls.ENABLE_ESCAPE = True
 
     def convert_to_html(self):
         html = self._trim_last_break(''.join(child.convert_to_html()
@@ -546,27 +588,43 @@ class _InlineElementContainingInline(_InlineElement):
         return html.join(self.HTML_TAGS)
 
 
-class _InlineElementContainingText(_InlineElement):
+class _InlineElementNotContainingInline(_InlineElement):
+    """
+    Base class for inline elements not containing inline elements.
+    """
+    @classmethod
+    def install_marks(cls, start_mark_to_element, start_mark,
+                      start_mark_spaced_to_element, start_mark_spaced):
+        cls.START_MARK_TO_INLINE_ELEMENT = {}
+        cls.START_MARK_SPACED_TO_INLINE_ELEMENT = {}
+        cls.ENABLE_ESCAPE = False
+
+
+class _InlineElementContainingText(_InlineElementNotContainingInline):
     """
     Base class for inline elements containing plain text.
     """
-    @classmethod
-    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
-        cls.START_MARK_TO_INLINE_ELEMENT = {}
-        cls.END_MARK = end_mark
-        cls.ESCAPE_MARK = None
-
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children
                                                         ).join(self.HTML_TAGS)
 
 
-class DummyInlineElement(_InlineElement):
+class _InlineElementContainingRaw(_InlineElementNotContainingInline):
+    """
+    Base class for inline elements containing raw text.
+    """
+    def convert_to_html(self):
+        return ''.join(child.get_raw_text() for child in self.children
+                                                        ).join(self.HTML_TAGS)
+
+
+class BaseInlineElement(_InlineElement):
     """
     Dummy inline element for parsing other inline elements.
     """
     @classmethod
-    def install_marks(cls, start_mark_to_element, start_mark, end_mark):
+    def install_marks(cls, start_mark_to_element, start_mark,
+                      start_mark_spaced_to_element, start_mark_spaced):
         cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
-        cls.END_MARK = None
-        cls.ESCAPE_MARK = Marks.ESCAPE_CHAR
+        cls.START_MARK_SPACED_TO_INLINE_ELEMENT = start_mark_spaced_to_element
+        cls.ENABLE_ESCAPE = True
