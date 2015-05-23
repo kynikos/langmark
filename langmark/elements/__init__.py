@@ -44,6 +44,26 @@ class _Regexs:
     INLINE_END_SIMPLE_SPACED = ' '
 
 
+class InlineMarkFactory:
+    """
+    Base class for inline mark factories.
+    """
+    pass
+
+
+class InlineMarkSimple(InlineMarkFactory):
+    """
+    A simple sequence of the same character.
+    """
+    def __init__(self, char):
+        # Make sure that char is a single character
+        escaped_char = re.escape(char[0])
+        self.normal = re.compile(_Regexs.INLINE_START_SIMPLE.format(
+                                                    escaped_char=escaped_char))
+        self.spaced = re.compile(_Regexs.INLINE_START_SIMPLE_SPACED.format(
+                                                    escaped_char=escaped_char))
+
+
 class Header:
     """
     The header of the document, hosting the meta data.::

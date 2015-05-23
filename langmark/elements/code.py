@@ -26,7 +26,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
 
         !code!
     """
-    MARK = '!'
+    INLINE_MARK = langmark.elements.InlineMarkSimple('!')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -36,7 +36,7 @@ class PlainCode(langmark.elements._InlineElementContainingText):
 
         |code|
     """
-    MARK = '|'
+    INLINE_MARK = langmark.elements.InlineMarkSimple('|')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -46,7 +46,7 @@ class PlainText(langmark.elements._InlineElementContainingRaw):
 
         \text\
     """
-    MARK = '\\'
+    INLINE_MARK = langmark.elements.InlineMarkSimple('\\')
     HTML_TAGS = ('<span>', '</span>')
 
 
