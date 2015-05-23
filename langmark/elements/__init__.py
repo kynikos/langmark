@@ -25,7 +25,7 @@ import textparser
 
 class _Regexs:
     """
-    Auxiliary regular expressions and strings.
+    Auxiliary regular expressions.
     """
     METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
     BLANK_LINE = re.compile(r'^[ \t]*\n')
@@ -66,8 +66,7 @@ class InlineMarkSimple(_InlineMarkFactory):
 
     @classmethod
     def make_end_mark_normal(cls, start_mark):
-        return re.compile(cls.END_NORMAL +
-                          re.escape(start_mark))
+        return re.compile(cls.END_NORMAL + re.escape(start_mark))
 
     @classmethod
     def make_end_text_normal(cls, parsed_text):
