@@ -37,7 +37,7 @@ class Marks:
     ESCAPE_CHAR = re.compile('`.')
     # Note how marks at the end of lines are ignored
     INLINE_START_SIMPLE = (r'(^{escaped_mark}+[ \t]*|{escaped_mark}+)'
-                            '(?![ \t\n]|{escaped_mark})')
+                            '(?![{escaped_mark} \t\n])')
     # Note how marks at the end of lines are ignored
     INLINE_START_SIMPLE_SPACED = (r'(?<!^)[ \t]+{escaped_mark}+[ \t]+(?!\n)')
 
