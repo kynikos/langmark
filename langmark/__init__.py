@@ -60,21 +60,22 @@ class Langmark:
         self._install_inline_elements()
 
     def _install_inline_elements(self):
-        start_mark_to_element = {}
+        start_mark_normal_to_element = {}
         start_mark_spaced_to_element = {}
         element_to_compiled_marks = {}
         for Element in INLINE_ELEMENTS:
             mark = Element.INLINE_MARK
-            start_mark_to_element[mark.normal] = Element
+            start_mark_normal_to_element[mark.normal] = Element
             start_mark_spaced_to_element[mark.spaced] = Element
             element_to_compiled_marks[Element] = (mark.normal, mark.spaced)
         element_to_compiled_marks[elements.BaseInlineElement] = (None, None)
         # The first loop builds the dictionaries, which have to be installed
         #  in a separate loop
         for Element in element_to_compiled_marks:
-            start_mark, start_mark_spaced = element_to_compiled_marks[Element]
-            Element.install_marks(start_mark_to_element.copy(),
-                                  start_mark,
+            start_mark_normal, start_mark_spaced = element_to_compiled_marks[
+                                                                    Element]
+            Element.install_marks(start_mark_normal_to_element.copy(),
+                                  start_mark_normal,
                                   start_mark_spaced_to_element.copy(),
                                   start_mark_spaced)
 
