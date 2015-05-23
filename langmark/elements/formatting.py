@@ -53,7 +53,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
     """
     Subscript text.::
 
-        **subscript**
+        ,,subscript,,
     """
     HTML_TAGS = ('<sub>', '</sub>')
 
@@ -62,7 +62,7 @@ class Small(langmark.elements._InlineElementContainingInline):
     """
     Small text.::
 
-        **subscript**
+        ;;small;;
     """
     HTML_TAGS = ('<small>', '</small>')
 
@@ -71,7 +71,7 @@ class Strikethrough(langmark.elements._InlineElementContainingInline):
     """
     Strikethrough text.::
 
-        **subscript**
+        ~~strikethrough~~
     """
     HTML_TAGS = ('<del>', '</del>')
 
