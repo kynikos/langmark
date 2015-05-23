@@ -64,14 +64,15 @@ class Langmark:
         start_mark_spaced_to_element = {}
         element_to_compiled_marks = {}
         for Element in INLINE_ELEMENTS:
-            mark = Element.MARK
+            # Make sure that the mark is a single character
+            escaped_char = re.escape(Element.MARK[0])
             start_mark = re.compile(
                 elements._Regexs.INLINE_START_SIMPLE.format(
-                                                escaped_mark=re.escape(mark)))
+                                                    escaped_char=escaped_char))
             start_mark_to_element[start_mark] = Element
             start_mark_spaced = re.compile(
                 elements._Regexs.INLINE_START_SIMPLE_SPACED.format(
-                                                escaped_mark=re.escape(mark)))
+                                                    escaped_char=escaped_char))
             start_mark_spaced_to_element[start_mark_spaced] = Element
             element_to_compiled_marks[Element] = (start_mark,
                                                   start_mark_spaced)

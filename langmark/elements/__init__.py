@@ -36,10 +36,10 @@ class _Regexs:
     #  added at the beginning of a line, it will always escape both.
     ESCAPE_CHAR = re.compile('`.')
     # Note how marks at the end of lines are ignored
-    INLINE_START_SIMPLE = (r'(^{escaped_mark}+[ \t]*|{escaped_mark}+)'
-                            '(?![{escaped_mark} \t\n])')
+    INLINE_START_SIMPLE = (r'(^{escaped_char}+[ \t]*|{escaped_char}+)'
+                            '(?![{escaped_char} \t\n])')
     # Note how marks at the end of lines are ignored
-    INLINE_START_SIMPLE_SPACED = (r'(?<!^)[ \t]+{escaped_mark}+[ \t]+(?!\n)')
+    INLINE_START_SIMPLE_SPACED = (r'(?<!^)[ \t]+{escaped_char}+[ \t]+(?!\n)')
     INLINE_END_SIMPLE = r'(?<![ \t])'
     INLINE_END_SIMPLE_SPACED = ' '
 
