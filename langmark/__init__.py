@@ -41,15 +41,15 @@ BLOCK_ELEMENTS = [headings.Heading1Alt,
 # Additional extension modules should insert their inline element classes in
 #  the list below; they must thus be imported *after* importing langmark, but
 #  *before* instantiating the Langmark class
-INLINE_ELEMENTS_SIMPLE = [formatting.Emphasis,
-                          formatting.Strong,
-                          formatting.Superscript,
-                          formatting.Subscript,
-                          formatting.Small,
-                          formatting.Strikethrough,
-                          code.FormattableCode,
-                          code.PlainCode,
-                          code.PlainText]
+INLINE_ELEMENTS = [formatting.Emphasis,
+                   formatting.Strong,
+                   formatting.Superscript,
+                   formatting.Subscript,
+                   formatting.Small,
+                   formatting.Strikethrough,
+                   code.FormattableCode,
+                   code.PlainCode,
+                   code.PlainText]
 
 
 class Langmark:
@@ -57,13 +57,13 @@ class Langmark:
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
         elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
-        self._install_simple_inline_elements()
+        self._install_inline_elements()
 
-    def _install_simple_inline_elements(self):
+    def _install_inline_elements(self):
         start_mark_to_element = {}
         start_mark_spaced_to_element = {}
         element_to_compiled_marks = {}
-        for Element in INLINE_ELEMENTS_SIMPLE:
+        for Element in INLINE_ELEMENTS:
             mark = Element.MARK
             start_mark = re.compile(
                 elements.Marks.INLINE_START_SIMPLE.format(
