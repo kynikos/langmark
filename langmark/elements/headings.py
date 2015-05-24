@@ -67,6 +67,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
         if match:
             indent = len(match.group(1))
             indented_line = match.group(2)
+            self.rewind_lines(lines[1], lines[2])
 
         elif langmark.elements._Regexs.BLANK_LINE.fullmatch(lines[0]):
             match3 = self.END_MARK.fullmatch(lines[2])
