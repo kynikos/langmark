@@ -26,8 +26,51 @@ import langmark
 #       Perhaps implement them only when converting to HTML
 
 
-class Heading1Alt(
-        langmark.elements._BlockElementContainingInline_LineMarkOptionalEnd):
+class _SimpleHeading(langmark.elements._BlockElementContainingInline):
+    """
+    A block element, containing inline elements, that can only span one line
+    and is identified by a prefix.
+
+    START_MARK's first capturing group will be used as the element content.
+    """
+    START_MARK = None
+
+    def check_element_start(self, line):
+        match = self.START_MARK.match(line)
+        if not match:
+            raise langmark.elements._BlockElementStartNotMatched(line)
+        indent = len(match.group(1))
+        return (indent, indent, match.group(2))
+
+    def check_element_end(self, line):
+        if self.rawtext:
+            raise langmark.elements._BlockElementEndNotConsumed(line)
+
+
+class _ComplexHeading(langmark.elements._BlockElementContainingInline):
+    """
+    A block element, containing inline elements, that starts with a full-line
+    mark and ends with an optional full-line mark.
+    """
+    START_MARK = None
+    END_MARK = None
+
+    def check_element_start(self, line):
+        match = self.START_MARK.fullmatch(line)
+        if not match:
+            raise langmark.elements._BlockElementStartNotMatched(line)
+        indent = len(match.group(1))
+        return (indent, indent, None)
+
+    def check_element_end(self, line):
+        match = self.END_MARK.fullmatch(line)
+        if match:
+            raise langmark.elements._BlockElementEndConsumed()
+        if self.rawtext:
+            raise langmark.elements._BlockElementEndNotConsumed(line)
+
+
+class Heading1Alt(_ComplexHeading):
     """
     A level-1 heading (multiline syntax).::
 
@@ -45,8 +88,7 @@ class Heading1Alt(
     HTML_TAGS = ('<h1>', '</h1>')
 
 
-class Heading2Alt(
-        langmark.elements._BlockElementContainingInline_LineMarkOptionalEnd):
+class Heading2Alt(_ComplexHeading):
     """
     A level-2 heading (multiline syntax).::
 
@@ -71,7 +113,7 @@ class Heading2Alt(
     HTML_TAGS = ('<h2>', '</h2>')
 
 
-class Heading1(langmark.elements._BlockElementContainingInline_OneLine):
+class Heading1(_SimpleHeading):
     """
     A level-1 heading (one-line syntax).::
 
@@ -86,7 +128,7 @@ class Heading1(langmark.elements._BlockElementContainingInline_OneLine):
     HTML_TAGS = ('<h1>', '</h1>')
 
 
-class Heading2(langmark.elements._BlockElementContainingInline_OneLine):
+class Heading2(_SimpleHeading):
     """
     A level-2 heading (one-line syntax).::
 
@@ -101,7 +143,7 @@ class Heading2(langmark.elements._BlockElementContainingInline_OneLine):
     HTML_TAGS = ('<h2>', '</h2>')
 
 
-class Heading3(langmark.elements._BlockElementContainingInline_OneLine):
+class Heading3(_SimpleHeading):
     """
     A level-3 heading.::
 
@@ -116,7 +158,7 @@ class Heading3(langmark.elements._BlockElementContainingInline_OneLine):
     HTML_TAGS = ('<h3>', '</h3>')
 
 
-class Heading4(langmark.elements._BlockElementContainingInline_OneLine):
+class Heading4(_SimpleHeading):
     """
     A level-4 heading.::
 
@@ -131,7 +173,7 @@ class Heading4(langmark.elements._BlockElementContainingInline_OneLine):
     HTML_TAGS = ('<h4>', '</h4>')
 
 
-class Heading5(langmark.elements._BlockElementContainingInline_OneLine):
+class Heading5(_SimpleHeading):
     """
     A level-5 heading.::
 
@@ -146,7 +188,7 @@ class Heading5(langmark.elements._BlockElementContainingInline_OneLine):
     HTML_TAGS = ('<h5>', '</h5>')
 
 
-class Heading6(langmark.elements._BlockElementContainingInline_OneLine):
+class Heading6(_SimpleHeading):
     """
     A level-6 heading.::
 

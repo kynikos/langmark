@@ -477,51 +477,6 @@ class _BlockElementContainingBlock_Prefix_Grouped(
         return html
 
 
-class _BlockElementContainingInline_OneLine(_BlockElementContainingInline):
-    """
-    A block element, containing inline elements, that can only span one line
-    and is identified by a prefix.
-
-    START_MARK's first capturing group will be used as the element content.
-    """
-    START_MARK = None
-
-    def check_element_start(self, line):
-        match = self.START_MARK.match(line)
-        if not match:
-            raise _BlockElementStartNotMatched(line)
-        indent = len(match.group(1))
-        return (indent, indent, match.group(2))
-
-    def check_element_end(self, line):
-        if self.rawtext:
-            raise _BlockElementEndNotConsumed(line)
-
-
-class _BlockElementContainingInline_LineMarkOptionalEnd(
-                                                _BlockElementContainingInline):
-    """
-    A block element, containing inline elements, that starts with a full-line
-    mark and ends with an optional full-line mark.
-    """
-    START_MARK = None
-    END_MARK = None
-
-    def check_element_start(self, line):
-        match = self.START_MARK.fullmatch(line)
-        if not match:
-            raise _BlockElementStartNotMatched(line)
-        indent = len(match.group(1))
-        return (indent, indent, None)
-
-    def check_element_end(self, line):
-        match = self.END_MARK.fullmatch(line)
-        if match:
-            raise _BlockElementEndConsumed()
-        if self.rawtext:
-            raise _BlockElementEndNotConsumed(line)
-
-
 class _BlockElementContainingInline_LineMarks(_BlockElementContainingInline):
     """
     A block element, containing inline elements, that starts and ends with
