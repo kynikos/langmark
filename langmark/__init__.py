@@ -24,14 +24,12 @@ from .elements import (headings, lists, code, formatting)
 # Additional extension modules should insert their block element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
 #  *before* instantiating the Langmark class
-BLOCK_ELEMENTS = [headings.Heading1Alt,
-                  headings.Heading2Alt,
-                  headings.Heading6,
-                  headings.Heading5,
-                  headings.Heading4,
-                  headings.Heading3,
+BLOCK_ELEMENTS = [headings.Heading1,
                   headings.Heading2,
-                  headings.Heading1,
+                  headings.Heading3,
+                  headings.Heading4,
+                  headings.Heading5,
+                  headings.Heading6,
                   lists.UnorderedListItem,
                   code.FormattableCodeBlock,
                   code.PlainCodeBlock,

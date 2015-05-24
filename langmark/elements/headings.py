@@ -33,6 +33,8 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
 
     START_MARK's first capturing group will be used as the element content.
     """
+    START_RE = (r'^()\={{{level}}}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                 '[ \t]*\=*[ \t]*\n')
     START_MARK = None
 
     def check_element_start(self, line):
@@ -52,27 +54,58 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
     A block element, containing inline elements, that starts with a full-line
     mark and ends with an optional full-line mark.
     """
+    ONELINE_MARK = None
     START_MARK = None
     END_MARK = None
 
     def check_element_start(self, line):
-        match = self.START_MARK.fullmatch(line)
-        if not match:
-            raise langmark.elements._BlockElementStartNotMatched(line)
-        indent = len(match.group(1))
-        return (indent, indent, None)
+        match = self.ONELINE_MARK.match(line)
+        if match:
+            indent = len(match.group(1))
+            indented_line = match.group(2)
+
+        elif langmark.elements._Regexs.BLANK_LINE.fullmatch(line):
+            line2 = self.read_next_line()
+            line3 = self.read_next_line()
+            match3 = self.END_MARK.fullmatch(line3)
+            if not match3:
+                raise langmark.elements._BlockElementStartNotMatched(line,
+                                                                line2, line3)
+            indent = len(match3.group(1))
+            indented_line = line2
+
+        else:
+            match1 = self.START_MARK.fullmatch(line)
+            if not match1:
+                raise langmark.elements._BlockElementStartNotMatched(line)
+            line2 = self.read_next_line()
+            line3 = self.read_next_line()
+            match3 = self.END_MARK.fullmatch(line3)
+            if not match3:
+                raise langmark.elements._BlockElementStartNotMatched(line,
+                                                                line2, line3)
+            indent = len(match1.group(1))
+            indented_line = line2
+
+        return (indent, indent, indented_line)
 
     def check_element_end(self, line):
-        match = self.END_MARK.fullmatch(line)
-        if match:
-            raise langmark.elements._BlockElementEndConsumed()
         if self.rawtext:
             raise langmark.elements._BlockElementEndNotConsumed(line)
 
 
-class Heading1Alt(_ComplexHeading):
+class Heading1(_ComplexHeading):
     """
-    A level-1 heading (multiline syntax).::
+    A level-1 heading.::
+
+        = Title
+
+    There must be one space between the equal sign and the title. The
+    rest of the line is taken literally as the title until the line break. The
+    heading must have an empty line below itself.
+
+        Title
+        =====
 
         =====
         Title
@@ -83,14 +116,24 @@ class Heading1Alt(_ComplexHeading):
     start of the line to the line break. The heading must have an empty line
     below itself.
     """
+    ONELINE_MARK = re.compile(_SimpleHeading.START_RE.format(level='1'))
     START_MARK = re.compile(r'^()\={3,}[ \t]*\n')
-    END_MARK = re.compile(r'^()\=*[ \t]*\n')
+    END_MARK = re.compile(r'^()\=+[ \t]*\n')
     HTML_TAGS = ('<h1>', '</h1>')
 
 
-class Heading2Alt(_ComplexHeading):
+class Heading2(_ComplexHeading):
     """
-    A level-2 heading (multiline syntax).::
+    A level-2 heading.::
+
+        == Title
+
+    There must be one space between the second equal sign and the title. The
+    rest of the line is taken literally as the title until the line break. The
+    heading must have an empty line below itself.
+
+        Title
+        -----
 
         -----
         Title
@@ -102,44 +145,9 @@ class Heading2Alt(_ComplexHeading):
     start of the line to the line break. The heading must have an empty line
     below itself.
     """
-    # TODO: Try to recognize headings with only equal signs below (maybe
-    #       reading the preceding empty line):
-    #
-    #     Title
-    #     =====
-    #
+    ONELINE_MARK = re.compile(_SimpleHeading.START_RE.format(level='2'))
     START_MARK = re.compile(r'^()[\=\-]{3,}[ \t]*\n')
-    END_MARK = re.compile(r'^()[\=\-]*[ \t]*\n')
-    HTML_TAGS = ('<h2>', '</h2>')
-
-
-class Heading1(_SimpleHeading):
-    """
-    A level-1 heading (one-line syntax).::
-
-        === Title
-
-    There must be one space between the equal sign and the title. The
-    rest of the line is taken literally as the title until the line break. The
-    heading must have an empty line below itself.
-    """
-    START_MARK = re.compile(r'^()\={1}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                             '[ \t]*\=*[ \t]*\n')
-    HTML_TAGS = ('<h1>', '</h1>')
-
-
-class Heading2(_SimpleHeading):
-    """
-    A level-2 heading (one-line syntax).::
-
-        === Title
-
-    There must be one space between the second equal sign and the title. The
-    rest of the line is taken literally as the title until the line break. The
-    heading must have an empty line below itself.
-    """
-    START_MARK = re.compile(r'^()\={2}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                             '[ \t]*\=*[ \t]*\n')
+    END_MARK = re.compile(r'^()[\=\-]+[ \t]*\n')
     HTML_TAGS = ('<h2>', '</h2>')
 
 
@@ -153,8 +161,7 @@ class Heading3(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(r'^()\={3}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                             '[ \t]*\=*[ \t]*\n')
+    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='3'))
     HTML_TAGS = ('<h3>', '</h3>')
 
 
@@ -168,8 +175,7 @@ class Heading4(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(r'^()\={4}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                             '[ \t]*\=*[ \t]*\n')
+    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='4'))
     HTML_TAGS = ('<h4>', '</h4>')
 
 
@@ -183,8 +189,7 @@ class Heading5(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(r'^()\={5}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                             '[ \t]*\=*[ \t]*\n')
+    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='5'))
     HTML_TAGS = ('<h5>', '</h5>')
 
 
@@ -198,6 +203,5 @@ class Heading6(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(r'^()\={6,}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                             '[ \t]*\=*[ \t]*\n')
+    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='6,'))
     HTML_TAGS = ('<h6>', '</h6>')
