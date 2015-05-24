@@ -83,9 +83,16 @@ class Langmark:
         # The parameters for parse must reflect the attributes set through
         # argparse by the launcher script
         # TODO: Support passing a string instead of a stream
-        elements._BlockElement.STREAM = stream
-        header = elements.Header()
-        line = header.parse(stream)
+        streamobj = elements.Stream(stream)
+        header = elements.Header(streamobj)
+        try:
+            header.parse_next_line()
+        except StopIteration:
+            pass
         self.meta = header.keys
-        self.etree = elements.Root(line)
-        self.etree.parse_lines()
+        elements._BlockElement.STREAM = streamobj
+        self.etree = elements.Root()
+        try:
+            self.etree.parse_next_line()
+        except StopIteration:
+            pass
