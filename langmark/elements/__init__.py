@@ -100,7 +100,9 @@ class Header:
                 self.keys[match.group(1)] = match.group(2)
                 self.parse_next_line()
             else:
-                self.stream.rewind_lines(line)
+                # Inserting an emtpy line makes sure that elements starting
+                #  with an empty line, like multiline headings, are recognized
+                self.stream.rewind_lines('\n', line)
                 break
 
 
