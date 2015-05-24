@@ -46,7 +46,23 @@ class Stream:
         self.stream = itertools.chain(stream, ('\n'))
 
     def read_next_line(self):
+        # Do *not* use this method without protecting it from StopIteration
+        #   and properly rewinding the parsed lines in case they aren't used!!!
+        #  If possible, don't use this method at all (just rely on the core
+        #   engine
         return next(self.stream)
+
+    def read_next_lines_buffered(self, N):
+        # Do *not* use this method without protecting it from StopIteration
+        #   and properly rewinding the parsed lines in case they aren't used!!!
+        #  If possible, don't use this method at all (just rely on the core
+        #   engine
+        self.lines_buffer = []
+        # Don't use a list comprehension because StopIteration can be raised
+        #  and the buffer must contain the last iterated lines
+        for n in range(N):
+            self.lines_buffer.append(self.read_next_line())
+        return self.lines_buffer
 
     def rewind_lines(self, *lines):
         self.stream = itertools.chain(lines, self.stream)
@@ -77,14 +93,15 @@ class Header:
         self.keys = {}
 
     def parse_next_line(self):
-        line = self.stream.read_next_line()
-        match = self.METADATA.fullmatch(line)
-        if match:
-            self.keys[match.group(1)] = match.group(2)
-            self.parse_next_line()
-        else:
-            self.stream.rewind_lines(line)
-            raise StopIteration()
+        while True:
+            line = self.stream.read_next_line()
+            match = self.METADATA.fullmatch(line)
+            if match:
+                self.keys[match.group(1)] = match.group(2)
+                self.parse_next_line()
+            else:
+                self.stream.rewind_lines(line)
+                break
 
 
 class _InlineMarkFactory:
@@ -158,8 +175,7 @@ class _BlockElementStartNotMatched(Exception):
     Internal exception used to communicate to the parent that the parsed line
     does not correspond to the start of the element.
     """
-    def __init__(self, *lines):
-        self.lines = lines
+    pass
 
 
 class _BlockElementStartMatched(Exception):
@@ -169,6 +185,14 @@ class _BlockElementStartMatched(Exception):
     """
     def __init__(self, element):
         self.element = element
+
+
+class _BlockElementEndOfFile(Exception):
+    """
+    Internal exception used to communicate to the parent that the creation of
+    an element has been stopped by the end of file.
+    """
+    pass
 
 
 class _BlockElementEndConsumed(Exception):
@@ -217,35 +241,67 @@ class _BlockElement(_Element):
     """
     STREAM = None
     INSTALLED_BLOCK_ELEMENTS = None
+    TEST_START_LINES = None
+    TEST_END_LINES = None
     HTML_BREAK = '\n'
     HTML_TAGS = ('<div>', '</div>')
 
     def __init__(self):
-        line = self.read_next_line()
-        self.indentation_external, self.indentation_internal, indented_line = \
-                                                self.check_element_start(line)
-        _Element.__init__(self)
-        # The first line might need to be ignored
-        if indented_line is not None:
-            self.rewind_lines(''.join((' ' * self.indentation_internal,
-                                       indented_line)))
+        try:
+            lines = self._read_start_check_lines()
+        except StopIteration:
+            # Re-raise the exception, but keep this to keep track of where it
+            #  comes from
+            # Don't just process it here because the element doesn't have to be
+            #  instantiated
+            raise _BlockElementEndOfFile()
+        else:
+            self.indentation_external, self.indentation_internal, \
+                                indented_line = self.check_element_start(lines)
+            _Element.__init__(self)
+            # The first line might need to be ignored
+            if indented_line is not None:
+                self.rewind_lines(''.join((' ' * self.indentation_internal,
+                                           indented_line)))
 
     def find_element_start(self):
         for Element in self.INSTALLED_BLOCK_ELEMENTS:
             try:
                 return Element()
-            except _BlockElementStartNotMatched as exc:
-                self.rewind_lines(*exc.lines)
+            except (_BlockElementStartNotMatched, _BlockElementEndOfFile):
+                self._rewind_check_lines_buffer()
                 continue
         return False
 
-    def read_next_line(self):
-        return _BlockElement.STREAM.read_next_line()
+    def _read_start_check_lines(self):
+        # Do *not* use this method without protecting it from StopIteration
+        #   and properly rewinding the parsed lines in case they aren't used!!!
+        #  If possible, don't use this method at all (just rely on the core
+        #   engine
+        return _BlockElement.STREAM.read_next_lines_buffered(
+                                                        self.TEST_START_LINES)
+
+    def _read_end_check_lines(self):
+        # Do *not* use this method without protecting it from StopIteration
+        #   and properly rewinding the parsed lines in case they aren't used!!!
+        #  If possible, don't use this method at all (just rely on the core
+        #   engine
+        return _BlockElement.STREAM.read_next_lines_buffered(
+                                                        self.TEST_END_LINES)
+
+    def _read_check_lines_buffer(self):
+        return _BlockElement.STREAM.lines_buffer
+
+    def _rewind_check_lines_buffer(self):
+        self.rewind_lines(*self._read_check_lines_buffer())
 
     def rewind_lines(self, *lines):
         _BlockElement.STREAM.rewind_lines(*lines)
 
-    def check_element_start(self, line):
+    def check_element_start(self, lines):
+        raise NotImplementedError()
+
+    def check_element_end(self, lines):
         raise NotImplementedError()
 
     def parse_next_line(self):
@@ -334,6 +390,8 @@ class _BlockElementContainingBlock(_BlockElement):
                 # Just discard the consumed lines if really nothing wants them
                 self.parse_next_line()
                 return
+            except _BlockElementEndOfFile:
+                return
         self._parse_element(element)
 
     def _parse_element(self, element):
@@ -378,11 +436,9 @@ class _BlockElementNotContainingBlock(_BlockElement):
         self.rawtext = RawText('')
         _BlockElement.__init__(self)
 
-    def _add_raw_line(self, line):
-        self.rawtext.append(line[self.indentation_external:])
-
-    def check_element_end(self, line):
-        raise NotImplementedError()
+    def _add_raw_lines(self, lines):
+        self.rawtext.append(''.join(line[self.indentation_external:]
+                            for line in lines))
 
 
 class _BlockElementContainingInline(_BlockElementNotContainingBlock):
@@ -390,20 +446,26 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
     Base class for elements containing inline elements.
     """
     def parse_next_line(self):
-        line = self.read_next_line()
         try:
-            self.check_element_end(line)
-        except (_BlockElementStartMatched, _BlockElementEndConsumed,
-                _BlockElementEndNotConsumed):
-            inline_parser = textparser.TextParser(self.rawtext.text)
-            dummyelement = BaseInlineElement(self, inline_parser, None)
-            dummyelement.take_inline_control()
-            inline_parser.parse()
-            self.children = dummyelement.children
-            raise
+            lines = self._read_end_check_lines()
+        except StopIteration:
+            lines = self._read_check_lines_buffer()
+            self._add_raw_lines(lines)
+            return
         else:
-            self._add_raw_line(line)
-            self.parse_next_line()
+            try:
+                self.check_element_end(lines)
+            except (_BlockElementStartMatched, _BlockElementEndConsumed,
+                    _BlockElementEndNotConsumed):
+                inline_parser = textparser.TextParser(self.rawtext.text)
+                dummyelement = BaseInlineElement(self, inline_parser, None)
+                dummyelement.take_inline_control()
+                inline_parser.parse()
+                self.children = dummyelement.children
+                raise
+            else:
+                self._add_raw_lines(lines)
+                self.parse_next_line()
 
     def convert_to_html(self):
         html = self._trim_last_break(''.join(
@@ -418,10 +480,11 @@ class Root(_BlockElementContainingBlock):
     The first section can start immediately after the header, or be separated
     by no more than one empty line.
     """
+    TEST_START_LINES = 1
     HTML_TAGS = ('', '')
 
-    def check_element_start(self, line):
-        return (0, 0, line)
+    def check_element_start(self, lines):
+        return (0, 0, lines[0])
 
     def convert_to_html(self):
         return self.HTML_BREAK.join(child.convert_to_html()
@@ -435,12 +498,13 @@ class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
     START_MARK's first capturing group will be used as the first line of
     content.`
     """
+    TEST_START_LINES = 1
     START_MARK = None
 
-    def check_element_start(self, line):
-        match = self.START_MARK.fullmatch(line)
+    def check_element_start(self, lines):
+        match = self.START_MARK.fullmatch(lines[0])
         if not match:
-            raise _BlockElementStartNotMatched(line)
+            raise _BlockElementStartNotMatched()
         return (len(match.group(2)), len(match.group(1)), match.group(3))
 
 
@@ -482,18 +546,20 @@ class _BlockElementContainingInline_LineMarks(_BlockElementContainingInline):
     A block element, containing inline elements, that starts and ends with
     full-line marks.
     """
+    TEST_START_LINES = 1
+    TEST_END_LINES = 1
     START_MARK = None
     END_MARK = None
 
-    def check_element_start(self, line):
-        match = self.START_MARK.fullmatch(line)
+    def check_element_start(self, lines):
+        match = self.START_MARK.fullmatch(lines[0])
         if not match:
-            raise _BlockElementStartNotMatched(line)
+            raise _BlockElementStartNotMatched()
         indent = len(match.group(1))
         return (indent, indent, None)
 
-    def check_element_end(self, line):
-        match = self.END_MARK.fullmatch(line)
+    def check_element_end(self, lines):
+        match = self.END_MARK.fullmatch(lines[0])
         if match:
             raise _BlockElementEndConsumed()
 
@@ -506,26 +572,32 @@ class Paragraph(_BlockElementContainingInline):
     empty lines are found, all except the last one are considered part of the
     content.
     """
+    TEST_START_LINES = 1
+    TEST_END_LINES = 1
     HTML_TAGS = ('<p>', '</p>')
 
-    def check_element_start(self, line):
+    def check_element_start(self, lines):
+        line = lines[0]
         if _Regexs.BLANK_LINE.fullmatch(line):
-            raise _BlockElementStartNotMatched(line)
+            raise _BlockElementStartNotMatched()
         indent = len(_Regexs.PARAGRAPH_INDENTATION.match(line).group())
         return (indent, indent, line[indent:])
 
-    def check_element_end(self, line):
+    def check_element_end(self, lines):
         # If this is the first line parsed by the Paragraph, it means it's
         #  already been discarded by all the other elements, and it's not a
-        #  blank line either
+        #  blank line either, so avoid unnecessary tests
         if self.rawtext:
-            self.rewind_lines(line)
+            self.rewind_lines(*lines)
             element = self.find_element_start()
             if element:
                 raise _BlockElementStartMatched(element)
-            # If no element was matched, this line must be consumed again
-            self.read_next_line()
-            if _Regexs.BLANK_LINE.fullmatch(line):
+            # The end check lines have to be re-read because they have been
+            #  rewinded just above
+            # There should be no need to protect this from StopIteration
+            #  because it's already been done safely before calling this method
+            self._read_end_check_lines()
+            if _Regexs.BLANK_LINE.fullmatch(lines[0]):
                 raise _BlockElementEndConsumed()
 
     # If an inline mark has overlapping matches with an inline mark, **which
@@ -537,6 +609,8 @@ class Paragraph(_BlockElementContainingInline):
     #  starting a line with an escaped escape character with 3, but all this
     #  would not feel natural. As said above, all marks, both block and inline,
     #  should be designed to never overlap.
+    # Also note that the original method has changed since this override was
+    #  implemented.
     #def _add_raw_line(self, line):
     #    if _Regexs.ESCAPE_CHAR.match(line):
     #        line = line[1:]
@@ -557,24 +631,35 @@ class _BlockElementNotContainingInline_LineMarks(
     Base class for elements containing neither inline nor block elements, that
     starts and ends with full-line marks.
     """
+    TEST_START_LINES = 1
+    TEST_END_LINES = 1
     START_MARK = None
     END_MARK = None
 
-    def check_element_start(self, line):
-        match = self.START_MARK.fullmatch(line)
+    def check_element_start(self, lines):
+        match = self.START_MARK.fullmatch(lines[0])
         if not match:
-            raise _BlockElementStartNotMatched(line)
+            raise _BlockElementStartNotMatched()
         indent = len(match.group(1))
         return (indent, indent, None)
 
     def parse_next_line(self):
-        line = self.read_next_line()
-        self.check_element_end(line)
-        self._add_raw_line(line)
-        self.parse_next_line()
+        try:
+            lines = self._read_end_check_lines()
+        except StopIteration:
+            # It would be safe to just pass here because self.TEST_END_LINES
+            #  is 1, however just make it safe to adapt to possible future
+            #  changes
+            lines = _read_check_lines_buffer()
+            self._add_raw_lines(lines)
+            return
+        else:
+            self.check_element_end(lines)
+            self._add_raw_lines(lines)
+            self.parse_next_line()
 
-    def check_element_end(self, line):
-        match = self.END_MARK.fullmatch(line)
+    def check_element_end(self, lines):
+        match = self.END_MARK.fullmatch(lines[0])
         if match:
             raise _BlockElementEndConsumed()
 

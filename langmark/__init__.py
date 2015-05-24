@@ -83,14 +83,8 @@ class Langmark:
         # TODO: Support passing a string instead of a stream
         streamobj = elements.Stream(stream)
         header = elements.Header(streamobj)
-        try:
-            header.parse_next_line()
-        except StopIteration:
-            pass
+        header.parse_next_line()
         self.meta = header.keys
         elements._BlockElement.STREAM = streamobj
         self.etree = elements.Root()
-        try:
-            self.etree.parse_next_line()
-        except StopIteration:
-            pass
+        self.etree.parse_next_line()
