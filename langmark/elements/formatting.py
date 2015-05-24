@@ -20,22 +20,13 @@ import re
 import langmark
 
 
-class Marks(langmark.elements.Marks):
-    EMPHASIS = '_'
-    STRONG = '*'
-    SUPERSCRIPT = '^'
-    SUBSCRIPT = ';'
-    SMALL = ':'
-    STRIKETHROUGH = '~'
-
-
 class Emphasis(langmark.elements._InlineElementContainingInline):
     """
     Emphasized text (usually rendered with italic formatting).::
 
         _emphasized_
     """
-    MARK = Marks.EMPHASIS
+    MARK = '_'
     HTML_TAGS = ('<em>', '</em>')
 
 
@@ -45,7 +36,7 @@ class Strong(langmark.elements._InlineElementContainingInline):
 
         *strong*
     """
-    MARK = Marks.STRONG
+    MARK = '*'
     HTML_TAGS = ('<strong>', '</strong>')
 
 
@@ -55,7 +46,7 @@ class Superscript(langmark.elements._InlineElementContainingInline):
 
         ^superscript^
     """
-    MARK = Marks.SUPERSCRIPT
+    MARK = '^'
     HTML_TAGS = ('<sup>', '</sup>')
 
 
@@ -65,7 +56,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
 
         ;subscript;
     """
-    MARK = Marks.SUBSCRIPT
+    MARK = ';'
     HTML_TAGS = ('<sub>', '</sub>')
 
 
@@ -75,7 +66,7 @@ class Small(langmark.elements._InlineElementContainingInline):
 
         :small:
     """
-    MARK = Marks.SMALL
+    MARK = ':'
     HTML_TAGS = ('<small>', '</small>')
 
 
@@ -85,5 +76,5 @@ class Strikethrough(langmark.elements._InlineElementContainingInline):
 
         ~strikethrough~
     """
-    MARK = Marks.STRIKETHROUGH
+    MARK = '~'
     HTML_TAGS = ('<del>', '</del>')

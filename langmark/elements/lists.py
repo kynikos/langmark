@@ -20,12 +20,6 @@ import re
 import langmark
 
 
-class Marks(langmark.elements.Marks):
-    # Without the space after the * there would be a clash with bold text at
-    #  the start of a line
-    UNORDEREDLISTITEM_START = re.compile(r'^(([ \t]*)\*[ \t]+)(.*\n)')
-
-
 class UnorderedListItem(
                 langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
     """
@@ -35,6 +29,8 @@ class UnorderedListItem(
     """
     # TODO: For the moment it's impossible to have two separate lists without
     #       other elements between them
-    START_MARK = Marks.UNORDEREDLISTITEM_START
+    # Without the space after the * there would be a clash with bold text at
+    #  the start of a line
+    START_MARK = re.compile(r'^(([ \t]*)\*[ \t]+)(.*\n)')
     HTML_OUTER_TAGS = ('<ul>', '</ul>')
     HTML_TAGS = ('<li>', '</li>')

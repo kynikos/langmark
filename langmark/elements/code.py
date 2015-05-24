@@ -20,25 +20,13 @@ import re
 import langmark
 
 
-class Marks(langmark.elements.Marks):
-    FORMATTABLECODE = '!'
-    PLAINCODE = '|'
-    PLAINTEXT = '\\'
-    FORMATTABLECODEBLOCK_START = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
-    FORMATTABLECODEBLOCK_END = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
-    PLAINCODEBLOCK_START = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
-    PLAINCODEBLOCK_END = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
-    PLAINTEXTBLOCK_START = re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
-    PLAINTEXTBLOCK_END = re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
-
-
 class FormattableCode(langmark.elements._InlineElementContainingInline):
     """
     Inline formattable monospace text.::
 
         !code!
     """
-    MARK = Marks.FORMATTABLECODE
+    MARK = '!'
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -48,7 +36,7 @@ class PlainCode(langmark.elements._InlineElementContainingText):
 
         |code|
     """
-    MARK = Marks.PLAINCODE
+    MARK = '|'
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -58,7 +46,7 @@ class PlainText(langmark.elements._InlineElementContainingRaw):
 
         \text\
     """
-    MARK = Marks.PLAINTEXT
+    MARK = '\\'
     HTML_TAGS = ('<span>', '</span>')
 
 
@@ -71,8 +59,8 @@ class FormattableCodeBlock(
         Formatted code
         !!!
     """
-    START_MARK = Marks.FORMATTABLECODEBLOCK_START
-    END_MARK = Marks.FORMATTABLECODEBLOCK_END
+    START_MARK =re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^([ \t]*)\!{3,}[ \t]*\n')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -84,8 +72,8 @@ class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
         Plain code
         |||
     """
-    START_MARK = Marks.PLAINCODEBLOCK_START
-    END_MARK = Marks.PLAINCODEBLOCK_END
+    START_MARK = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -97,6 +85,6 @@ class PlainTextBlock(langmark.elements._BlockElementContainingRaw_LineMarks):
         Plain text
         \\\
     """
-    START_MARK = Marks.PLAINTEXTBLOCK_START
-    END_MARK = Marks.PLAINTEXTBLOCK_END
+    START_MARK = re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
+    END_MARK =re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
     HTML_TAGS = ('<div>', '</div>')

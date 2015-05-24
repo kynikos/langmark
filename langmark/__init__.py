@@ -66,11 +66,11 @@ class Langmark:
         for Element in INLINE_ELEMENTS:
             mark = Element.MARK
             start_mark = re.compile(
-                elements.Marks.INLINE_START_SIMPLE.format(
+                elements._Regexs.INLINE_START_SIMPLE.format(
                                                 escaped_mark=re.escape(mark)))
             start_mark_to_element[start_mark] = Element
             start_mark_spaced = re.compile(
-                elements.Marks.INLINE_START_SIMPLE_SPACED.format(
+                elements._Regexs.INLINE_START_SIMPLE_SPACED.format(
                                                 escaped_mark=re.escape(mark)))
             start_mark_spaced_to_element[start_mark_spaced] = Element
             element_to_compiled_marks[Element] = (start_mark,

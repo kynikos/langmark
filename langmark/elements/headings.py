@@ -26,25 +26,6 @@ import langmark
 #       Perhaps implement them only when converting to HTML
 
 
-class Marks(langmark.elements.Marks):
-    HEADING1ALT_START = re.compile(r'^()\={3,}[ \t]*\n')
-    HEADING1ALT_END = re.compile(r'^()\=*[ \t]*\n')
-    HEADING2ALT_START = re.compile(r'^()[\=\-]{3,}[ \t]*\n')
-    HEADING2ALT_END = re.compile(r'^()[\=\-]*[ \t]*\n')
-    HEADING1 = re.compile(r'^()\={1}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                           '[ \t]*\=*[ \t]*\n')
-    HEADING2 = re.compile(r'^()\={2}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                           '[ \t]*\=*[ \t]*\n')
-    HEADING5 = re.compile(r'^()\={5}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                           '[ \t]*\=*[ \t]*\n')
-    HEADING3 = re.compile(r'^()\={3}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                           '[ \t]*\=*[ \t]*\n')
-    HEADING4 = re.compile(r'^()\={4}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                           '[ \t]*\=*[ \t]*\n')
-    HEADING6 = re.compile(r'^()\={6,}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                           '[ \t]*\=*[ \t]*\n')
-
-
 class Heading1Alt(
         langmark.elements._BlockElementContainingInline_LineMarkOptionalEnd):
     """
@@ -59,8 +40,8 @@ class Heading1Alt(
     start of the line to the line break. The heading must have an empty line
     below itself.
     """
-    START_MARK = Marks.HEADING1ALT_START
-    END_MARK = Marks.HEADING1ALT_END
+    START_MARK = re.compile(r'^()\={3,}[ \t]*\n')
+    END_MARK = re.compile(r'^()\=*[ \t]*\n')
     HTML_TAGS = ('<h1>', '</h1>')
 
 
@@ -85,8 +66,8 @@ class Heading2Alt(
     #     Title
     #     =====
     #
-    START_MARK = Marks.HEADING2ALT_START
-    END_MARK = Marks.HEADING2ALT_END
+    START_MARK = re.compile(r'^()[\=\-]{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^()[\=\-]*[ \t]*\n')
     HTML_TAGS = ('<h2>', '</h2>')
 
 
@@ -100,7 +81,8 @@ class Heading1(langmark.elements._BlockElementContainingInline_OneLine):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = Marks.HEADING1
+    START_MARK = re.compile(r'^()\={1}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                             '[ \t]*\=*[ \t]*\n')
     HTML_TAGS = ('<h1>', '</h1>')
 
 
@@ -114,7 +96,8 @@ class Heading2(langmark.elements._BlockElementContainingInline_OneLine):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = Marks.HEADING2
+    START_MARK = re.compile(r'^()\={2}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                             '[ \t]*\=*[ \t]*\n')
     HTML_TAGS = ('<h2>', '</h2>')
 
 
@@ -128,7 +111,8 @@ class Heading3(langmark.elements._BlockElementContainingInline_OneLine):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = Marks.HEADING3
+    START_MARK = re.compile(r'^()\={3}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                             '[ \t]*\=*[ \t]*\n')
     HTML_TAGS = ('<h3>', '</h3>')
 
 
@@ -142,7 +126,8 @@ class Heading4(langmark.elements._BlockElementContainingInline_OneLine):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = Marks.HEADING4
+    START_MARK = re.compile(r'^()\={4}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                             '[ \t]*\=*[ \t]*\n')
     HTML_TAGS = ('<h4>', '</h4>')
 
 
@@ -156,7 +141,8 @@ class Heading5(langmark.elements._BlockElementContainingInline_OneLine):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = Marks.HEADING5
+    START_MARK = re.compile(r'^()\={5}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                             '[ \t]*\=*[ \t]*\n')
     HTML_TAGS = ('<h5>', '</h5>')
 
 
@@ -170,5 +156,6 @@ class Heading6(langmark.elements._BlockElementContainingInline_OneLine):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = Marks.HEADING6
+    START_MARK = re.compile(r'^()\={6,}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                             '[ \t]*\=*[ \t]*\n')
     HTML_TAGS = ('<h6>', '</h6>')

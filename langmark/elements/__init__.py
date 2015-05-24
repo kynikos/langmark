@@ -23,9 +23,9 @@ import textparser
 
 
 
-class Marks:
+class _Regexs:
     """
-    The regular expressions used to detect start and end of elements.
+    Auxiliary regular expressions and strings.
     """
     METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
     BLANK_LINE = re.compile(r'^[ \t]*\n')
@@ -40,6 +40,8 @@ class Marks:
                             '(?![{escaped_mark} \t\n])')
     # Note how marks at the end of lines are ignored
     INLINE_START_SIMPLE_SPACED = (r'(?<!^)[ \t]+{escaped_mark}+[ \t]+(?!\n)')
+    INLINE_END_SIMPLE = r'(?<![ \t])'
+    INLINE_END_SIMPLE_SPACED = ' '
 
 
 class Header:
@@ -65,7 +67,7 @@ class Header:
 
     def parse(self, stream):
         for line in stream:
-            match = Marks.METADATA.fullmatch(line)
+            match = _Regexs.METADATA.fullmatch(line)
             if match:
                 self.keys[match.group(1)] = match.group(2)
             else:
@@ -211,7 +213,7 @@ class _InlineElement(_Element):
         if end_mark:
             self.inline_bindings[end_mark] = self._handle_inline_end_mark
         if self.ENABLE_ESCAPE:
-            self.inline_bindings[Marks.ESCAPE_CHAR] = \
+            self.inline_bindings[_Regexs.ESCAPE_CHAR] = \
                                                     self._handle_inline_escape
         _Element.__init__(self)
         self.set_parent(parent)
@@ -230,7 +232,8 @@ class _InlineElement(_Element):
                                      event.mark.group()[1]))
 
     def _handle_inline_start_mark(self, event):
-        end_mark = re.compile(r'(?<![ \t])' + re.escape(event.mark.group()))
+        end_mark = re.compile(_Regexs.INLINE_END_SIMPLE +
+                              re.escape(event.mark.group()))
         element = self.START_MARK_TO_INLINE_ELEMENT[event.regex](self,
                                                 self.inline_parser, end_mark)
         self._append_element(event.parsed_text, element)
@@ -241,7 +244,8 @@ class _InlineElement(_Element):
         end_mark = re.compile(re.escape(event.mark.group()[:-1]))
         element = self.START_MARK_SPACED_TO_INLINE_ELEMENT[event.regex](self,
                                                 self.inline_parser, end_mark)
-        self._append_element(event.parsed_text + ' ', element)
+        self._append_element(event.parsed_text +
+                             _Regexs.INLINE_END_SIMPLE_SPACED, element)
 
     def _append_element(self, parsed_text, element):
         self.children.append(RawText(parsed_text))
@@ -486,16 +490,16 @@ class Paragraph(_BlockElementContainingInline):
     HTML_TAGS = ('<p>', '</p>')
 
     def parse_first_line(self, line):
-        if Marks.BLANK_LINE.fullmatch(line):
+        if _Regexs.BLANK_LINE.fullmatch(line):
             raise _BlockElementStartNotMatched()
-        indent = len(Marks.PARAGRAPH_INDENTATION.match(line).group())
+        indent = len(_Regexs.PARAGRAPH_INDENTATION.match(line).group())
         return (indent, indent, line[indent:])
 
     def check_last_line(self, line):
         element = self.find_element_start(line)
         if element:
             raise _BlockElementStartMatched(element)
-        if Marks.BLANK_LINE.fullmatch(line):
+        if _Regexs.BLANK_LINE.fullmatch(line):
             raise _BlockElementEndConsumed()
 
     # If an inline mark has overlapping matches with an inline mark, **which
@@ -508,7 +512,7 @@ class Paragraph(_BlockElementContainingInline):
     #  would not feel natural. As said above, all marks, both block and inline,
     #  should be designed to never overlap.
     #def _add_raw_line(self, line):
-    #    if Marks.ESCAPE_CHAR.match(line):
+    #    if _Regexs.ESCAPE_CHAR.match(line):
     #        line = line[1:]
     #    super(Paragraph, self)._add_raw_line(line)
 
