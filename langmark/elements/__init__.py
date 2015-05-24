@@ -119,9 +119,9 @@ class InlineMarkSimple(_InlineMarkFactory):
     """
     # Note how marks at the end of lines are ignored
     START_NORMAL = (r'(^{escaped_char}+[ \t]*|{escaped_char}+)'
-                     '(?![{escaped_char} \t\n])')
+                     '(?![{escaped_char} \t\n]|$)')
     # Note how marks at the end of lines are ignored
-    START_SPACED = r'(?<!^)[ \t]+{escaped_char}+[ \t]+(?!\n)'
+    START_SPACED = r'(?<!^)[ \t]+{escaped_char}+[ \t]+(?!\n|$)'
     END_NORMAL = r'(?<![ \t])'
     END_SPACED = ' '
 
