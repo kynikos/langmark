@@ -60,6 +60,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
     TEST_END_LINES = 1
     ONELINE_MARK = None
     START_MARK = None
+    TITLE_MARK = re.compile(r'^[ \t]*(.+?)[ \t]*\n')
     END_MARK = None
 
     def check_element_start(self, lines):
@@ -70,21 +71,27 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
             self.rewind_lines(lines[1], lines[2])
 
         elif langmark.elements._Regexs.BLANK_LINE.fullmatch(lines[0]):
+            match2 = self.TITLE_MARK.fullmatch(lines[1])
+            if not match2:
+                raise langmark.elements._BlockElementStartNotMatched()
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
                 raise langmark.elements._BlockElementStartNotMatched()
             indent = len(match3.group(1))
-            indented_line = lines[1]
+            indented_line = match2.group(1)
 
         else:
             match1 = self.START_MARK.fullmatch(lines[0])
             if not match1:
                 raise langmark.elements._BlockElementStartNotMatched()
+            match2 = self.TITLE_MARK.fullmatch(lines[1])
+            if not match2:
+                raise langmark.elements._BlockElementStartNotMatched()
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
                 raise langmark.elements._BlockElementStartNotMatched()
             indent = len(match1.group(1))
-            indented_line = lines[1]
+            indented_line = match2.group(1)
 
         return (indent, indent, indented_line)
 
