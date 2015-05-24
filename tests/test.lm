@@ -1,32 +1,44 @@
 ::m a
 ::z
 ::b c
+Title 1z
+========
 
 ==
 Not a title
 ==
 
-=======
+========
 Title 1a
-=======
+========
 
 Text.
 
-= Title 1b
+Title 1b
+========
+
+Text.
+
+= Title 1c
 
 Text.
 
 `=== Not heading
 
--------
+--------
 Title 2a
-=======
+========
 
 Text.
 
--------
-Title 2b
--------
+---------
+Title 2b*
+---------
+
+Text.
+
+Title 2c
+--------
 
 Text.
 
@@ -52,7 +64,7 @@ Text.
 
 Non item.
 
-== Title 2c
+== Title 2d
 
 Text.
 
@@ -60,9 +72,9 @@ Text.
 `Es`cap`ing` more backticks here, but not here``.
 Plain code #` should ` allow ` single ` backticks `#.
 
-=======
-Title 1c
-=======
+========
+Title 1d
+========
 Text.
 
 === Title 3
