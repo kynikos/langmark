@@ -535,11 +535,15 @@ class Paragraph(_BlockElementContainingInline):
         return (indent, indent, line[indent:])
 
     def check_last_line(self, line):
-        element = self.find_element_start(line)
-        if element:
-            raise _BlockElementStartMatched(element)
-        if _Regexs.BLANK_LINE.fullmatch(line):
-            raise _BlockElementEndConsumed()
+        # If this is the first line parsed by the Paragraph, it means it's
+        #  already been discarded by all the other elements, and it's not a
+        #  blank line either
+        if self.rawtext:
+            element = self.find_element_start(line)
+            if element:
+                raise _BlockElementStartMatched(element)
+            if _Regexs.BLANK_LINE.fullmatch(line):
+                raise _BlockElementEndConsumed()
 
     # If an inline mark has overlapping matches with an inline mark, **which
     #  should never happen by design**, it's impossible to only escape the
