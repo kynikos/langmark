@@ -440,6 +440,13 @@ class _BlockElementNotContainingBlock(_BlockElement):
         self.rawtext.append(''.join(line[self.indentation_external:]
                             for line in lines))
 
+    def _parse_inline(self):
+        inline_parser = textparser.TextParser(self.rawtext.text)
+        dummyelement = BaseInlineElement(self, inline_parser, None)
+        dummyelement.take_inline_control()
+        inline_parser.parse()
+        self.children = dummyelement.children
+
 
 class _BlockElementContainingInline(_BlockElementNotContainingBlock):
     """
@@ -457,11 +464,7 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
                 self.check_element_end(lines)
             except (_BlockElementStartMatched, _BlockElementEndConsumed,
                     _BlockElementEndNotConsumed):
-                inline_parser = textparser.TextParser(self.rawtext.text)
-                dummyelement = BaseInlineElement(self, inline_parser, None)
-                dummyelement.take_inline_control()
-                inline_parser.parse()
-                self.children = dummyelement.children
+                self._parse_inline()
                 raise
             else:
                 self._add_raw_lines(lines)
@@ -564,7 +567,7 @@ class _BlockElementContainingInline_LineMarks(_BlockElementContainingInline):
             raise _BlockElementEndConsumed()
 
 
-class Paragraph(_BlockElementContainingInline):
+class Paragraph(_BlockElementNotContainingBlock):
     """
     A paragraph.
 
@@ -583,22 +586,39 @@ class Paragraph(_BlockElementContainingInline):
         indent = len(_Regexs.PARAGRAPH_INDENTATION.match(line).group())
         return (indent, indent, line[indent:])
 
-    def check_element_end(self, lines):
+    def parse_next_line(self):
         # If this is the first line parsed by the Paragraph, it means it's
         #  already been discarded by all the other elements, and it's not a
         #  blank line either, so avoid unnecessary tests
         if self.rawtext:
-            self.rewind_lines(*lines)
             element = self.find_element_start()
             if element:
+                self._parse_inline()
                 raise _BlockElementStartMatched(element)
-            # The end check lines have to be re-read because they have been
-            #  rewinded just above
-            # There should be no need to protect this from StopIteration
-            #  because it's already been done safely before calling this method
-            self._read_end_check_lines()
-            if _Regexs.BLANK_LINE.fullmatch(lines[0]):
-                raise _BlockElementEndConsumed()
+            try:
+                lines = self._read_end_check_lines()
+            except StopIteration:
+                lines = self._read_check_lines_buffer()
+                self._add_raw_lines(lines)
+                return
+            else:
+                if _Regexs.BLANK_LINE.fullmatch(lines[0]):
+                    self._parse_inline()
+                    raise _BlockElementEndConsumed()
+                self._add_raw_lines(lines)
+                self.parse_next_line()
+                return
+        else:
+            try:
+                lines = self._read_end_check_lines()
+            except StopIteration:
+                lines = self._read_check_lines_buffer()
+                self._add_raw_lines(lines)
+                return
+            else:
+                self._add_raw_lines(lines)
+                self.parse_next_line()
+                return
 
     # If an inline mark has overlapping matches with an inline mark, **which
     #  should never happen by design**, it's impossible to only escape the
