@@ -1,61 +1,39 @@
+Inspiration languages (read their specification):
+* Markdown (+ Smartypants)
+  * GitHub flavored
+  * Python-Markdown extensions
+* reStructuredText
 
 
-\**notbold*\*
-`**notbold*`*
-* notbold*
-** notbold**
-*bold *stillbold*
-**bold **stillbold**
+# list
+# list
+  & list
+# list
+& list
+  a. list
+  b. list
+4. list
+5. list
 
-Single-character start marks could be escaped if followed by a space, and end
-  marks if preceeded by a space
-Double-character marks could be escaped by separating them with a space
-Also still consider the escape-by-doubling technique (*bold**stillbold*)
-
-
-{{nowiki}}escaped{{!nowiki}}
-\\\escaped///
-///escaped\\\
-\/\escaped/\/
-|!|escaped|!|
-
-The nowiki mode should also be used when in need for adding raw HTML code
++ done
++ done
+  - todo
+- todo
 
 
-Paragraph3 line1`
-Paragraph3 line1
-
-If a line ends in an odd number of `, the last one is changed to a line break,
-while the others are halved; if a line ends in an even number of `, no line
-break is created, and half of the source backticks are rendered.
-
-
-`italic` *italic* ''italic'' ^italic^ /italic/ |italic| //italic// __italic__
-``italic`italic`italic`` __italic_italic_italic__
-
-*bold* **bold*bold*bold**
-
-#[code]# \\code\\ :[code]: `code` |formattedcode| ``plaincode`` ||plaincode||
+Paragraph line1`
+Paragraph line1
 
 
 [link]
-[[[link||url]]]
+[link|id]
+[link|url]
 [[smartlink||url]]
-@@reference1@@
-http://plain.link.com/
 @[link|url]
-_link _text_
-__link_text__
+http://plain.link.com/
 
 @reference1(hidden) url
 @ reference1(visible) url
-
-
-'quote' -> ‘quote’
-"quote" -> “quote”
-en--dash -> en–dash
-em---dash -> em—dash
-ellipsis... -> ellipsis…
 
 
  code
@@ -84,20 +62,6 @@ ellipsis... -> ellipsis…
 >> quote
 > quote
 
-# list
-# list
-  & list
-# list
-& list
-  & list
-4. list
-5. list
-
-+ done
-+ done
-  - todo
-- todo
-
 
 !Note: text
 !Warning: text
@@ -116,6 +80,16 @@ code
 {{image path}}
 {{gallery path}}
 {{extension}}{{!extension}}
+
+
+Horizontal line
+
+
+'quote' -> ‘quote’
+"quote" -> “quote”
+en--dash -> en–dash
+em---dash -> em—dash
+ellipsis... -> ellipsis…
 
 
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#tables
@@ -147,6 +121,14 @@ True   False  True
 False  True   True
 True   True   True
 =====  =====  ======
+
+------  ------  ------
+Tables  Are     Cool
+------  :----:  ------
+False   False   False
+True    False   True
+False   True    True
+True    True    True
 
 | Tables        | Are           | Cool  |
 | ------------- |:-------------:| -----:|
