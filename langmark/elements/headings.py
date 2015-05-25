@@ -35,7 +35,7 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
     """
     TEST_START_LINES = 1
     TEST_END_LINES = 1
-    START_RE = (r'^()\={{{level}}}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+    START_RE = (r'^\={{{level}}}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
                  '[ \t]*\=*[ \t]*\n')
     START_MARK = None
 
@@ -43,8 +43,7 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
         match = self.START_MARK.match(lines[0])
         if not match:
             raise langmark.elements._BlockElementStartNotMatched()
-        indent = len(match.group(1))
-        return (indent, indent, match.group(2))
+        return (0, 0, match.group(1))
 
     def check_element_end(self, lines):
         if self.rawtext:
@@ -66,8 +65,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
     def check_element_start(self, lines):
         match = self.ONELINE_MARK.match(lines[0])
         if match:
-            indent = len(match.group(1))
-            indented_line = match.group(2)
+            indented_line = match.group(1)
             self.rewind_lines(lines[1], lines[2])
 
         elif langmark.elements._Regexs.BLANK_LINE.fullmatch(lines[0]):
@@ -77,7 +75,6 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
                 raise langmark.elements._BlockElementStartNotMatched()
-            indent = len(match3.group(1))
             indented_line = match2.group(1)
 
         else:
@@ -90,10 +87,9 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
                 raise langmark.elements._BlockElementStartNotMatched()
-            indent = len(match1.group(1))
             indented_line = match2.group(1)
 
-        return (indent, indent, indented_line)
+        return (0, 0, indented_line)
 
     def check_element_end(self, lines):
         if self.rawtext:
@@ -123,8 +119,8 @@ class Heading1(_ComplexHeading):
     below itself.
     """
     ONELINE_MARK = re.compile(_SimpleHeading.START_RE.format(level='1'))
-    START_MARK = re.compile(r'^()\={3,}[ \t]*\n')
-    END_MARK = re.compile(r'^()\=+[ \t]*\n')
+    START_MARK = re.compile(r'^\={3,}[ \t]*\n')
+    END_MARK = re.compile(r'^\=+[ \t]*\n')
     HTML_TAGS = ('<h1>', '</h1>')
 
 
@@ -152,8 +148,8 @@ class Heading2(_ComplexHeading):
     below itself.
     """
     ONELINE_MARK = re.compile(_SimpleHeading.START_RE.format(level='2'))
-    START_MARK = re.compile(r'^()[\=\-]{3,}[ \t]*\n')
-    END_MARK = re.compile(r'^()[\=\-]+[ \t]*\n')
+    START_MARK = re.compile(r'^[\=\-]{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^[\=\-]+[ \t]*\n')
     HTML_TAGS = ('<h2>', '</h2>')
 
 
