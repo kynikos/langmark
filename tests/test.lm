@@ -44,23 +44,50 @@ Text.
 
 * item1
 * item2
-* item3
+  item2 continued
+* item3a
+item3a continued
+* item3b
+    item3b continued
+* item3c
 
 `* not item
 
 * item4
   * item5
+  item5 continued
   `* not item
 * item6
 
 * itemA
-  itemB *bold* itemBB
-
-  ###
-  code
-  ###
-
+itemB *bold* itemBB
   itemC
+
+  |||
+  code1
+  |||
+
+  ###
+  code2
+  ###
+
+  |||
+  code3
+|||
+
+  ###
+  code4
+###
+
+  |||
+code5
+|||
+
+  ###
+code6
+###
+
+  itemD
 
 Non item.
 
@@ -155,3 +182,10 @@ notcode
 ====== Title 6
 
 Text.
+
+|||
+code
+*code*
+_code*more*_
+<br />
+code

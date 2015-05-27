@@ -31,6 +31,6 @@ class UnorderedListItem(
     #       other elements between them
     # Without the space after the * there would be a clash with bold text at
     #  the start of a line
-    START_MARK = re.compile(r'^(([ \t]*)\*[ \t]+)(.*\n)')
+    START_MARK = re.compile(r'^([ \t]*)(\*[ \t]+)(.*\n)')
     HTML_OUTER_TAGS = ('<ul>', '</ul>')
     HTML_TAGS = ('<li>', '</li>')

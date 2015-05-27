@@ -25,10 +25,11 @@ import textparser
 
 class _Regexs:
     """
-    Auxiliary regular expressions.
+    Auxiliary regular expressions and other constants.
     """
+    TAB_LENGTH = 4
     BLANK_LINE = re.compile(r'^[ \t]*\n')
-    PARAGRAPH_INDENTATION = re.compile(r'^[ \t]*')
+    INDENTATION = re.compile(r'^[ \t]*')
     # If an inline mark has overlapping matches with an inline mark, **which
     #  should never happen by design**, it's impossible to only escape the
     #  block mark leaving the inline mark intact; if an escape character is
@@ -156,9 +157,6 @@ class RawText:
     def __init__(self, text):
         self.text = text
 
-    def __bool__(self):
-        return len(self.text) > 0
-
     def append(self, text):
         self.text = ''.join((self.text, text))
 
@@ -258,13 +256,33 @@ class _BlockElement(_Element):
             #  instantiated
             raise _BlockElementEndOfFile()
         else:
-            self.indentation_external, self.indentation_internal, \
-                                indented_line = self.check_element_start(lines)
             _Element.__init__(self)
-            # The first line might need to be ignored
-            if indented_line is not None:
-                self.rewind_lines(''.join((' ' * self.indentation_internal,
-                                           indented_line)))
+            indentation_external, indentation_internal, initial_lines = \
+                                                self._parse_indentation(lines)
+            self.indentation_external = self._compute_equivalent_indentation(
+                                                        indentation_external)
+            self.indentation_internal = self.indentation_external + \
+                    self._compute_equivalent_indentation(indentation_internal)
+            self._parse_initial_lines(initial_lines)
+
+    def _compute_equivalent_indentation(self, line):
+        # TODO: Move to external library
+        split = line.split('\t')
+        indent = 0
+        for chunk in split[:-1]:
+            indent += len(chunk) // _Regexs.TAB_LENGTH + 1
+        indent *= _Regexs.TAB_LENGTH
+        indent += len(split[-1])
+        return indent
+
+    def _parse_indentation(self, lines):
+        raise NotImplementedError()
+
+    def _parse_initial_lines(self, lines):
+        raise NotImplementedError()
+
+    def parse_next_line(self):
+        raise NotImplementedError()
 
     def find_element_start(self):
         for Element in self.INSTALLED_BLOCK_ELEMENTS:
@@ -299,15 +317,6 @@ class _BlockElement(_Element):
 
     def rewind_lines(self, *lines):
         _BlockElement.STREAM.rewind_lines(*lines)
-
-    def check_element_start(self, lines):
-        raise NotImplementedError()
-
-    def check_element_end(self, lines):
-        raise NotImplementedError()
-
-    def parse_next_line(self):
-        raise NotImplementedError()
 
 
 class _InlineElement(_Element):
@@ -380,6 +389,12 @@ class _BlockElementContainingBlock(_BlockElement):
     """
     Base class for elements containing block elements.
     """
+    def _parse_initial_lines(self, lines):
+        self.rewind_lines(*self._adapt_initial_lines(lines))
+
+    def _adapt_initial_lines(self, lines):
+        raise NotImplementedError()
+
     def parse_next_line(self):
         element = self.find_element_start()
         if not element:
@@ -436,11 +451,33 @@ class _BlockElementNotContainingBlock(_BlockElement):
     """
     def __init__(self):
         self.rawtext = RawText('')
+        self.indentation_content = None
         _BlockElement.__init__(self)
 
-    def _add_raw_lines(self, lines):
-        self.rawtext.append(''.join(line[self.indentation_external:]
-                            for line in lines))
+    def _parse_indentation(self, lines):
+        indentation, initial_lines = self.check_element_start(lines)
+        return (indentation, '', initial_lines)
+
+    def check_element_start(self, lines):
+        raise NotImplementedError()
+
+    def check_element_end(self, lines):
+        raise NotImplementedError()
+
+    def _add_raw_first_line(self, line):
+        self.rawtext.append(line[self.indentation_external:])
+
+    def _check_indentation_and_add_raw_lines(self, lines):
+        for lN, line in enumerate(lines):
+            indentation = self._compute_equivalent_indentation(
+                                    _Regexs.INDENTATION.match(line).group())
+            try:
+                if indentation < self.indentation_content:
+                    self._parse_inline()
+                    raise _BlockElementEndNotConsumed(*lines[lN:])
+            except TypeError:
+                self.indentation_content = indentation
+            self.rawtext.append(line[self.indentation_content:])
 
     def _parse_inline(self):
         inline_parser = textparser.TextParser(self.rawtext.text)
@@ -459,7 +496,8 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
             lines = self._read_end_check_lines()
         except StopIteration:
             lines = self._read_check_lines_buffer()
-            self._add_raw_lines(lines)
+            self._check_indentation_and_add_raw_lines(lines)
+            self._parse_inline()
             return
         else:
             try:
@@ -469,7 +507,7 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
                 self._parse_inline()
                 raise
             else:
-                self._add_raw_lines(lines)
+                self._check_indentation_and_add_raw_lines(lines)
                 self.parse_next_line()
 
     def convert_to_html(self):
@@ -486,10 +524,12 @@ class Root(_BlockElementContainingBlock):
     by no more than one empty line.
     """
     TEST_START_LINES = 1
-    HTML_TAGS = ('', '')
 
-    def check_element_start(self, lines):
-        return (0, 0, lines[0])
+    def _parse_indentation(self, lines):
+        return ('', '', lines)
+
+    def _adapt_initial_lines(self, lines):
+        return lines
 
     def convert_to_html(self):
         return self.HTML_BREAK.join(child.convert_to_html()
@@ -506,11 +546,16 @@ class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
     TEST_START_LINES = 1
     START_MARK = None
 
-    def check_element_start(self, lines):
+    def _parse_indentation(self, lines):
         match = self.START_MARK.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
-        return (len(match.group(2)), len(match.group(1)), match.group(3))
+        return (match.group(1), match.group(2), (match.group(3), ))
+
+    def _adapt_initial_lines(self, lines):
+        # Remove the prefix, otherwise the same block will be parsed
+        #  recursively endlessly
+        return (''.join((' ' * self.indentation_internal, lines[0])), )
 
 
 class _BlockElementContainingBlock_Prefix_Grouped(
@@ -560,8 +605,10 @@ class _BlockElementContainingInline_LineMarks(_BlockElementContainingInline):
         match = self.START_MARK.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
-        indent = len(match.group(1))
-        return (indent, indent, None)
+        return (match.group(1), ())
+
+    def _parse_initial_lines(self, lines):
+        pass
 
     def check_element_end(self, lines):
         match = self.END_MARK.fullmatch(lines[0])
@@ -585,42 +632,30 @@ class Paragraph(_BlockElementNotContainingBlock):
         line = lines[0]
         if _Regexs.BLANK_LINE.fullmatch(line):
             raise _BlockElementStartNotMatched()
-        indent = len(_Regexs.PARAGRAPH_INDENTATION.match(line).group())
-        return (indent, indent, line[indent:])
+        indentation = _Regexs.INDENTATION.match(line).group()
+        return (indentation, lines)
+
+    def _parse_initial_lines(self, lines):
+        self._add_raw_first_line(lines[0])
 
     def parse_next_line(self):
-        # If this is the first line parsed by the Paragraph, it means it's
-        #  already been discarded by all the other elements, and it's not a
-        #  blank line either, so avoid unnecessary tests
-        if self.rawtext:
-            element = self.find_element_start()
-            if element:
-                self._parse_inline()
-                raise _BlockElementStartMatched(element)
-            try:
-                lines = self._read_end_check_lines()
-            except StopIteration:
-                lines = self._read_check_lines_buffer()
-                self._add_raw_lines(lines)
-                return
-            else:
-                if _Regexs.BLANK_LINE.fullmatch(lines[0]):
-                    self._parse_inline()
-                    raise _BlockElementEndConsumed()
-                self._add_raw_lines(lines)
-                self.parse_next_line()
-                return
+        element = self.find_element_start()
+        if element:
+            self._parse_inline()
+            raise _BlockElementStartMatched(element)
+        try:
+            lines = self._read_end_check_lines()
+        except StopIteration:
+            lines = self._read_check_lines_buffer()
+            self._check_indentation_and_add_raw_lines(lines)
+            return
         else:
-            try:
-                lines = self._read_end_check_lines()
-            except StopIteration:
-                lines = self._read_check_lines_buffer()
-                self._add_raw_lines(lines)
-                return
-            else:
-                self._add_raw_lines(lines)
-                self.parse_next_line()
-                return
+            if _Regexs.BLANK_LINE.fullmatch(lines[0]):
+                self._parse_inline()
+                raise _BlockElementEndConsumed()
+            self._check_indentation_and_add_raw_lines(lines)
+            self.parse_next_line()
+            return
 
     # If an inline mark has overlapping matches with an inline mark, **which
     #  should never happen by design**, it's impossible to only escape the
@@ -662,8 +697,10 @@ class _BlockElementNotContainingInline_LineMarks(
         match = self.START_MARK.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
-        indent = len(match.group(1))
-        return (indent, indent, None)
+        return (match.group(1), ())
+
+    def _parse_initial_lines(self, lines):
+        pass
 
     def parse_next_line(self):
         try:
@@ -672,12 +709,12 @@ class _BlockElementNotContainingInline_LineMarks(
             # It would be safe to just pass here because self.TEST_END_LINES
             #  is 1, however just make it safe to adapt to possible future
             #  changes
-            lines = _read_check_lines_buffer()
-            self._add_raw_lines(lines)
+            lines = self._read_check_lines_buffer()
+            self._check_indentation_and_add_raw_lines(lines)
             return
         else:
             self.check_element_end(lines)
-            self._add_raw_lines(lines)
+            self._check_indentation_and_add_raw_lines(lines)
             self.parse_next_line()
 
     def check_element_end(self, lines):

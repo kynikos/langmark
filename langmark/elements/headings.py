@@ -34,7 +34,7 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
     START_MARK's first capturing group will be used as the element content.
     """
     TEST_START_LINES = 1
-    TEST_END_LINES = 1
+    TEST_END_LINES = 0
     START_RE = (r'^\={{{level}}}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
                  '[ \t]*\=*[ \t]*\n')
     START_MARK = None
@@ -43,11 +43,13 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
         match = self.START_MARK.match(lines[0])
         if not match:
             raise langmark.elements._BlockElementStartNotMatched()
-        return (0, 0, match.group(1))
+        return ('', (match.group(1), ))
+
+    def _parse_initial_lines(self, lines):
+        self._check_indentation_and_add_raw_lines(lines)
 
     def check_element_end(self, lines):
-        if self.rawtext:
-            raise langmark.elements._BlockElementEndNotConsumed(lines[0])
+        raise langmark.elements._BlockElementEndConsumed()
 
 
 class _ComplexHeading(langmark.elements._BlockElementContainingInline):
@@ -56,7 +58,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
     mark and ends with an optional full-line mark.
     """
     TEST_START_LINES = 3
-    TEST_END_LINES = 1
+    TEST_END_LINES = 0
     ONELINE_MARK = None
     START_MARK = None
     TITLE_MARK = re.compile(r'^[ \t]*(.+?)[ \t]*\n')
@@ -65,7 +67,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
     def check_element_start(self, lines):
         match = self.ONELINE_MARK.match(lines[0])
         if match:
-            indented_line = match.group(1)
+            title = match.group(1)
             self.rewind_lines(lines[1], lines[2])
 
         elif langmark.elements._Regexs.BLANK_LINE.fullmatch(lines[0]):
@@ -75,7 +77,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
                 raise langmark.elements._BlockElementStartNotMatched()
-            indented_line = match2.group(1)
+            title = match2.group(1)
 
         else:
             match1 = self.START_MARK.fullmatch(lines[0])
@@ -87,13 +89,15 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
                 raise langmark.elements._BlockElementStartNotMatched()
-            indented_line = match2.group(1)
+            title = match2.group(1)
 
-        return (0, 0, indented_line)
+        return ('', (title, ))
+
+    def _parse_initial_lines(self, lines):
+        self._check_indentation_and_add_raw_lines(lines)
 
     def check_element_end(self, lines):
-        if self.rawtext:
-            raise langmark.elements._BlockElementEndNotConsumed(lines[0])
+        raise langmark.elements._BlockElementEndConsumed()
 
 
 class Heading1(_ComplexHeading):
