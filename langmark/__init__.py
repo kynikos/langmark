@@ -87,4 +87,4 @@ class Langmark:
         self.meta = header.keys
         elements._BlockElement.STREAM = streamobj
         self.etree = elements.Root()
-        self.etree.parse_next_line()
+        self.etree.parse_tree()

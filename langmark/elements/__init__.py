@@ -185,7 +185,7 @@ class _BlockElementStartMatched(Exception):
         self.element = element
 
 
-class _BlockElementEndOfFile(Exception):
+class _EndOfFile(Exception):
     """
     Internal exception used to communicate to the parent that the creation of
     an element has been stopped by the end of file.
@@ -252,7 +252,7 @@ class _BlockElement(_Element):
             #  comes from
             # Don't just process it here because the element doesn't have to be
             #  instantiated
-            raise _BlockElementEndOfFile()
+            raise _EndOfFile()
         else:
             _Element.__init__(self)
             indentation_external, indentation_internal, initial_lines = \
@@ -286,7 +286,7 @@ class _BlockElement(_Element):
         for Element in self.INSTALLED_BLOCK_ELEMENTS:
             try:
                 return Element()
-            except (_BlockElementStartNotMatched, _BlockElementEndOfFile):
+            except (_BlockElementStartNotMatched, _EndOfFile):
                 self._rewind_check_lines_buffer()
                 continue
         return False
@@ -405,8 +405,6 @@ class _BlockElementContainingBlock(_BlockElement):
                 # Just discard the consumed lines if really nothing wants them
                 self.parse_next_line()
                 return
-            except _BlockElementEndOfFile:
-                return
         self._parse_element(element)
 
     def _parse_element(self, element):
@@ -496,7 +494,7 @@ class _BlockElementContainingInline(_BlockElementNotContainingBlock):
             lines = self._read_check_lines_buffer()
             self._check_indentation_and_add_raw_lines(lines)
             self._parse_inline()
-            return
+            raise _EndOfFile()
         else:
             try:
                 self.check_element_end(lines)
@@ -522,6 +520,12 @@ class Root(_BlockElementContainingBlock):
     by no more than one empty line.
     """
     TEST_START_LINES = 1
+
+    def parse_tree(self):
+        try:
+            self.parse_next_line()
+        except _EndOfFile:
+            pass
 
     def _parse_indentation(self, lines):
         return ('', '', lines)
@@ -647,7 +651,7 @@ class Paragraph(_BlockElementNotContainingBlock):
             lines = self._read_check_lines_buffer()
             self._check_indentation_and_add_raw_lines(lines)
             self._parse_inline()
-            return
+            raise _EndOfFile()
         else:
             if _Regexs.BLANK_LINE.fullmatch(lines[0]):
                 self._parse_inline()
@@ -710,7 +714,7 @@ class _BlockElementNotContainingInline_LineMarks(
             #  changes
             lines = self._read_check_lines_buffer()
             self._check_indentation_and_add_raw_lines(lines)
-            return
+            raise _EndOfFile()
         else:
             self.check_element_end(lines)
             self._check_indentation_and_add_raw_lines(lines)
