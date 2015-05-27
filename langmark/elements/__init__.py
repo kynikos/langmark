@@ -42,9 +42,7 @@ class Stream:
     The document stream.
     """
     def __init__(self, stream):
-        # Appending an emtpy line makes sure that the last paragraph is
-        #  recognized
-        self.stream = itertools.chain(stream, ('\n'))
+        self.stream = stream
 
     def read_next_line(self):
         # Do *not* use this method without protecting it from StopIteration
@@ -648,6 +646,7 @@ class Paragraph(_BlockElementNotContainingBlock):
         except StopIteration:
             lines = self._read_check_lines_buffer()
             self._check_indentation_and_add_raw_lines(lines)
+            self._parse_inline()
             return
         else:
             if _Regexs.BLANK_LINE.fullmatch(lines[0]):
