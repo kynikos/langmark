@@ -17,6 +17,10 @@ Text.
 Title 1b
 ========
 
+Text,
+Text.
+
+Text,
 Text.
 
 = Title 1c
@@ -58,6 +62,11 @@ item3a continued
   item5 continued
   `* not item
 * item6
+  ###
+  codecode
+
+  codecode
+  ###
 
 * itemA
 itemB *bold* itemBB
@@ -69,22 +78,16 @@ itemB *bold* itemBB
 
   ###
   code2
-  ###
-
-  |||
+     ###
   code3
-|||
 
   ###
-  code4
-###
-
   |||
-code5
+code4
 |||
 
   ###
-code6
+code5
 ###
 
   itemD

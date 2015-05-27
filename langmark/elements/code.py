@@ -60,7 +60,7 @@ class FormattableCodeBlock(
         |||
     """
     START_MARK =re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
-    END_MARK = re.compile(r'^([ \t]*)\|{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^\|{3,}[ \t]*\n')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -73,7 +73,7 @@ class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
         ###
     """
     START_MARK = re.compile(r'^([ \t]*)\#{3,}[ \t]*\n')
-    END_MARK = re.compile(r'^([ \t]*)\#{3,}[ \t]*\n')
+    END_MARK = re.compile(r'^\#{3,}[ \t]*\n')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -86,5 +86,5 @@ class PlainTextBlock(langmark.elements._BlockElementContainingRaw_LineMarks):
         \\\
     """
     START_MARK = re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
-    END_MARK =re.compile(r'^([ \t]*)\\{3,}[ \t]*\n')
+    END_MARK =re.compile(r'^\\{3,}[ \t]*\n')
     HTML_TAGS = ('<div>', '</div>')

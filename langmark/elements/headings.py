@@ -46,7 +46,7 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
         return ('', (match.group(1), ))
 
     def _parse_initial_lines(self, lines):
-        self._check_indentation_and_add_raw_lines(lines)
+        self._add_raw_first_line(lines[0])
 
     def check_element_end(self, lines):
         raise langmark.elements._BlockElementEndConsumed()
@@ -94,7 +94,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
         return ('', (title, ))
 
     def _parse_initial_lines(self, lines):
-        self._check_indentation_and_add_raw_lines(lines)
+        self._add_raw_first_line(lines[0])
 
     def check_element_end(self, lines):
         raise langmark.elements._BlockElementEndConsumed()
