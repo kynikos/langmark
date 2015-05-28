@@ -94,6 +94,22 @@ code5
 
   itemD
 
+*   itemE1
+    itemE2
+     in list
+*   itemE1
+    itemE2
+    in list
+*   itemE1
+    itemE2
+   not in list
+*   itemF1
+    itemF2
+  not in list
+*   itemG1
+    itemG2
+ not in list
+
 Non item.
 
 == Title 2d
