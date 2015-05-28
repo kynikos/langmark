@@ -524,6 +524,11 @@ class _BlockElementNotContainingBlock(_BlockElement):
                 if not ignore_blank_lines:
                     self._parse_inline()
                     raise _BlockElementEndNotConsumed(*lines[lN:])
+                # Never strip the line break from blank lines
+                # If self.indentation_content hasn't been set yet, it behaves
+                #  like 0 in string slicing
+                indented_lines.append(line[self.indentation_content:-1] +
+                                      line[-1])
             else:
                 indentation = self._compute_equivalent_indentation(
                                     _Regexs.INDENTATION.match(line).group())
@@ -533,7 +538,7 @@ class _BlockElementNotContainingBlock(_BlockElement):
                         raise _BlockElementEndNotConsumed(*lines[lN:])
                 except TypeError:
                     self.indentation_content = indentation
-            indented_lines.append(line[self.indentation_content:])
+                indented_lines.append(line[self.indentation_content:])
         return indented_lines
 
     def _add_raw_content_lines(self, lines):
