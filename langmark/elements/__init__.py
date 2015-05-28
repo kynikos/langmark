@@ -448,10 +448,15 @@ class _BlockElementContainingBlock_Prefix_Grouped(
     def set_parent(self, element):
         super(_BlockElementContainingBlock_Prefix_Grouped, self).set_parent(
                                                                     element)
-        previous = element.children[-1]
-        if previous.__class__ == self.__class__:
-            self.group_item_number = previous.group_item_number + 1
-            previous.group_item_last = False
+        try:
+            previous = element.children[-1]
+        except IndexError:
+            # The list could be the first element of the document
+            pass
+        else:
+            if previous.__class__ == self.__class__:
+                self.group_item_number = previous.group_item_number + 1
+                previous.group_item_last = False
 
     def convert_to_html(self):
         html = super(_BlockElementContainingBlock_Prefix_Grouped,
