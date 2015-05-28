@@ -625,7 +625,7 @@ class _BlockElementContainingBlock_Prefix_Grouped(
         return html
 
 
-class _BlockElementContainingInline_LineMarks(_BlockElementContainingInline):
+class _BlockElementNotContainingBlock_LineMarksMixin:
     """
     A block element, containing inline elements, that starts and ends with
     full-line marks.
@@ -647,6 +647,16 @@ class _BlockElementContainingInline_LineMarks(_BlockElementContainingInline):
     def check_element_end(self, lines):
         if self.end_mark.fullmatch(lines[0]):
             raise _BlockElementEndConsumed()
+
+
+class _BlockElementContainingInline_LineMarks(
+                                _BlockElementNotContainingBlock_LineMarksMixin,
+                                _BlockElementContainingInline):
+    """
+    A block element, containing inline elements, that starts and ends with
+    full-line marks.
+    """
+    pass
 
 
 class Paragraph(_BlockElementContainingInline_Meta):
@@ -719,33 +729,9 @@ class _BlockElementNotContainingInline(_BlockElementNotContainingBlock):
         pass
 
 
-class _BlockElementNotContainingInline_LineMarks(
-                                            _BlockElementNotContainingInline):
-    """
-    Base class for elements containing neither inline nor block elements, that
-    starts and ends with full-line marks.
-    """
-    TEST_START_LINES = 1
-    TEST_END_LINES = 1
-    BLOCK_MARK = None
-
-    def check_element_start(self, lines):
-        match = self.BLOCK_MARK.start.fullmatch(lines[0])
-        if not match:
-            raise _BlockElementStartNotMatched()
-        self.end_mark = self.BLOCK_MARK.make_end_mark(match.group(2))
-        return (match.group(1), ())
-
-    def _parse_initial_lines(self, lines):
-        pass
-
-    def check_element_end(self, lines):
-        if self.end_mark.fullmatch(lines[0]):
-            raise _BlockElementEndConsumed()
-
-
 class _BlockElementContainingText_LineMarks(
-                                _BlockElementNotContainingInline_LineMarks):
+                                _BlockElementNotContainingBlock_LineMarksMixin,
+                                _BlockElementNotContainingInline):
     """
     A block element, containing plain text, that starts and ends with full-line
     marks.
@@ -756,7 +742,8 @@ class _BlockElementContainingText_LineMarks(
 
 
 class _BlockElementContainingRaw_LineMarks(
-                                _BlockElementNotContainingInline_LineMarks):
+                                _BlockElementNotContainingBlock_LineMarksMixin,
+                                _BlockElementNotContainingInline):
     """
     A block element, containing raw text, that starts and ends with full-line
     marks.
