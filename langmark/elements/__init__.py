@@ -105,6 +105,31 @@ class Header:
                 break
 
 
+class _BlockMarkFactory:
+    """
+    Base class for block mark factories.
+    """
+    pass
+
+
+class BlockMarkSimple(_BlockMarkFactory):
+    """
+    A simple sequence of the same character possibly only followed by
+    whitespace characters.
+    """
+    START = r'^([ \t]*)({escaped_char}{{3,}})[ \t]*\n'
+    END = r'[ \t]*\n'
+
+    def __init__(self, char):
+        # Make sure that char is a single character
+        escaped_char = re.escape(char[0])
+        self.start = re.compile(self.START.format(escaped_char=escaped_char))
+
+    @classmethod
+    def make_end_mark(cls, start_mark):
+        return re.compile(re.escape(start_mark) + cls.END)
+
+
 class _InlineMarkFactory:
     """
     Base class for inline mark factories.
@@ -607,21 +632,20 @@ class _BlockElementContainingInline_LineMarks(_BlockElementContainingInline):
     """
     TEST_START_LINES = 1
     TEST_END_LINES = 1
-    START_MARK = None
-    END_MARK = None
+    BLOCK_MARK = None
 
     def check_element_start(self, lines):
-        match = self.START_MARK.fullmatch(lines[0])
+        match = self.BLOCK_MARK.start.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
+        self.end_mark = self.BLOCK_MARK.make_end_mark(match.group(2))
         return (match.group(1), ())
 
     def _parse_initial_lines(self, lines):
         pass
 
     def check_element_end(self, lines):
-        match = self.END_MARK.fullmatch(lines[0])
-        if match:
+        if self.end_mark.fullmatch(lines[0]):
             raise _BlockElementEndConsumed()
 
 
@@ -703,21 +727,20 @@ class _BlockElementNotContainingInline_LineMarks(
     """
     TEST_START_LINES = 1
     TEST_END_LINES = 1
-    START_MARK = None
-    END_MARK = None
+    BLOCK_MARK = None
 
     def check_element_start(self, lines):
-        match = self.START_MARK.fullmatch(lines[0])
+        match = self.BLOCK_MARK.start.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
+        self.end_mark = self.BLOCK_MARK.make_end_mark(match.group(2))
         return (match.group(1), ())
 
     def _parse_initial_lines(self, lines):
         pass
 
     def check_element_end(self, lines):
-        match = self.END_MARK.fullmatch(lines[0])
-        if match:
+        if self.end_mark.fullmatch(lines[0]):
             raise _BlockElementEndConsumed()
 
 

@@ -160,18 +160,20 @@ _code*more*_
 code
 |||
 
-###
+#####
 code
 *code*
 _code*more*_
+###
 <br />
 code
-###
+#####
 
 \\\
 code
 *code*
 _code*more*_
+\\\\\
 <br />
 code
 \\\
