@@ -157,6 +157,200 @@ Xxx _yyy; zzz.
 
 Text.
 
+Text1*bold*text.
+Text**bold**text.
+Text***bold***text.
+Text****text****text.
+
+*2bold*text.
+**bold**text.
+***bold***text.
+****text****text.
+
+Text3*bold*
+Text**bold**
+Text***bold***
+Text****text****
+
+Text4**bold*bold**text.
+Text***bold**bold***text.
+Text***bold****bold***text.
+
+Text5 *bold *bold* text.
+Text *bold * bold* text.
+Text **bold **bold** text.
+Text **bold ** bold** text.
+Text ***bold ***bold*** text.
+Text ***bold *** bold*** text.
+Text ***bold ****bold*** text.
+Text ***bold **** bold*** text.
+
+Text6`**bold*text.
+Text*`*bold*text.
+Text*bold`**text.
+Text*bold*`*text.
+
+Text7``*bold*text.
+Text*bold``*text.
+
+Text8`````**bold*text.
+Text*`````*bold*text.
+Text*bold`````**text.
+Text*bold*`````*text.
+
+Text9*` bold*text.
+Text *` bold*text.
+Text*bold` *text.
+Text*bold` * text.
+
+Text10*`` bold*text.
+Text *`` bold*text.
+Text*bold`` *bold*text.
+
+Text11*````` bold*text.
+Text *````` bold*text.
+Text*bold````` *text.
+Text*bold````` * text.
+
+Text12 * bold * text.
+Text ** bold ** text.
+Text *** bold *** text.
+Text **** text **** text.
+
+`* 13bold * text.
+** bold ** text.
+*** bold *** text.
+**** text **** text.
+
+Text14 * bold *
+Text ** bold **
+Text *** bold ***
+Text **** text ****
+
+Text15 ** bold * bold ** text.
+Text *** bold ** bold *** text.
+Text *** bold **** bold *** text.
+
+Text16 ** bold**bold ** text.
+Text ** bold** bold ** text.
+Text ** bold **bold ** text.
+Text *** bold***bold *** text.
+Text *** bold*** bold *** text.
+Text *** bold ***bold *** text.
+Text *** bold****bold *** text.
+Text *** bold**** bold *** text.
+Text *** bold ****bold *** text.
+
+Text17 ** *bold* ** text.
+** *bold* ** text.
+Text ** *bold* **
+** *bold* **
+
+Text18 *** **bold** *** text.
+*** **bold** *** text.
+Text *** **bold** ***
+*** **bold** ***
+
+Text19  ** bold ** text.
+Text **  bold ** text.
+Text ** bold  ** text.
+Text ** bold **  text.
+
+Text20`  ** bold ** text.
+Text ** ` bold ** text.
+Text ** bold`  ** text.
+Text ** bold ** ` text.
+
+Text21``  ** bold ** text.
+Text ** `` bold ** text.
+Text ** bold``  ** text.
+Text ** bold ** `` text.
+
+Text22`````  ** bold ** text.
+Text ** ````` bold ** text.
+Text ** bold`````  ** text.
+Text ** bold ** ````` text.
+
+Text23` ** text.
+Text `** text.
+Text *`** text.
+Text **` bold**text.
+Text ** bold` ** bold ** text.
+Text ** bold `** bold ** text.
+Text ** bold *`* bold ** text.
+Text ** bold **` bold ** text.
+
+Text24`` ** bold ** text.
+Text ``** text.
+Text *``* text.
+Text **`` bold** text.
+Text ** bold`` ** text.
+Text ** bold ``** bold ** text.
+Text ** bold *``* bold ** text.
+Text ** bold **`` bold ** text.
+
+Text25````` ** text.
+Text `````** text.
+Text *`````** text.
+Text **````` bold** text.
+Text ** bold````` ** bold ** text.
+Text ** bold `````** bold ** text.
+Text ** bold *`````* bold ** text.
+Text ** bold **````` bold ** text.
+
+** bold26 ** text.
+
+*
+**
+***
+****
+
+ *
+ **
+ ***
+ ****
+
+  *
+  **
+  ***
+  ****
+
+**bold27
+*
+**
+***
+****
+
+**bold28
+ *
+ **
+ ***
+ ****
+
+**bold29
+  *
+  **
+  ***
+  ****
+
+** bold30
+*
+**
+***
+****
+
+** bold31
+ *
+ **
+ ***
+ ****
+
+** bold32
+  *
+  **
+  ***
+  ****
+
 ==== Title *4a*
 
 Text <escap&this>.

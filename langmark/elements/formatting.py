@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import langmark
 
 
@@ -26,7 +25,7 @@ class Emphasis(langmark.elements._InlineElementContainingInline):
 
         _emphasized_
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('_')
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar('_', 3)
     HTML_TAGS = ('<em>', '</em>')
 
 
@@ -36,7 +35,7 @@ class Strong(langmark.elements._InlineElementContainingInline):
 
         *strong*
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('*')
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar('*', 3)
     HTML_TAGS = ('<strong>', '</strong>')
 
 
@@ -46,7 +45,7 @@ class Superscript(langmark.elements._InlineElementContainingInline):
 
         ^superscript^
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('^')
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar('^', 3)
     HTML_TAGS = ('<sup>', '</sup>')
 
 
@@ -56,7 +55,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
 
         ;subscript;
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple(';')
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar(';', 3)
     HTML_TAGS = ('<sub>', '</sub>')
 
 
@@ -66,7 +65,7 @@ class Small(langmark.elements._InlineElementContainingInline):
 
         :small:
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple(':')
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar(':', 3)
     HTML_TAGS = ('<small>', '</small>')
 
 
@@ -76,5 +75,5 @@ class Strikethrough(langmark.elements._InlineElementContainingInline):
 
         ~strikethrough~
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('~')
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar('~', 3)
     HTML_TAGS = ('<del>', '</del>')

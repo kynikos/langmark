@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import langmark
 
 
@@ -26,7 +25,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
 
         |code|
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('|')
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar('|', 3)
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -36,7 +35,9 @@ class PlainCode(langmark.elements._InlineElementContainingText):
 
         #code#
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('#')
+    # It's not possible to escape the mark character with the normal escape
+    #  character, so allow an indefinite number of characters as a mark
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar('#', None)
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -46,7 +47,9 @@ class PlainText(langmark.elements._InlineElementContainingRaw):
 
         \text\
     """
-    INLINE_MARK = langmark.elements.InlineMarkSimple('\\')
+    # It's not possible to escape the mark character with the normal escape
+    #  character, so allow an indefinite number of characters as a mark
+    INLINE_MARK = langmark.elements._InlineMarkSingleChar('\\', None)
     HTML_TAGS = ('<span>', '</span>')
 
 

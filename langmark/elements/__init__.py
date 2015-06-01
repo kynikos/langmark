@@ -34,7 +34,7 @@ class _Regexs:
     #  should never happen by design**, it's impossible to only escape the
     #  block mark leaving the inline mark intact; if an escape character is
     #  added at the beginning of a line, it will always escape both.
-    ESCAPE_CHAR = re.compile('`.')
+    ESCAPE_CHAR = re.compile(r'`.')
 
 
 class Stream:
@@ -125,55 +125,100 @@ class BlockMarkSimple(_BlockMarkFactory):
         escaped_char = re.escape(char[0])
         self.start = re.compile(self.START.format(escaped_char=escaped_char))
 
-    @classmethod
-    def make_end_mark(cls, start_mark):
-        return re.compile(re.escape(start_mark) + cls.END)
+    def make_end_mark(self, start_mark):
+        return re.compile(re.escape(start_mark) + self.END)
 
 
 class _InlineMarkFactory:
     """
     Base class for inline mark factories.
     """
-    pass
+    PREFIX_TEST = r'(?:(\n)|([ \t]?)|({escaped_char}))\Z'
+    SUFFIX_TEST = r'[{escaped_char} \t]'
 
 
-class InlineMarkSimple(_InlineMarkFactory):
+class _InlineMarkSingleChar(_InlineMarkFactory):
     """
-    A simple sequence of the same character.
+    Base class for inline mark factories.
     """
-    # Note how marks at the end of lines are ignored
-    START_NORMAL = (r'(^{escaped_char}+[ \t]*|{escaped_char}+)'
-                     '(?![{escaped_char} \t\n]|$)')
-    # Note how marks at the end of lines are ignored
-    START_SPACED = r'(?<!^)[ \t]+{escaped_char}+[ \t]+(?!\n|$)'
-    END_NORMAL = r'(?<![ \t])'
-    END_SPACED = ' '
+    POSSIBLE_MARK = r'({escaped_char}{quantifier})(?!{escaped_char}|$)([ \t])?'
+    # All end marks should have the same capturing groups
+    END_MARK_NORMAL = r'(?<!\n)({escaped_mark})(?!{escaped_char})'
+    END_MARK_SPACED = r'([ \t]{escaped_mark})(?=[ \t]|$)'
 
-    def __init__(self, char):
+    def __init__(self, char, max_chars):
         # Make sure that char is a single character
-        escaped_char = re.escape(char[0])
-        self.normal = re.compile(self.START_NORMAL.format(
-                                                    escaped_char=escaped_char))
-        self.spaced = re.compile(self.START_SPACED.format(
-                                                    escaped_char=escaped_char))
+        self.escaped_char = re.escape(char[0])
+        quantifier = r'{1,' + str(max_chars) + r'}' if max_chars else r'+'
+        self.start = re.compile(self.POSSIBLE_MARK.format(
+                        escaped_char=self.escaped_char, quantifier=quantifier),
+                        re.MULTILINE)
+        self.prefix_test = re.compile(self.PREFIX_TEST.format(
+                                escaped_char=self.escaped_char), re.MULTILINE)
+        self.suffix_test = re.compile(self.SUFFIX_TEST.format(
+                                escaped_char=self.escaped_char), re.MULTILINE)
 
-    @classmethod
-    def make_end_mark_normal(cls, start_mark):
-        return re.compile(cls.END_NORMAL + re.escape(start_mark))
+    def make_end_mark(self, parsed_text, start_mark, is_paragraph_start):
+        # Yes, most of this could be done directly in the regular expression,
+        #  but good luck with that... Also remember that Python's standard re
+        #  module doesn't support variable-length look-behind...
+        line_start, pre_space, pre_char = self.prefix_test.search(parsed_text
+                                                                    ).groups()
+        if pre_char is not None:
+            return False
 
-    @classmethod
-    def make_end_text_normal(cls, parsed_text):
-        return parsed_text
+        # There's no need to look for escaped characters: that's already done
+        #  by the normal escaping algorithm, and every time a character is
+        #  escaped, parsed_text is reset to start from the following unescaped
+        #  character; also, an escape match will always start before a possible
+        #  mark match, and they aren't allowed to overlap
+        possible_mark, post_space = start_mark.groups()
 
-    @classmethod
-    def make_end_mark_spaced(cls, start_mark):
-        # Don't match the last space ([:-1]), so that it's added after the
-        #  closing HTML tag
-        return re.compile(re.escape(start_mark[:-1]))
+        # I can't just match ^ to see if it's the start of a line, because
+        #  in general parsed_text starts after the previous expression matched
+        #  by the parser engine
+        # Note that marks at the end of lines are already excluded by the
+        #  regular expression
+        if is_paragraph_start or line_start is not None:
+            if post_space:
+                # \n** text...
+                return self._make_end_mark_spaced(possible_mark)
+            # \n**text...
+            return self._make_end_mark_normal(possible_mark)
+        elif post_space:
+            if pre_space:
+                # ... ** text...
+                return self._make_end_mark_spaced(possible_mark)
+            # ...** text...
+            return False
+        # ...**text...
+        # ... **text...
+        return self._make_end_mark_normal(possible_mark)
 
-    @classmethod
-    def make_end_text_spaced(cls, parsed_text):
-        return parsed_text + cls.END_SPACED
+    def _make_end_mark_normal(self, mark):
+        return re.compile(self.END_MARK_NORMAL.format(
+                          escaped_mark=re.escape(mark),
+                          escaped_char=self.escaped_char),
+                          re.MULTILINE)
+
+    def _make_end_mark_spaced(self, mark):
+        if len(mark) > 1:
+            return re.compile(self.END_MARK_SPACED.format(
+                              escaped_mark=re.escape(mark)),
+                              re.MULTILINE)
+        else:
+            return False
+
+    def check_end_mark(self, parsed_text, end_mark):
+        if end_mark.group(1)[0] == self.escaped_char[-1]:
+            try:
+                pre_char = parsed_text[-1]
+            except IndexError:
+                pass
+            else:
+                if self.suffix_test.fullmatch(pre_char):
+                    return False
+        return True
 
 
 class RawText:
@@ -701,19 +746,15 @@ class _InlineElement(_Element):
     """
     Base class for inline elements.
     """
-    START_MARK_NORMAL_TO_INLINE_ELEMENT = None
-    START_MARK_SPACED_TO_INLINE_ELEMENT = None
+    START_MARK_TO_INLINE_ELEMENT = None
     ENABLE_ESCAPE = True
+    INLINE_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
     def __init__(self, parent, inline_parser, end_mark):
         self.inline_parser = inline_parser
-        self.inline_bindings = {
-            start_mark_normal: self._handle_inline_start_mark_normal
-            for start_mark_normal in self.START_MARK_NORMAL_TO_INLINE_ELEMENT}
-        self.inline_bindings.update(
-            {start_mark_spaced: self._handle_inline_start_mark_spaced
-            for start_mark_spaced in self.START_MARK_SPACED_TO_INLINE_ELEMENT})
+        self.inline_bindings = {start_mark: self._handle_inline_start_mark
+                        for start_mark in self.START_MARK_TO_INLINE_ELEMENT}
         # BaseInlineElement passes None as end_mark
         if end_mark:
             self.inline_bindings[end_mark] = self._handle_inline_end_mark
@@ -724,8 +765,7 @@ class _InlineElement(_Element):
         self.set_parent(parent)
 
     @classmethod
-    def install_marks(cls, start_mark_normal_to_element, start_mark_normal,
-                      start_mark_spaced_to_element, start_mark_spaced):
+    def install_mark(cls, start_mark_to_element, start_mark):
         raise NotImplementedError()
 
     def take_inline_control(self):
@@ -736,28 +776,26 @@ class _InlineElement(_Element):
         self.children.append(RawText(event.parsed_text +
                                      event.mark.group()[1]))
 
-    def _handle_inline_start_mark_normal(self, event):
-        end_mark = InlineMarkSimple.make_end_mark_normal(event.mark.group())
-        element = self.START_MARK_NORMAL_TO_INLINE_ELEMENT[event.regex](self,
-                                                self.inline_parser, end_mark)
-        self._append_element(InlineMarkSimple.make_end_text_normal(
-                                                event.parsed_text), element)
-
-    def _handle_inline_start_mark_spaced(self, event):
-        end_mark = InlineMarkSimple.make_end_mark_spaced(event.mark.group())
-        element = self.START_MARK_SPACED_TO_INLINE_ELEMENT[event.regex](self,
-                                                self.inline_parser, end_mark)
-        self._append_element(InlineMarkSimple.make_end_text_spaced(
-                                                event.parsed_text), element)
-
-    def _append_element(self, parsed_text, element):
-        self.children.append(RawText(parsed_text))
-        self.children.append(element)
-        element.take_inline_control()
+    def _handle_inline_start_mark(self, event):
+        Element = self.START_MARK_TO_INLINE_ELEMENT[event.regex]
+        end_mark = Element.INLINE_MARK.make_end_mark(event.parsed_text,
+                                        event.mark, not bool(self.children))
+        if end_mark:
+            element = Element(self, self.inline_parser, end_mark)
+            self.children.append(RawText(event.parsed_text))
+            self.children.append(element)
+            element.take_inline_control()
+        else:
+            self.children.append(RawText(''.join((event.parsed_text,
+                                                  event.mark.group()))))
 
     def _handle_inline_end_mark(self, event):
-        self.children.append(RawText(event.parsed_text))
-        self.parent.take_inline_control()
+        if self.INLINE_MARK.check_end_mark(event.parsed_text, event.mark):
+            self.children.append(RawText(event.parsed_text))
+            self.parent.take_inline_control()
+        else:
+            self.children.append(RawText(''.join((event.parsed_text,
+                                                  event.mark.group()))))
 
     def _handle_inline_parse_end(self, event):
         self.children.append(RawText(event.remainder_text))
@@ -767,11 +805,12 @@ class BaseInlineElement(_InlineElement):
     """
     Dummy inline element for parsing other inline elements.
     """
+    # This is only a dummy inline mark
+    INLINE_MARK = _InlineMarkSingleChar(' ', 1)
+
     @classmethod
-    def install_marks(cls, start_mark_normal_to_element, start_mark_normal,
-                      start_mark_spaced_to_element, start_mark_spaced):
-        cls.START_MARK_NORMAL_TO_INLINE_ELEMENT = start_mark_normal_to_element
-        cls.START_MARK_SPACED_TO_INLINE_ELEMENT = start_mark_spaced_to_element
+    def install_mark(cls, start_mark_to_element, start_mark):
+        cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
         cls.ENABLE_ESCAPE = True
 
 
@@ -779,15 +818,11 @@ class _InlineElementContainingInline(_InlineElement):
     """
     Base class for inline elements containing inline elements.
     """
-    INLINE_MARK = None
 
     @classmethod
-    def install_marks(cls, start_mark_normal_to_element, start_mark_normal,
-                      start_mark_spaced_to_element, start_mark_spaced):
-        del start_mark_normal_to_element[start_mark_normal]
-        del start_mark_spaced_to_element[start_mark_spaced]
-        cls.START_MARK_NORMAL_TO_INLINE_ELEMENT = start_mark_normal_to_element
-        cls.START_MARK_SPACED_TO_INLINE_ELEMENT = start_mark_spaced_to_element
+    def install_mark(cls, start_mark_to_element, start_mark):
+        del start_mark_to_element[start_mark]
+        cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
         cls.ENABLE_ESCAPE = True
 
     def convert_to_html(self):
@@ -801,10 +836,8 @@ class _InlineElementNotContainingInline(_InlineElement):
     Base class for inline elements not containing inline elements.
     """
     @classmethod
-    def install_marks(cls, start_mark_normal_to_element, start_mark_normal,
-                      start_mark_spaced_to_element, start_mark_spaced):
-        cls.START_MARK_NORMAL_TO_INLINE_ELEMENT = {}
-        cls.START_MARK_SPACED_TO_INLINE_ELEMENT = {}
+    def install_mark(cls, start_mark_to_element, start_mark):
+        cls.START_MARK_TO_INLINE_ELEMENT = {}
         cls.ENABLE_ESCAPE = False
 
 
@@ -812,7 +845,6 @@ class _InlineElementContainingRaw(_InlineElementNotContainingInline):
     """
     Base class for inline elements containing raw text.
     """
-    INLINE_MARK = None
 
     def convert_to_html(self):
         return ''.join(child.get_raw_text() for child in self.children
@@ -823,7 +855,6 @@ class _InlineElementContainingText(_InlineElementNotContainingInline):
     """
     Base class for inline elements containing plain text.
     """
-    INLINE_MARK = None
 
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children

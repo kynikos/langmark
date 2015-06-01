@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 from .elements import (headings, lists, code, formatting)
 
 # The order of the block elements is important: put the most likey elements
@@ -58,24 +57,18 @@ class Langmark:
         self._install_inline_elements()
 
     def _install_inline_elements(self):
-        start_mark_normal_to_element = {}
-        start_mark_spaced_to_element = {}
-        element_to_compiled_marks = {}
+        start_mark_to_element = {}
+        element_to_compiled_mark = {}
         for Element in INLINE_ELEMENTS:
             mark = Element.INLINE_MARK
-            start_mark_normal_to_element[mark.normal] = Element
-            start_mark_spaced_to_element[mark.spaced] = Element
-            element_to_compiled_marks[Element] = (mark.normal, mark.spaced)
-        element_to_compiled_marks[elements.BaseInlineElement] = (None, None)
+            start_mark_to_element[mark.start] = Element
+            element_to_compiled_mark[Element] = mark.start
+        element_to_compiled_mark[elements.BaseInlineElement] = None
         # The first loop builds the dictionaries, which have to be installed
         #  in a separate loop
-        for Element in element_to_compiled_marks:
-            start_mark_normal, start_mark_spaced = element_to_compiled_marks[
-                                                                    Element]
-            Element.install_marks(start_mark_normal_to_element.copy(),
-                                  start_mark_normal,
-                                  start_mark_spaced_to_element.copy(),
-                                  start_mark_spaced)
+        for Element in element_to_compiled_mark:
+            start_mark = element_to_compiled_mark[Element]
+            Element.install_mark(start_mark_to_element.copy(), start_mark)
 
     def parse(self, stream):
         # The parameters for parse must reflect the attributes set through
