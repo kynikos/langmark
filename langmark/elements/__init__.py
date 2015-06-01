@@ -165,7 +165,7 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
         line_start, pre_space, pre_char = self.prefix_test.search(parsed_text
                                                                     ).groups()
         if pre_char is not None:
-            return False
+            raise _InlineElementStartNotMatched()
 
         # There's no need to look for escaped characters: that's already done
         #  by the normal escaping algorithm, and every time a character is
@@ -190,7 +190,7 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
                 # ... ** text...
                 return self._make_end_mark_spaced(possible_mark)
             # ...** text...
-            return False
+            raise _InlineElementStartNotMatched()
         # ...**text...
         # ... **text...
         return self._make_end_mark_normal(possible_mark)
@@ -207,7 +207,7 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
                               escaped_mark=re.escape(mark)),
                               re.MULTILINE)
         else:
-            return False
+            raise _InlineElementStartNotMatched()
 
     def check_end_mark(self, parsed_text, end_mark):
         if end_mark.group(1)[0] == self.escaped_char[-1]:
@@ -255,14 +255,6 @@ class _BlockElementStartMatched(Exception):
         self.element = element
 
 
-class _EndOfFile(Exception):
-    """
-    Internal exception used to communicate to the parent that the creation of
-    an element has been stopped by the end of file.
-    """
-    pass
-
-
 class _BlockElementEndConsumed(Exception):
     """
     Internal exception used to communicate the end of the element to its
@@ -278,6 +270,22 @@ class _BlockElementEndNotConsumed(Exception):
     """
     def __init__(self, *lines):
         self.lines = lines
+
+
+class _InlineElementStartNotMatched(Exception):
+    """
+    Internal exception used to communicate to the parent that the parsed line
+    does not correspond to the start of the element.
+    """
+    pass
+
+
+class _EndOfFile(Exception):
+    """
+    Internal exception used to communicate to the parent that the creation of
+    an element has been stopped by the end of file.
+    """
+    pass
 
 
 class _Element:
@@ -610,7 +618,7 @@ class _BlockElementContainingInline_Meta(_BlockElementNotContainingBlock):
     """
     def _parse_inline(self):
         inline_parser = textparser.TextParser(self.rawtext.text)
-        dummyelement = BaseInlineElement(self, inline_parser, None)
+        dummyelement = BaseInlineElement(self, inline_parser, None, None, None)
         dummyelement.take_inline_control()
         inline_parser.parse()
         self.children = dummyelement.children
@@ -751,12 +759,15 @@ class _InlineElement(_Element):
     INLINE_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
-    def __init__(self, parent, inline_parser, end_mark):
+    def __init__(self, parent, inline_parser, parsed_text, start_mark,
+                 is_paragraph_start):
         self.inline_parser = inline_parser
         self.inline_bindings = {start_mark: self._handle_inline_start_mark
                         for start_mark in self.START_MARK_TO_INLINE_ELEMENT}
-        # BaseInlineElement passes None as end_mark
-        if end_mark:
+        # BaseInlineElement passes None as start_mark
+        if start_mark:
+            end_mark = self.INLINE_MARK.make_end_mark(parsed_text, start_mark,
+                                                            is_paragraph_start)
             self.inline_bindings[end_mark] = self._handle_inline_end_mark
         if self.ENABLE_ESCAPE:
             self.inline_bindings[_Regexs.ESCAPE_CHAR] = \
@@ -777,17 +788,17 @@ class _InlineElement(_Element):
                                      event.mark.group()[1]))
 
     def _handle_inline_start_mark(self, event):
-        Element = self.START_MARK_TO_INLINE_ELEMENT[event.regex]
-        end_mark = Element.INLINE_MARK.make_end_mark(event.parsed_text,
+        try:
+            element = self.START_MARK_TO_INLINE_ELEMENT[event.regex](self,
+                                        self.inline_parser, event.parsed_text,
                                         event.mark, not bool(self.children))
-        if end_mark:
-            element = Element(self, self.inline_parser, end_mark)
+        except _InlineElementStartNotMatched:
+            self.children.append(RawText(''.join((event.parsed_text,
+                                                  event.mark.group()))))
+        else:
             self.children.append(RawText(event.parsed_text))
             self.children.append(element)
             element.take_inline_control()
-        else:
-            self.children.append(RawText(''.join((event.parsed_text,
-                                                  event.mark.group()))))
 
     def _handle_inline_end_mark(self, event):
         if self.INLINE_MARK.check_end_mark(event.parsed_text, event.mark):
