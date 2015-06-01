@@ -159,9 +159,10 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
     END_MARK_NORMAL = r'(?<!\n)({escaped_mark})(?!{escaped_char})'
     END_MARK_SPACED = r'([ \t]{escaped_mark})(?=[ \t]|$)'
 
-    def __init__(self, char, max_chars):
-        # Make sure that char is a single character
-        self.escaped_char = re.escape(char[0])
+    def __init__(self, start_char, end_char, max_chars):
+        # Make sure that *_char are single characters
+        self.escaped_start_char = re.escape(start_char[0])
+        self.escaped_end_char = re.escape(end_char[0])
         # I also considered treating 1-character marks differently, making them
         #  work only if no whitespace is found between them; however this is
         #  very difficult to implement because the internal text still needs
@@ -169,12 +170,12 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
         #  cancel all the parsing with an exception
         quantifier = r'{1,' + str(max_chars) + r'}' if max_chars else r'+'
         self.start = re.compile(self.POSSIBLE_MARK.format(
-                        escaped_char=self.escaped_char, quantifier=quantifier),
-                        re.MULTILINE)
+                escaped_char=self.escaped_start_char, quantifier=quantifier),
+                re.MULTILINE)
         self.prefix_test = re.compile(self.PREFIX_TEST.format(
-                                escaped_char=self.escaped_char), re.MULTILINE)
+                        escaped_char=self.escaped_start_char), re.MULTILINE)
         self.suffix_test = re.compile(self.SUFFIX_TEST.format(
-                                escaped_char=self.escaped_char), re.MULTILINE)
+                        escaped_char=self.escaped_end_char), re.MULTILINE)
 
     def make_end_mark(self, parsed_text, start_mark, is_paragraph_start):
         # Yes, most of this could be done directly in the regular expression,
@@ -215,20 +216,20 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
 
     def _make_end_mark_normal(self, mark):
         return re.compile(self.END_MARK_NORMAL.format(
-                          escaped_mark=re.escape(mark),
-                          escaped_char=self.escaped_char),
+                          escaped_mark=self.escaped_end_char * len(mark),
+                          escaped_char=self.escaped_end_char),
                           re.MULTILINE)
 
     def _make_end_mark_spaced(self, mark):
         if len(mark) > 1:
             return re.compile(self.END_MARK_SPACED.format(
-                              escaped_mark=re.escape(mark)),
+                              escaped_mark=self.escaped_end_char * len(mark)),
                               re.MULTILINE)
         else:
             raise _InlineElementStartNotMatched()
 
     def check_end_mark(self, parsed_text, end_mark):
-        if end_mark.group(1)[0] == self.escaped_char[-1]:
+        if end_mark.group(1)[0] == self.escaped_end_char[-1]:
             try:
                 pre_char = parsed_text[-1]
             except IndexError:
