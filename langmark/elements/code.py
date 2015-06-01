@@ -29,7 +29,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
     HTML_TAGS = ('<code>', '</code>')
 
 
-class PlainCode(langmark.elements._InlineElementContainingText):
+class PlainCode(langmark.elements._InlineElementContainingHtmlText):
     """
     Inline preformatted monospace text.::
 
@@ -41,7 +41,7 @@ class PlainCode(langmark.elements._InlineElementContainingText):
     HTML_TAGS = ('<code>', '</code>')
 
 
-class PlainText(langmark.elements._InlineElementContainingRaw):
+class PlainText(langmark.elements._InlineElementContainingRawText):
     """
     Inline plain, unescaped text.::
 

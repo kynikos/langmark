@@ -869,21 +869,19 @@ class _InlineElementNotContainingInline(_InlineElement):
         cls.ENABLE_ESCAPE = False
 
 
-class _InlineElementContainingRaw(_InlineElementNotContainingInline):
+class _InlineElementContainingRawText(_InlineElementNotContainingInline):
     """
     Base class for inline elements containing raw text.
     """
-
     def convert_to_html(self):
         return ''.join(child.get_raw_text() for child in self.children
                                                         ).join(self.HTML_TAGS)
 
 
-class _InlineElementContainingText(_InlineElementNotContainingInline):
+class _InlineElementContainingHtmlText(_InlineElementNotContainingInline):
     """
     Base class for inline elements containing plain text.
     """
-
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children
                                                         ).join(self.HTML_TAGS)
