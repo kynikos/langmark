@@ -112,6 +112,36 @@ code5
 
 Non item.
 
+#. item1
+3. item2
+   #. item2a
+   22. item2a
+#. item3
+4. item4
+
+&. item1
+g. item2
+   &. item2a
+   F. item2a
+&. item3
+x. item4
+
+#. item1
+3. item2
+   * item2a
+   * item2a
+     77. item2a1
+     9. item2a2
+#. item3
+4. item4
+
+* item1
+* item2
+#. item1
+#. item2
+&. item1
+&. item2
+
 == Title 2d
 
 Text.

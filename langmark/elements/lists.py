@@ -29,6 +29,37 @@ class UnorderedListItem(
     """
     # TODO: For the moment it's impossible to have two separate lists without
     #       other elements between them
-    BLOCK_MARK = langmark.elements.BlockMarkPrefix('*')
+    BLOCK_MARK = langmark.elements.BlockMarkPrefix(r'\*')
     HTML_OUTER_TAGS = ('<ul>', '</ul>')
+    HTML_TAGS = ('<li>', '</li>')
+
+
+class NumberedListItem(
+                langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
+    """
+    A numbered list item.::
+
+        #. List item
+        1. List item
+    """
+    # TODO: For the moment it's impossible to have two separate lists without
+    #       other elements between them
+    BLOCK_MARK = langmark.elements.BlockMarkPrefix(r'(?:[0-9]+|#)\.')
+    HTML_OUTER_TAGS = ('<ol>', '</ol>')
+    HTML_TAGS = ('<li>', '</li>')
+
+
+class LatinListItem(
+                langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
+    """
+    An alphabetical list item using Latin characters.::
+
+        &. List item
+        a. List item
+    """
+    # TODO: For the moment it's impossible to have two separate lists without
+    #       other elements between them
+    # TODO: Let customize the class name
+    BLOCK_MARK = langmark.elements.BlockMarkPrefix(r'[a-zA-Z&]\.')
+    HTML_OUTER_TAGS = ('<ol class="langmark-latin">', '</ol>')
     HTML_TAGS = ('<li>', '</li>')

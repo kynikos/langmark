@@ -136,12 +136,10 @@ class BlockMarkPrefix(_BlockMarkFactory):
     """
     # Without the space after escaped_char there would be a clash with some
     #  inline elements at the start of a line
-    PREFIX = r'^([ \t]*)({escaped_char}[ \t]+)(.*\n)'
+    PREFIX = r'^([ \t]*)({prefix}[ \t]+)(.*\n)'
 
-    def __init__(self, char):
-        # Make sure that char is a single character
-        escaped_char = re.escape(char[0])
-        self.prefix = re.compile(self.PREFIX.format(escaped_char=escaped_char))
+    def __init__(self, regex):
+        self.prefix = re.compile(self.PREFIX.format(prefix=regex))
 
 
 class _InlineMarkFactory:

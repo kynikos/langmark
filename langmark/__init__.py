@@ -30,6 +30,8 @@ BLOCK_ELEMENTS = [headings.Heading1,
                   headings.Heading5,
                   headings.Heading6,
                   lists.UnorderedListItem,
+                  lists.NumberedListItem,
+                  lists.LatinListItem,
                   code.FormattableCodeBlock,
                   code.PlainCodeBlock,
                   code.PlainTextBlock]
