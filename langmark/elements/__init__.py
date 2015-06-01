@@ -816,8 +816,7 @@ class BaseInlineElement(_InlineElement):
     """
     Dummy inline element for parsing other inline elements.
     """
-    # This is only a dummy inline mark
-    INLINE_MARK = _InlineMarkSingleChar(' ', 1)
+    INLINE_MARK = None
 
     @classmethod
     def install_mark(cls, start_mark_to_element, start_mark):
