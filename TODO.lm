@@ -1,0 +1,26 @@
+* See notes in syntax.lm`
+  Search for "TODO" in the files
+* Isolate the HTML converting code in a proper class, also preparing for
+  different converters like Markdown, MediaWiki...
+
+  Make HTML escaping smarter? E.g. only escape & and < inside code tags, or
+  recognize HTML tags and entities, and escape the rest; see also what
+  Makrdown does.
+
+  Optionally do further HTML escapes (see Wembler's escape.py script)
+
+* Markdown compatibility mode
+* Add tests`
+  Test headerless and contentless source files
+* File extension: .lm .lmk
+* Documentation
+  * Review and update all docstrings
+  * When inserting html entities ("&...;"), they must be escaped like html tags
+  * Mention dependencies
+* Add methods to traverse/modify the etree object`
+  Allow inserting an etree into another one
+* Benchmark/compare with other languages/parsers
+* Support Python 2.7
+  * https://pypi.python.org/pypi/3to2
+  * http://python3porting.com/noconv.html
+* GUI editor/real-time converter
