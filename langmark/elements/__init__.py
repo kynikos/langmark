@@ -149,6 +149,11 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
     def __init__(self, char, max_chars):
         # Make sure that char is a single character
         self.escaped_char = re.escape(char[0])
+        # I also considered treating 1-character marks differently, making them
+        #  work only if no whitespace is found between them; however this is
+        #  very difficult to implement because the internal text still needs
+        #  to be parsed for nested inline elements, and a white space should
+        #  cancel all the parsing with an exception
         quantifier = r'{1,' + str(max_chars) + r'}' if max_chars else r'+'
         self.start = re.compile(self.POSSIBLE_MARK.format(
                         escaped_char=self.escaped_char, quantifier=quantifier),
