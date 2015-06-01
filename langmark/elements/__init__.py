@@ -129,6 +129,21 @@ class BlockMarkSimple(_BlockMarkFactory):
         return re.compile(re.escape(start_mark) + self.END)
 
 
+class BlockMarkPrefix(_BlockMarkFactory):
+    """
+    A simple sequence of the same character possibly only followed by
+    whitespace characters.
+    """
+    # Without the space after escaped_char there would be a clash with some
+    #  inline elements at the start of a line
+    PREFIX = r'^([ \t]*)({escaped_char}[ \t]+)(.*\n)'
+
+    def __init__(self, char):
+        # Make sure that char is a single character
+        escaped_char = re.escape(char[0])
+        self.prefix = re.compile(self.PREFIX.format(escaped_char=escaped_char))
+
+
 class _InlineMarkFactory:
     """
     Base class for inline mark factories.
@@ -474,10 +489,10 @@ class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
     content.`
     """
     TEST_START_LINES = 1
-    START_MARK = None
+    BLOCK_MARK = None
 
     def _parse_indentation(self, lines):
-        match = self.START_MARK.fullmatch(lines[0])
+        match = self.BLOCK_MARK.prefix.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
         return (match.group(1), match.group(2), (match.group(3), ))

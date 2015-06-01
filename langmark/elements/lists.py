@@ -29,8 +29,6 @@ class UnorderedListItem(
     """
     # TODO: For the moment it's impossible to have two separate lists without
     #       other elements between them
-    # Without the space after the * there would be a clash with bold text at
-    #  the start of a line
-    START_MARK = re.compile(r'^([ \t]*)(\*[ \t]+)(.*\n)')
+    BLOCK_MARK = langmark.elements.BlockMarkPrefix('*')
     HTML_OUTER_TAGS = ('<ul>', '</ul>')
     HTML_TAGS = ('<li>', '</li>')
