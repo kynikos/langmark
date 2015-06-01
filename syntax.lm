@@ -3,43 +3,41 @@ Inspiration languages (read their specification):
   * GitHub flavored
   * Python-Markdown extensions
 * reStructuredText
-
-
-# list
-# list
-  & list
-# list
-& list
-  a. list
-  b. list
-4. list
-5. list
-
-+ done
-+ done
-  - todo
-- todo
-
-
-Paragraph line1`
-Paragraph line1
+* MediaWiki
 
 
 [link]
 [link|id]
-[link|url]
-[[smartlink||url]]
-@[link|url]
+[link/http://url.com]
+[link/http://url.com title]
+[link]<http://url.com title>
+<link>
+<link|id>
+<link/http://url.com>
+<link/http://url.com title>
 http://plain.link.com/
+<http://plain.link.com/>
+[disguised@email.address]
+<disguised@email.address>
+![smartlink/http://url.com/image.jpg title]
+!<smartlink/http://url.com/image.jpg title>
 
-@reference1(hidden) url
-@ reference1(visible) url
+@[id] http://url.com title(hidden)
+*[id] http://url.com title(visible)
 
 
- code
-  indented
+Paragraph line1`
+Paragraph line2
+
+
+ escape
+  code
    code
     indented
+
+Space 1 should allow escaping block elements (hence ignored in rendering)
+Spaces 2/3 should define code blocks
+Space 4 should nest an indented container
 
 ) indented
 )) indented
@@ -63,26 +61,40 @@ http://plain.link.com/
 > quote
 
 
++ done
++ done
+  - todo
+- todo
+
+x] done
+x] done
+   !] todo
+!] todo
+
+
 !Note: text
 !Warning: text
 !Tip: text
 
 
-{{code config}}
+{code|config}
 code
 code
-{{!code}}
+{!code}
 
-{{transclude page 1=arg cc=arg}}
-{{arg 1}}
-{{arg cc}}
+{transclude|page|1=arg|cc=arg}
+{arg|1}
+{arg|cc}
 
-{{image path}}
-{{gallery path}}
-{{extension}}{{!extension}}
+{image|path}
+{gallery|path}
+{extension}{!extension}
 
 
 Horizontal line
+
+
+Commented text
 
 
 'quote' -> ‘quote’
