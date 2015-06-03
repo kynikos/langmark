@@ -8,19 +8,25 @@ Inspiration languages (read their specification):
 
 [link]
 [link|id]
-[link/http://url.com]
-[link/http://url.com title]
+[link|http://url.com]
+[link|http://url.com|title]
+[link|http://url.com title]
+[[link||http://url.com||title]]
+[[link||http://url.com  title]]
+[[ link || http://url.com || title ]]
+[[ link || http://url.com    title ]]
 [link]<http://url.com title>
+[link]http://url.com
 <link>
 <link|id>
-<link/http://url.com>
-<link/http://url.com title>
+<link|http://url.com>
+<link|http://url.com title>
 http://plain.link.com/
 <http://plain.link.com/>
 [disguised@email.address]
 <disguised@email.address>
-![smartlink/http://url.com/image.jpg title]
-!<smartlink/http://url.com/image.jpg title>
+![smartlink|http://url.com/image.jpg title]
+!<smartlink|http://url.com/image.jpg title>
 
 @[id] http://url.com title(hidden)
 *[id] http://url.com title(visible)
@@ -29,15 +35,20 @@ http://plain.link.com/
 Paragraph line1`
 Paragraph line2
 
+Paragraph line1
+ Paragraph line2
 
- escape
+
+ escape/line-break
   code
    code
     indented
 
-Space 1 should allow escaping block elements (hence ignored in rendering)
-Spaces 2/3 should define code blocks
-Space 4 should nest an indented container
+ Space 1 should allow escaping block elements (hence ignored in rendering) if
+the first line of a paragraph; it should represent a line break if a non-first
+line of a paragraph
+ Spaces 2/3 should define code blocks
+ Space 4 should nest an indented container
 
 ) indented
 )) indented
@@ -70,6 +81,16 @@ x] done
 x] done
    !] todo
 !] todo
+
+
+% term1
+
+  definition
+
+% term2
+
+  definition
+  definition
 
 
 !Note: text

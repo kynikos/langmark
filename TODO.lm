@@ -1,11 +1,15 @@
 * See notes in syntax.lm`
   Search for "TODO" in the files
+* Use a centralized configuration script
+* While parsing the links, prepare a report of their status (links with missing
+  id's, duplicated id's...)
 * Isolate the HTML converting code in a proper class, also preparing for
   different converters like Markdown, MediaWiki...
 
   Make HTML escaping smarter? E.g. only escape & and < inside code tags, or
   recognize HTML tags and entities, and escape the rest; see also what
   Makrdown does.
+      Note that currently I'm also using < and > to mark links
 
   Optionally do further HTML escapes (see Wembler's escape.py script)
 
