@@ -795,14 +795,17 @@ class _InlineElement(_Element):
     """
     Base class for inline elements.
     """
-    ENABLE_ESCAPE = True
+    ENABLE_ESCAPE = None
     INLINE_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
     def __init__(self, parent, inline_parser, parsed_text, start_mark,
                  is_paragraph_start):
         self.inline_parser = inline_parser
-        self.inline_bindings = self.install_bindings()
+        try:
+            self.inline_bindings = self.install_bindings()
+        except NotImplementedError:
+            self.inline_bindings = {}
         # BaseInlineElement passes None as start_mark
         if start_mark:
             end_mark = self.INLINE_MARK.make_end_mark(parsed_text, start_mark,
@@ -845,6 +848,7 @@ class _InlineElementContainingInline(_InlineElement):
     """
     Base class for inline elements containing inline elements.
     """
+    ENABLE_ESCAPE = True
     START_MARK_TO_INLINE_ELEMENT = None
 
     @classmethod
@@ -852,7 +856,6 @@ class _InlineElementContainingInline(_InlineElement):
         # BaseInlineElement passes None as start_mark
         start_mark_to_element.pop(start_mark, None)
         cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
-        cls.ENABLE_ESCAPE = True
 
     def install_bindings(self):
         return {start_mark: self._handle_inline_start_mark
@@ -884,31 +887,24 @@ class BaseInlineElement(_InlineElementContainingInline):
     INLINE_MARK = None
 
 
-class _InlineElementContainingText(_InlineElement):
-    """
-    Base class for inline elements not containing inline elements.
-    """
-    @classmethod
-    def install_mark(cls, start_mark_to_element, start_mark):
-        cls.ENABLE_ESCAPE = False
 
-    def install_bindings(self):
-        return {}
-
-
-class _InlineElementContainingRawText(_InlineElementContainingText):
+class _InlineElementContainingRawText(_InlineElement):
     """
     Base class for inline elements containing raw text.
     """
+    ENABLE_ESCAPE = False
+
     def convert_to_html(self):
         return ''.join(child.get_raw_text() for child in self.children
                                                         ).join(self.HTML_TAGS)
 
 
-class _InlineElementContainingHtmlText(_InlineElementContainingText):
+class _InlineElementContainingHtmlText(_InlineElement):
     """
     Base class for inline elements containing plain text.
     """
+    ENABLE_ESCAPE = False
+
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children
                                                         ).join(self.HTML_TAGS)

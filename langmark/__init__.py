@@ -70,7 +70,10 @@ class Langmark:
         #  in a separate loop
         for Element in element_to_compiled_mark:
             start_mark = element_to_compiled_mark[Element]
-            Element.install_mark(start_mark_to_element.copy(), start_mark)
+            try:
+                Element.install_mark(start_mark_to_element.copy(), start_mark)
+            except NotImplementedError:
+                pass
 
     def parse(self, stream):
         # The parameters for parse must reflect the attributes set through
