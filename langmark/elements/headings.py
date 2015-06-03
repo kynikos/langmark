@@ -70,7 +70,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
             title = match.group(1)
             self.rewind_lines(lines[1], lines[2])
 
-        elif langmark.elements._Regexs.BLANK_LINE.fullmatch(lines[0]):
+        elif langmark.elements.Configuration.BLANK_LINE.fullmatch(lines[0]):
             match2 = self.TITLE_MARK.fullmatch(lines[1])
             if not match2:
                 raise langmark.elements._BlockElementStartNotMatched()

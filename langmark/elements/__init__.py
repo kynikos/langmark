@@ -23,11 +23,12 @@ import textparser
 
 
 
-class _Regexs:
+class Configuration:
     """
     Auxiliary regular expressions and other constants.
     """
     TAB_LENGTH = 4
+    MARK_LIMIT = 3
     BLANK_LINE = re.compile(r'^[ \t]*\n')
     INDENTATION = re.compile(r'^[ \t]*')
     # If an inline mark has overlapping matches with an inline mark, **which
@@ -240,7 +241,7 @@ class _InlineMarkEscapable(_InlineMarkFactory):
     Base class for inline mark factories.
     """
     def __init__(self, char):
-        _InlineMarkFactory.__init__(self, char, char, 3)
+        _InlineMarkFactory.__init__(self, char, char, Configuration.MARK_LIMIT)
 
 
 class _InlineMarkNonEscapable(_InlineMarkFactory):
@@ -259,7 +260,8 @@ class _InlineMarkEscapableEnd(_InlineMarkFactory):
     Base class for inline mark factories.
     """
     def __init__(self, start_char, end_char):
-        _InlineMarkFactory.__init__(self, start_char, end_char, 3)
+        _InlineMarkFactory.__init__(self, start_char, end_char,
+                                    Configuration.MARK_LIMIT)
 
 
 class RawText:
@@ -388,8 +390,8 @@ class _BlockElement(_Element):
         split = line.split('\t')
         indent = 0
         for chunk in split[:-1]:
-            indent += len(chunk) // _Regexs.TAB_LENGTH + 1
-        indent *= _Regexs.TAB_LENGTH
+            indent += len(chunk) // Configuration.TAB_LENGTH + 1
+        indent *= Configuration.TAB_LENGTH
         indent += len(split[-1])
         return indent
 
@@ -619,7 +621,7 @@ class _BlockElementNotContainingBlock(_BlockElement):
     def _check_and_strip_indentation(self, lines, ignore_blank_lines):
         indented_lines = []
         for lN, line in enumerate(lines):
-            if _Regexs.BLANK_LINE.fullmatch(line):
+            if Configuration.BLANK_LINE.fullmatch(line):
                 if not ignore_blank_lines:
                     self._parse_inline()
                     raise _BlockElementEndNotConsumed(*lines[lN:])
@@ -630,7 +632,7 @@ class _BlockElementNotContainingBlock(_BlockElement):
                                       line[-1])
             else:
                 indentation = self._compute_equivalent_indentation(
-                                    _Regexs.INDENTATION.match(line).group())
+                                Configuration.INDENTATION.match(line).group())
                 try:
                     if indentation < self.indentation_content:
                         self._parse_inline()
@@ -679,9 +681,9 @@ class Paragraph(_BlockElementContainingInline_Meta):
 
     def check_element_start(self, lines):
         line = lines[0]
-        if _Regexs.BLANK_LINE.fullmatch(line):
+        if Configuration.BLANK_LINE.fullmatch(line):
             raise _BlockElementStartNotMatched()
-        indentation = _Regexs.INDENTATION.match(line).group()
+        indentation = Configuration.INDENTATION.match(line).group()
         return (indentation, lines)
 
     def _parse_initial_lines(self, lines):
@@ -708,7 +710,7 @@ class Paragraph(_BlockElementContainingInline_Meta):
     # Also note that the original method has changed since this override was
     #  implemented.
     #def _add_raw_line(self, line):
-    #    if _Regexs.ESCAPE_RE.match(line):
+    #    if Configuration.ESCAPE_RE.match(line):
     #        line = line[1:]
     #    super(Paragraph, self)._add_raw_line(line)
 
@@ -812,7 +814,7 @@ class _InlineElement(_Element):
                                                             is_paragraph_start)
             self.inline_bindings[end_mark] = self._handle_inline_end_mark
         if self.ENABLE_ESCAPE:
-            self.inline_bindings[_Regexs.ESCAPE_RE] = \
+            self.inline_bindings[Configuration.ESCAPE_RE] = \
                                                     self._handle_inline_escape
         _Element.__init__(self)
         self.set_parent(parent)
