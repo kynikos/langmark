@@ -25,7 +25,7 @@ class Emphasis(langmark.elements._InlineElementContainingInline):
 
         _emphasized_
     """
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar('_', '_', 3)
+    INLINE_MARK = langmark.elements._InlineMarkEscapable('_')
     HTML_TAGS = ('<em>', '</em>')
 
 
@@ -35,7 +35,7 @@ class Strong(langmark.elements._InlineElementContainingInline):
 
         *strong*
     """
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar('*', '*', 3)
+    INLINE_MARK = langmark.elements._InlineMarkEscapable('*')
     HTML_TAGS = ('<strong>', '</strong>')
 
 
@@ -45,7 +45,7 @@ class Superscript(langmark.elements._InlineElementContainingInline):
 
         ^superscript^
     """
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar('^', '^', 3)
+    INLINE_MARK = langmark.elements._InlineMarkEscapable('^')
     HTML_TAGS = ('<sup>', '</sup>')
 
 
@@ -55,7 +55,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
 
         ;subscript;
     """
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar(';', ';', 3)
+    INLINE_MARK = langmark.elements._InlineMarkEscapable(';')
     HTML_TAGS = ('<sub>', '</sub>')
 
 
@@ -65,7 +65,7 @@ class Small(langmark.elements._InlineElementContainingInline):
 
         :small:
     """
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar(':', ':', 3)
+    INLINE_MARK = langmark.elements._InlineMarkEscapable(':')
     HTML_TAGS = ('<small>', '</small>')
 
 
@@ -75,5 +75,5 @@ class Strikethrough(langmark.elements._InlineElementContainingInline):
 
         ~strikethrough~
     """
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar('~', '~', 3)
+    INLINE_MARK = langmark.elements._InlineMarkEscapable('~')
     HTML_TAGS = ('<del>', '</del>')

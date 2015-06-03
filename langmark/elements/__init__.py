@@ -148,12 +148,6 @@ class _InlineMarkFactory:
     """
     PREFIX_TEST = r'(?:(\n)|([ \t]?)|({escaped_char}))\Z'
     SUFFIX_TEST = r'[{escaped_char} \t]'
-
-
-class _InlineMarkSingleChar(_InlineMarkFactory):
-    """
-    Base class for inline mark factories.
-    """
     POSSIBLE_MARK = r'({escaped_char}{quantifier})(?!{escaped_char}|$)([ \t])?'
     # All end marks should have the same capturing groups
     END_MARK_NORMAL = r'(?<!\n)({escaped_mark})(?!{escaped_char})'
@@ -238,6 +232,34 @@ class _InlineMarkSingleChar(_InlineMarkFactory):
                 if self.suffix_test.fullmatch(pre_char):
                     return False
         return True
+
+
+
+class _InlineMarkEscapable(_InlineMarkFactory):
+    """
+    Base class for inline mark factories.
+    """
+    def __init__(self, char):
+        _InlineMarkFactory.__init__(self, char, char, 3)
+
+
+class _InlineMarkNonEscapable(_InlineMarkFactory):
+    """
+    Base class for inline mark factories.
+
+    When it is not possible to escape the mark character with the normal escape
+    character, allow an indefinite number of characters as a mark.
+    """
+    def __init__(self, char):
+        _InlineMarkFactory.__init__(self, char, char, None)
+
+
+class _InlineMarkEscapableEnd(_InlineMarkFactory):
+    """
+    Base class for inline mark factories.
+    """
+    def __init__(self, start_char, end_char):
+        _InlineMarkFactory.__init__(self, start_char, end_char, 3)
 
 
 class RawText:

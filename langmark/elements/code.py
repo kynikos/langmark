@@ -25,7 +25,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
 
         |code|
     """
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar('|', '|', 3)
+    INLINE_MARK = langmark.elements._InlineMarkEscapable('|')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -35,9 +35,7 @@ class PlainCode(langmark.elements._InlineElementContainingHtmlText):
 
         #code#
     """
-    # It's not possible to escape the mark character with the normal escape
-    #  character, so allow an indefinite number of characters as a mark
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar('#', '#', None)
+    INLINE_MARK = langmark.elements._InlineMarkNonEscapable('#')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -47,9 +45,7 @@ class PlainText(langmark.elements._InlineElementContainingRawText):
 
         \text\
     """
-    # It's not possible to escape the mark character with the normal escape
-    #  character, so allow an indefinite number of characters as a mark
-    INLINE_MARK = langmark.elements._InlineMarkSingleChar('\\', '\\', None)
+    INLINE_MARK = langmark.elements._InlineMarkNonEscapable('\\')
     HTML_TAGS = ('<span>', '</span>')
 
 
