@@ -34,7 +34,7 @@ class _Regexs:
     #  should never happen by design**, it's impossible to only escape the
     #  block mark leaving the inline mark intact; if an escape character is
     #  added at the beginning of a line, it will always escape both.
-    ESCAPE_CHAR = re.compile(r'`.')
+    ESCAPE_RE = re.compile(r'`.')
 
 
 class Stream:
@@ -686,7 +686,7 @@ class Paragraph(_BlockElementContainingInline_Meta):
     # Also note that the original method has changed since this override was
     #  implemented.
     #def _add_raw_line(self, line):
-    #    if _Regexs.ESCAPE_CHAR.match(line):
+    #    if _Regexs.ESCAPE_RE.match(line):
     #        line = line[1:]
     #    super(Paragraph, self)._add_raw_line(line)
 
@@ -787,7 +787,7 @@ class _InlineElement(_Element):
                                                             is_paragraph_start)
             self.inline_bindings[end_mark] = self._handle_inline_end_mark
         if self.ENABLE_ESCAPE:
-            self.inline_bindings[_Regexs.ESCAPE_CHAR] = \
+            self.inline_bindings[_Regexs.ESCAPE_RE] = \
                                                     self._handle_inline_escape
         _Element.__init__(self)
         self.set_parent(parent)
