@@ -172,7 +172,7 @@ class _InlineMarkFactory:
         self.suffix_test = re.compile(self.SUFFIX_TEST.format(
                         escaped_char=self.escaped_end_char), re.MULTILINE)
 
-    def make_end_mark(self, parsed_text, start_mark, is_paragraph_start):
+    def make_end_mark(self, parsed_text, start_mark, is_element_start):
         # Yes, most of this could be done directly in the regular expression,
         #  but good luck with that... Also remember that Python's standard re
         #  module doesn't support variable-length look-behind...
@@ -193,7 +193,7 @@ class _InlineMarkFactory:
         #  by the parser engine
         # Note that marks at the end of lines are already excluded by the
         #  regular expression
-        if is_paragraph_start or line_start is not None:
+        if is_element_start or line_start is not None:
             if post_space:
                 # \n** text...
                 return self._make_end_mark_spaced(possible_mark)
@@ -802,7 +802,7 @@ class _InlineElement(_Element):
     HTML_TAGS = ('<span>', '</span>')
 
     def __init__(self, parent, inline_parser, parsed_text, start_mark,
-                 is_paragraph_start):
+                 is_element_start):
         self.inline_parser = inline_parser
         try:
             self.inline_bindings = self.install_bindings()
@@ -811,7 +811,7 @@ class _InlineElement(_Element):
         # BaseInlineElement passes None as start_mark
         if start_mark:
             end_mark = self.INLINE_MARK.make_end_mark(parsed_text, start_mark,
-                                                            is_paragraph_start)
+                                                            is_element_start)
             self.inline_bindings[end_mark] = self._handle_inline_end_mark
         if self.ENABLE_ESCAPE:
             self.inline_bindings[Configuration.ESCAPE_RE] = \
