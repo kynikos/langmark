@@ -513,7 +513,7 @@ class _BlockElementContainingBlock_Prefix_Grouped(
     HTML_OUTER_TAGS = None
 
     def __init__(self):
-        super(_BlockElementContainingBlock_Prefix_Grouped, self).__init__()
+        _BlockElementContainingBlock_Prefix.__init__(self)
         self.group_item_number = 0
         self.group_item_last = True
 
