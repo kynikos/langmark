@@ -862,7 +862,7 @@ class BaseInlineElement(_InlineElementContainingInline):
     INLINE_MARK = None
 
 
-class _InlineElementNotContainingInline(_InlineElement):
+class _InlineElementContainingText(_InlineElement):
     """
     Base class for inline elements not containing inline elements.
     """
@@ -874,7 +874,7 @@ class _InlineElementNotContainingInline(_InlineElement):
         return {}
 
 
-class _InlineElementContainingRawText(_InlineElementNotContainingInline):
+class _InlineElementContainingRawText(_InlineElementContainingText):
     """
     Base class for inline elements containing raw text.
     """
@@ -883,7 +883,7 @@ class _InlineElementContainingRawText(_InlineElementNotContainingInline):
                                                         ).join(self.HTML_TAGS)
 
 
-class _InlineElementContainingHtmlText(_InlineElementNotContainingInline):
+class _InlineElementContainingHtmlText(_InlineElementContainingText):
     """
     Base class for inline elements containing plain text.
     """
