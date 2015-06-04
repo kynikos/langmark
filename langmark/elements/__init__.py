@@ -798,32 +798,22 @@ class _InlineElement(_Element):
     Base class for inline elements.
     """
     ENABLE_ESCAPE = None
+    START_MARK_TO_INLINE_ELEMENT = None
     INLINE_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
     def __init__(self, parent, inline_parser, parsed_text, start_mark,
                  is_element_start):
         self.inline_parser = inline_parser
-        try:
-            self.inline_bindings = self.install_bindings()
-        except NotImplementedError:
-            self.inline_bindings = {}
-        # BaseInlineElement passes None as start_mark
-        if start_mark:
-            end_mark = self.INLINE_MARK.make_end_mark(parsed_text, start_mark,
+        self.inline_bindings = self.install_bindings(parsed_text, start_mark,
                                                             is_element_start)
-            self.inline_bindings[end_mark] = self._handle_inline_end_mark
         if self.ENABLE_ESCAPE:
             self.inline_bindings[Configuration.ESCAPE_RE] = \
                                                     self._handle_inline_escape
         _Element.__init__(self)
         self.set_parent(parent)
 
-    @classmethod
-    def install_mark(cls, start_mark_to_element, start_mark):
-        raise NotImplementedError()
-
-    def install_bindings(self):
+    def install_bindings(self, parsed_text, start_mark, is_element_start):
         raise NotImplementedError()
 
     def take_inline_control(self):
@@ -851,17 +841,16 @@ class _InlineElementContainingInline(_InlineElement):
     Base class for inline elements containing inline elements.
     """
     ENABLE_ESCAPE = True
-    START_MARK_TO_INLINE_ELEMENT = None
 
-    @classmethod
-    def install_mark(cls, start_mark_to_element, start_mark):
+    def install_bindings(self, parsed_text, start_mark, is_element_start):
+        bindings = {start_mark: self._handle_inline_start_mark
+                    for start_mark in self.START_MARK_TO_INLINE_ELEMENT}
         # BaseInlineElement passes None as start_mark
-        start_mark_to_element.pop(start_mark, None)
-        cls.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element
-
-    def install_bindings(self):
-        return {start_mark: self._handle_inline_start_mark
-                for start_mark in self.START_MARK_TO_INLINE_ELEMENT}
+        if start_mark:
+            end_mark = self.INLINE_MARK.make_end_mark(parsed_text, start_mark,
+                                                            is_element_start)
+            bindings[end_mark] = self._handle_inline_end_mark
+        return bindings
 
     def _handle_inline_start_mark(self, event):
         try:
@@ -889,8 +878,17 @@ class BaseInlineElement(_InlineElementContainingInline):
     INLINE_MARK = None
 
 
+class _InlineElementContainingText(_InlineElement):
+    """
+    Base class for inline elements containing text.
+    """
+    def install_bindings(self, parsed_text, start_mark, is_element_start):
+        end_mark = self.INLINE_MARK.make_end_mark(parsed_text, start_mark,
+                                                  is_element_start)
+        return {end_mark: self._handle_inline_end_mark}
 
-class _InlineElementContainingRawText(_InlineElement):
+
+class _InlineElementContainingRawText(_InlineElementContainingText):
     """
     Base class for inline elements containing raw text.
     """
@@ -901,7 +899,7 @@ class _InlineElementContainingRawText(_InlineElement):
                                                         ).join(self.HTML_TAGS)
 
 
-class _InlineElementContainingHtmlText(_InlineElement):
+class _InlineElementContainingHtmlText(_InlineElementContainingText):
     """
     Base class for inline elements containing plain text.
     """

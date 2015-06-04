@@ -65,15 +65,14 @@ class Langmark:
             mark = Element.INLINE_MARK
             start_mark_to_element[mark.start] = Element
             element_to_compiled_mark[Element] = mark.start
-        element_to_compiled_mark[elements.BaseInlineElement] = None
         # The first loop builds the dictionaries, which have to be installed
         #  in a separate loop
         for Element in element_to_compiled_mark:
             start_mark = element_to_compiled_mark[Element]
-            try:
-                Element.install_mark(start_mark_to_element.copy(), start_mark)
-            except NotImplementedError:
-                pass
+            Element.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element.copy()
+            del Element.START_MARK_TO_INLINE_ELEMENT[start_mark]
+        elements.BaseInlineElement.START_MARK_TO_INLINE_ELEMENT = \
+                                                start_mark_to_element.copy()
 
     def parse(self, stream):
         # The parameters for parse must reflect the attributes set through
