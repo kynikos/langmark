@@ -1,35 +1,29 @@
 Inspiration languages (read their specification):
 * Markdown (+ Smartypants)
+  * PHP Markdown https://michelf.ca/projects/php-markdown/extra/
   * GitHub flavored
   * Python-Markdown extensions
 * reStructuredText
 * MediaWiki
 
 
-[link]
-[link|id]
-[link|http://url.com]
-[link|http://url.com|title]
-[link|http://url.com title]
-[[link||http://url.com||title]]
-[[link||http://url.com  title]]
-[[ link || http://url.com || title ]]
-[[ link || http://url.com    title ]]
-[link]<http://url.com title>
-[link]http://url.com
-<link>
-<link|id>
-<link|http://url.com>
-<link|http://url.com title>
-http://plain.link.com/
-<http://plain.link.com/>
-[disguised@email.address]
-<disguised@email.address>
-![smartlink|http://url.com/image.jpg title]
-!<smartlink|http://url.com/image.jpg title>
+[textid]
+[text|id]
+[text|http://www.url.com]
 
-@[id] http://url.com title(hidden)
-*[id] http://url.com title(visible)
+:@[id|http://www.url.com]
+:@[id|http://www.url.com|title]
+* @[text|id|http://www.url.com|] description
+* @[id|http://www.url.com|title] description
+* @[text|id|http://www.url.com|title] description
+
+
+Text '[sup]' text.
+Text :[small]: text.
+Text ,[sub], text.
+
+
+<html tag>
 
 
 Paragraph line1`
@@ -50,6 +44,7 @@ line of a paragraph
  Spaces 2/3 should define code blocks
  Space 4 should nest an indented container
 
+
 ) indented
 )) indented
 ) indented
@@ -66,10 +61,36 @@ line of a paragraph
 ~~ idented
 ~ indented
 
+
 > quote
 > > quote
 >> quote
 > quote
+
+
+http://plain.link.com/
+
+
+[disguised@email.address]
+
+
+![smartlink|http://url.com/image.jpg title]
+[!smartlink|http://url.com/image.jpg title]
+
+
+Text [^wikipedia-style ref link] text.
+Text ^[wikipedia-style ref link] text.
+Text [@wikipedia-style ref link] text.
+Text @[wikipedia-style ref link] text.
+
+Text @[wikipedia-style ref link|http://url.com title] text.
+{automatic references}
+
+
+Text &[ABBR] text.
+
+=&[ABBR]: abbreviation
+:&[ABBR]: abbreviation
 
 
 + done
@@ -101,7 +122,7 @@ x] done
 {code|config}
 code
 code
-{!code}
+!{code}
 
 {transclude|page|1=arg|cc=arg}
 {arg|1}
