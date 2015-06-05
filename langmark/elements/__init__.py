@@ -942,6 +942,10 @@ class _InlineElementContainingParameters(_InlineElement):
             self.children.append(RawText(''.join((event.parsed_text,
                                                   event.mark.group()))))
 
+    def get_parameters(self):
+        # The last parameter is not appended to self.parameters
+        return self.parameters + [self.children, ]
+
 
 class _InlineElementContainingText(_InlineElement):
     """

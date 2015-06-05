@@ -33,13 +33,13 @@ class Link(langmark.elements._InlineElementContainingParameters):
     HTML_TAGS = ('<a href="{href}">', '</a>')
 
     def convert_to_html(self):
-        # The last parameter is not appended to self.parameters
-        if len(self.parameters) == 0:
-            value = ''.join(child.convert_to_html() for child in self.children)
+        parameters = self.get_parameters()
+        value = ''.join(parameter.convert_to_html()
+                        for parameter in parameters[0])
+        try:
+            href = ''.join(parameter.convert_to_html()
+                           for parameter in parameters[1])
+        except IndexError:
             href = value
-        else:
-            value = ''.join(child.convert_to_html()
-                            for child in self.parameters[0])
-            href = self.children[0].get_raw_text()
         return value.join((self.HTML_TAGS[0].format(href=href),
                            self.HTML_TAGS[1]))
