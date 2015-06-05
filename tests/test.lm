@@ -390,6 +390,14 @@ Text.
 ==== Title 4b
 Text.
 
+Text [link] text.
+Text [link|url] text.
+Text [link||link] text.
+Text [[link|link]] text.
+Text [[link||url]] text.
+Text [[ link||link ]] text.
+Text [[ link || url ]] text.
+
 ===== Title *5 _(test)_*
 
 Text.

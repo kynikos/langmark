@@ -36,6 +36,7 @@ class Configuration:
     #  block mark leaving the inline mark intact; if an escape character is
     #  added at the beginning of a line, it will always escape both.
     ESCAPE_RE = re.compile(r'`.')
+    PARAMETER_CHAR = re.escape(r'|')
 
 
 class Stream:
@@ -150,6 +151,9 @@ class _InlineMarkFactory:
     PREFIX_TEST = r'(?:(\n)|([ \t]?)|({escaped_char}))\Z'
     SUFFIX_TEST = r'[{escaped_char} \t]'
     POSSIBLE_MARK = r'({escaped_char}{quantifier})(?!{escaped_char}|$)([ \t])?'
+    # All parameter marks should have the same capturing groups
+    PARAMETER_MARK_NORMAL = r'({escaped_mark})(?!{escaped_char})'
+    PARAMETER_MARK_SPACED = r'((?:^|[ \t]){escaped_mark})(?:[ \t]|$)'
     # All end marks should have the same capturing groups
     END_MARK_NORMAL = r'(?<!\n)({escaped_mark})(?!{escaped_char})'
     END_MARK_SPACED = r'([ \t]{escaped_mark})(?=[ \t]|$)'
@@ -172,7 +176,18 @@ class _InlineMarkFactory:
         self.suffix_test = re.compile(self.SUFFIX_TEST.format(
                         escaped_char=self.escaped_end_char), re.MULTILINE)
 
+    def make_parameter_and_end_marks(self, parsed_text, start_mark,
+                                     is_element_start):
+        return self._make_marks(parsed_text, start_mark, is_element_start,
+                                    self._make_parameter_and_end_marks_normal,
+                                    self._make_parameter_and_end_marks_spaced)
+
     def make_end_mark(self, parsed_text, start_mark, is_element_start):
+        return self._make_marks(parsed_text, start_mark, is_element_start,
+                        self._make_end_mark_normal, self._make_end_mark_spaced)
+
+    def _make_marks(self, parsed_text, start_mark, is_element_start,
+                    _make_marks_normal, _make_marks_spaced):
         # Yes, most of this could be done directly in the regular expression,
         #  but good luck with that... Also remember that Python's standard re
         #  module doesn't support variable-length look-behind...
@@ -191,29 +206,44 @@ class _InlineMarkFactory:
         # I can't just match ^ to see if it's the start of a line, because
         #  in general parsed_text starts after the previous expression matched
         #  by the parser engine
-        # Note that marks at the end of lines are already excluded by the
+        # Note that end marks at the end of lines are already excluded by the
         #  regular expression
         if is_element_start or line_start is not None:
             if post_space:
                 # \n** text...
-                return self._make_end_mark_spaced(possible_mark)
+                return _make_marks_spaced(possible_mark)
             # \n**text...
-            return self._make_end_mark_normal(possible_mark)
+            return _make_marks_normal(possible_mark)
         elif post_space:
             if pre_space:
                 # ... ** text...
-                return self._make_end_mark_spaced(possible_mark)
+                return _make_marks_spaced(possible_mark)
             # ...** text...
             raise _InlineElementStartNotMatched()
         # ...**text...
         # ... **text...
-        return self._make_end_mark_normal(possible_mark)
+        return _make_marks_normal(possible_mark)
+
+    def _make_parameter_and_end_marks_normal(self, mark):
+        parameter_mark = re.compile(self.PARAMETER_MARK_NORMAL.format(
+                      escaped_mark=Configuration.PARAMETER_CHAR * len(mark),
+                      escaped_char=Configuration.PARAMETER_CHAR),
+                      re.MULTILINE)
+        return (parameter_mark, self._make_end_mark_normal(mark))
 
     def _make_end_mark_normal(self, mark):
         return re.compile(self.END_MARK_NORMAL.format(
                           escaped_mark=self.escaped_end_char * len(mark),
                           escaped_char=self.escaped_end_char),
                           re.MULTILINE)
+
+    def _make_parameter_and_end_marks_spaced(self, mark):
+        # len(mark) is checked in _make_end_mark_spaced
+        #if len(mark) > 1:
+        parameter_mark = re.compile(self.PARAMETER_MARK_SPACED.format(
+                      escaped_mark=Configuration.PARAMETER_CHAR * len(mark)),
+                      re.MULTILINE)
+        return (parameter_mark, self._make_end_mark_spaced(mark))
 
     def _make_end_mark_spaced(self, mark):
         if len(mark) > 1:
@@ -222,6 +252,14 @@ class _InlineMarkFactory:
                               re.MULTILINE)
         else:
             raise _InlineElementStartNotMatched()
+
+    def check_parameter_mark(self, parsed_text, parameter_mark):
+        try:
+            return not parameter_mark.group(1)[0] == \
+                            Configuration.PARAMETER_CHAR[-1] == parsed_text[-1]
+        except IndexError:
+            # parsed_text may be an empty string
+            return True
 
     def check_end_mark(self, parsed_text, end_mark):
         if end_mark.group(1)[0] == self.escaped_end_char[-1]:
@@ -233,7 +271,6 @@ class _InlineMarkFactory:
                 if self.suffix_test.fullmatch(pre_char):
                     return False
         return True
-
 
 
 class _InlineMarkEscapable(_InlineMarkFactory):
@@ -876,6 +913,34 @@ class BaseInlineElement(_InlineElementContainingInline):
     Dummy inline element for parsing other inline elements.
     """
     INLINE_MARK = None
+
+
+class _InlineElementContainingParameters(_InlineElement):
+    """
+    Base class for inline elements containing parameters.
+    """
+    ENABLE_ESCAPE = True
+
+    def __init__(self, *args, **kwargs):
+        self.parameters = []
+        _InlineElement.__init__(self, *args, **kwargs)
+
+    def install_bindings(self, parsed_text, start_mark, is_element_start):
+        parameter_mark, end_mark = \
+                                self.INLINE_MARK.make_parameter_and_end_marks(
+                                parsed_text, start_mark, is_element_start)
+        return {parameter_mark: self._handle_parameter_mark,
+                end_mark: self._handle_inline_end_mark}
+
+    def _handle_parameter_mark(self, event):
+        if self.INLINE_MARK.check_parameter_mark(event.parsed_text,
+                                                 event.mark):
+            self.children.append(RawText(event.parsed_text))
+            self.parameters.append(self.children)
+            self.children = []
+        else:
+            self.children.append(RawText(''.join((event.parsed_text,
+                                                  event.mark.group()))))
 
 
 class _InlineElementContainingText(_InlineElement):

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-from .elements import (headings, lists, code, formatting)
+from .elements import (headings, lists, code, formatting, links)
 
 # The order of the block elements is important: put the most likey elements
 #  first; some elements may rely on the fact that others have been discarded
@@ -46,6 +46,7 @@ INLINE_ELEMENTS = [formatting.Emphasis,
                    formatting.Subscript,
                    formatting.Small,
                    formatting.Strikethrough,
+                   links.Link,
                    code.FormattableCode,
                    code.PlainCode,
                    code.PlainText]
