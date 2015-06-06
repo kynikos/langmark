@@ -11,16 +11,15 @@ Inspiration languages (read their specification):
 [text|id]
 [text|http://www.url.com]
 
-:@[id|http://www.url.com]
-:@[id|http://www.url.com|title]
-* @[text|id|http://www.url.com|] description
-* @[id|http://www.url.com|title] description
-* @[text|id|http://www.url.com|title] description
+* [text|id|http://www.url.com] description
+* [text|id|http://www.url.com|Title] description
+
+[id]: http://www.url.com "Title"
 
 
-Text '[sup]' text.
-Text :[small]: text.
-Text ,[sub], text.
+Text'|sup| text.
+Text:|small| text.
+Text,|sub| text.
 
 
 <html tag>
@@ -45,27 +44,15 @@ line of a paragraph
  Space 4 should nest an indented container
 
 
-) indented
-)) indented
-) indented
-
-. indented
-.. indented
-. indented
-
-: indented
-:: indented
-: indented
-
-~ indented
-~~ idented
-~ indented
-
-
 > quote
 > > quote
 >> quote
 > quote
+
+
+. indented
+.. indented
+. indented
 
 
 http://plain.link.com/
@@ -74,23 +61,13 @@ http://plain.link.com/
 [disguised@email.address]
 
 
-![smartlink|http://url.com/image.jpg title]
-[!smartlink|http://url.com/image.jpg title]
+![smartlink|http://url.com/image.jpg|title]
 
 
-Text [^wikipedia-style ref link] text.
-Text ^[wikipedia-style ref link] text.
-Text [@wikipedia-style ref link] text.
-Text @[wikipedia-style ref link] text.
+Text ^[footnote-reflink-id] text.
 
-Text @[wikipedia-style ref link|http://url.com title] text.
-{automatic references}
-
-
-Text &[ABBR] text.
-
-=&[ABBR]: abbreviation
-:&[ABBR]: abbreviation
+^[id1]: description
+^[id2]: [link] description
 
 
 + done
@@ -130,13 +107,13 @@ code
 
 {image|path}
 {gallery|path}
-{extension}{!extension}
+{extension}   !{extension}
 
 
 Horizontal line
 
 
-Commented text
+:#Commented text
 
 
 'quote' -> ‘quote’
