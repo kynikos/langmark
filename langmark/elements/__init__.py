@@ -69,14 +69,14 @@ class Stream:
         self.stream = itertools.chain(lines, self.stream)
 
 
-class _Meta:
+class _MetaData:
     """
-    Base class for meta elements.
+    Base class for metadata elements.
     """
     ATTRIBUTE_NAME = None
 
 
-class Header(_Meta):
+class Header(_MetaData):
     """
     The header of the document, hosting the meta data.::
 

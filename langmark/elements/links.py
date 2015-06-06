@@ -20,7 +20,7 @@ import re
 import langmark
 
 
-class LinksData(langmark.elements._Meta):
+class LinksData(langmark.elements._MetaData):
     """
     The links data.
     """
