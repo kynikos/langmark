@@ -61,6 +61,7 @@ class Langmark:
     def __init__(self):
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
+        elements._Element.DOCUMENT = self
         elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
         self._install_inline_elements()
 

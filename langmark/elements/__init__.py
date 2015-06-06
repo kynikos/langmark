@@ -380,6 +380,7 @@ class _Element:
     """
     Base class for document elements.
     """
+    DOCUMENT = None
     STREAM = None
 
     def __init__(self):
