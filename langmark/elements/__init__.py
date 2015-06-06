@@ -334,6 +334,14 @@ class _BlockElementStartNotMatched(Exception):
     pass
 
 
+class _BlockElementStartConsumed(Exception):
+    """
+    Internal exception used to communicate to the parent that the parsed line
+    corresponds to the start of the element and has already been used.
+    """
+    pass
+
+
 class _BlockElementStartMatched(Exception):
     """
     Internal exception used to communicate to the parent that the parsed line
@@ -443,13 +451,20 @@ class _BlockElement(_Element):
         return indent
 
     def find_element_start(self):
-        for Element in self.INSTALLED_BLOCK_ELEMENTS:
+        while True:
             try:
-                return Element()
-            except (_BlockElementStartNotMatched, _EndOfFile):
-                self._rewind_check_lines_buffer()
+                for Element in self.INSTALLED_BLOCK_ELEMENTS:
+                    try:
+                        return Element()
+                    except (_BlockElementStartNotMatched, _EndOfFile):
+                        self._rewind_check_lines_buffer()
+                        continue
+                return False
+            except _BlockElementStartConsumed:
+                # Restart the for loop from the beginning
                 continue
-        return False
+            else:
+                return False
 
     def _parse_indentation(self, lines):
         raise NotImplementedError()
