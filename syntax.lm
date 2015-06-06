@@ -7,13 +7,6 @@ Inspiration languages (read their specification):
 * MediaWiki
 
 
-[textid]
-[text|id]
-[text|http://www.url.com]
-
-* [text|id|http://www.url.com] description
-* [text|id|http://www.url.com|Title] description
-
 [id]: http://www.url.com "Title"
 
 
