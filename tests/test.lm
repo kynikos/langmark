@@ -412,6 +412,14 @@ Text [linkB|id2|urlB|TitleB] text.
 Text [id2] text.
 Text [linkB|id2] text.
 
+Text [id3] text.
+Text [linkC|id3] text.
+Text [id4] text.
+Text [linkD|id4] text.
+
+[id3]: http://www.url3.com
+[id4]: http://www.url4.com "TitleD"
+
 ===== Title *5 _(test)_*
 
 Text.

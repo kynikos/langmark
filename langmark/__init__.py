@@ -42,7 +42,8 @@ BLOCK_ELEMENTS = [elements.HeaderElement,  # HeaderElement uninstalls itself
                   lists.LatinListItem,
                   code.FormattableCodeBlock,
                   code.PlainCodeBlock,
-                  code.PlainTextBlock]
+                  code.PlainTextBlock,
+                  links.LinkDefinition]
 
 # The order of the inline elements is instead not important
 # Additional extension modules should insert their inline element classes in

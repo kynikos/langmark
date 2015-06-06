@@ -27,26 +27,23 @@ class LinksData(langmark.elements._MetaDataStorage):
     ATTRIBUTE_NAME = 'links'
 
     def __init__(self):
-        self.id_to_element = {}
+        self.id_to_data = {}
 
-    def add_id(self, id_, element):
-        self.id_to_element[id_] = element
+    def add_id(self, id_, url, title):
+        self.id_to_data[id_] = (langmark.elements.RawText(url),
+                        langmark.elements.RawText(title) if title else None)
 
-    def get_href(self, id_):
+    def get_data_html(self, id_):
         try:
-            return self.id_to_element[id_].children[2]
+            data = self.id_to_data[id_]
+            url = data[0].convert_to_html()
+            try:
+                title = data[1].convert_to_html()
+            except AttributeError:
+                title = None
+            return (url, title)
         except KeyError:
             # The passed value may not be a defined id
-            raise ValueError
-
-    def get_title(self, id_):
-        try:
-            return self.id_to_element[id_].children[3]
-        except KeyError:
-            # The passed value may not be a defined id
-            raise ValueError
-        except IndexError:
-            # The title is optional
             raise ValueError
 
 
@@ -66,12 +63,18 @@ class Link(langmark.elements._InlineElementContainingParameters):
                  '</a>')
 
     def post_process_parameters(self):
-        if len(self.children) > 2:
-            langmark.elements._Element.DOCUMENT.links.add_id(
-                                        self.children[1].get_raw_text(), self)
+        try:
+            url = self.children[2].get_raw_text()
+        except IndexError:
+            return
+        try:
+            title = self.children[3].get_raw_text()
+        except IndexError:
+            title = None
+        langmark.elements._Element.DOCUMENT.links.add_id(
+                                self.children[1].get_raw_text(), url, title)
 
     def convert_to_html(self):
-        title = None
         par1 = self.children[0]
         text = par1.convert_to_html()
         try:
@@ -79,31 +82,42 @@ class Link(langmark.elements._InlineElementContainingParameters):
         except IndexError:
             id_ = par1.get_raw_text()
             try:
-                href = langmark.elements._Element.DOCUMENT.links.get_href(id_
-                                                            ).convert_to_html()
+                href, title = \
+                    langmark.elements._Element.DOCUMENT.links.get_data_html(
+                                                                        id_)
             except ValueError:
                 href = text
-            else:
-                try:
-                    title = langmark.elements._Element.DOCUMENT.links.get_title(
-                                                        id_).convert_to_html()
-                except ValueError:
-                    pass
+                title = None
         else:
             id_ = par2.get_raw_text()
             try:
-                href = langmark.elements._Element.DOCUMENT.links.get_href(id_
-                                                            ).convert_to_html()
+                href, title = \
+                    langmark.elements._Element.DOCUMENT.links.get_data_html(
+                                                                        id_)
             except ValueError:
                 href = par2.convert_to_html()
-            else:
-                try:
-                    title = langmark.elements._Element.DOCUMENT.links.get_title(
-                                                        id_).convert_to_html()
-                except ValueError:
-                    pass
+                title = None
         if title:
             return text.join((self.HTML_TAGS[1].format(href=href,
                                       title=title), self.HTML_TAGS[2]))
         return text.join((self.HTML_TAGS[0].format(href=href),
                           self.HTML_TAGS[2]))
+
+
+class LinkDefinition(langmark.elements._MetaDataElement):
+    """
+    A link definition.::
+
+        [id]: url Title
+        [id]: url "Title"
+    """
+    METADATA = re.compile(r'^[ \t]*\[(.+?)\]:[ \t]+(.+?)'
+                          r'(?:[ \t]+[\'"](.+?)[\'"])?[ \t]*\n')
+
+    def process_match(self, match):
+        if match:
+            langmark.elements._Element.DOCUMENT.links.add_id(
+                                match.group(1), match.group(2), match.group(3))
+            raise langmark.elements._BlockElementStartConsumed()
+        else:
+            raise langmark.elements._BlockElementStartNotMatched()
