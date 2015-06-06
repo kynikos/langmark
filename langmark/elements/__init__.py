@@ -69,7 +69,14 @@ class Stream:
         self.stream = itertools.chain(lines, self.stream)
 
 
-class Header:
+class _Meta:
+    """
+    Base class for meta elements.
+    """
+    ATTRIBUTE_NAME = None
+
+
+class Header(_Meta):
     """
     The header of the document, hosting the meta data.::
 
@@ -85,17 +92,18 @@ class Header:
     Multiline values are not supported yet.
     The header ends as soon as a line that does not start with ``::`` is found.
     """
+    ATTRIBUTE_NAME = 'header'
     # TODO: Support multiline metadata (using indentation for the continuation
     #       lines)
     METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
 
-    def __init__(self, stream):
-        self.stream = stream
+    def __init__(self):
         self.keys = {}
+        self.parse_next_line()
 
     def parse_next_line(self):
         while True:
-            line = self.stream.read_next_line()
+            line = _BlockElement.STREAM.read_next_line()
             match = self.METADATA.fullmatch(line)
             if match:
                 self.keys[match.group(1)] = match.group(2)
@@ -103,7 +111,7 @@ class Header:
             else:
                 # Inserting an emtpy line makes sure that elements starting
                 #  with an empty line, like multiline headings, are recognized
-                self.stream.rewind_lines('\n', line)
+                _BlockElement.STREAM.rewind_lines('\n', line)
                 break
 
 

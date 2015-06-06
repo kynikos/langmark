@@ -18,6 +18,11 @@
 
 from .elements import (headings, lists, code, formatting, links)
 
+# Additional extension modules should insert their meta element classes in the
+#  list below; they must thus be imported *after* importing langmark, but
+#  *before* instantiating the Langmark class
+META_ELEMENTS = [elements.Header]
+
 # The order of the block elements is important: put the most likey elements
 #  first; some elements may rely on the fact that others have been discarded
 # Additional extension modules should insert their block element classes in the
@@ -79,10 +84,8 @@ class Langmark:
         # The parameters for parse must reflect the attributes set through
         # argparse by the launcher script
         # TODO: Support passing a string instead of a stream
-        streamobj = elements.Stream(stream)
-        header = elements.Header(streamobj)
-        header.parse_next_line()
-        self.meta = header.keys
-        elements._BlockElement.STREAM = streamobj
+        elements._BlockElement.STREAM = elements.Stream(stream)
+        for Meta in META_ELEMENTS:
+            setattr(self, Meta.ATTRIBUTE_NAME, Meta())
         self.etree = elements.Root()
         self.etree.parse_tree()
