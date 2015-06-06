@@ -79,40 +79,11 @@ class _MetaDataStorage:
 class Header(_MetaDataStorage):
     """
     The header of the document, hosting the meta data.::
-
-        ::key value
-        ::key value
-        ::key value
-
-    All the lines must start with ``::``.
-    Spaces between ``::`` and the key are ignored.
-    The key cannot contain spaces.
-    A value string is optional and is considered to start after the first
-    sequence of spaces after the key string.
-    Multiline values are not supported yet.
-    The header ends as soon as a line that does not start with ``::`` is found.
     """
     ATTRIBUTE_NAME = 'header'
-    # TODO: Support multiline metadata (using indentation for the continuation
-    #       lines)
-    METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
 
     def __init__(self):
         self.keys = {}
-        self.parse_next_line()
-
-    def parse_next_line(self):
-        while True:
-            line = _Element.STREAM.read_next_line()
-            match = self.METADATA.fullmatch(line)
-            if match:
-                self.keys[match.group(1)] = match.group(2)
-                self.parse_next_line()
-            else:
-                # Inserting an emtpy line makes sure that elements starting
-                #  with an empty line, like multiline headings, are recognized
-                _Element.STREAM.rewind_lines('\n', line)
-                break
 
 
 class _BlockMarkFactory:
@@ -414,6 +385,61 @@ class _Element:
         # TODO: Convert to HTML *while* building the tree, not afterwards
         #       (use events?)
         raise NotImplementedError()
+
+
+class _MetaDataElement(_Element):
+    """
+    Base class for metadata elements.
+    """
+    # TODO: Support multiline metadata (using indentation for the continuation
+    #       lines)
+    METADATA = None
+
+    def __init__(self):
+        try:
+            line = _Element.STREAM.read_next_lines_buffered(1)[0]
+        except StopIteration:
+            # Re-raise the exception, but keep this to keep track of where it
+            #  comes from
+            # Don't just process it here because the element doesn't have to be
+            #  instantiated
+            raise _EndOfFile()
+        else:
+            _Element.__init__(self)
+            self.process_match(self.METADATA.fullmatch(line))
+
+    def process_match(self, match):
+        raise NotImplementedError()
+
+
+class HeaderElement(_MetaDataElement):
+    """
+    A generic key/value metadata element.::
+
+        ::key value
+
+    Spaces between ``::`` and the key are ignored.
+    The key cannot contain spaces.
+    A value string is optional and is considered to start after the first
+    sequence of spaces after the key string.
+    """
+    METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
+
+    def process_match(self, match):
+        if match:
+            _Element.DOCUMENT.header.keys[match.group(1)] = match.group(2)
+        else:
+            # This is changing the size of INSTALLED_BLOCK_ELEMENTS, so I can't
+            #  raise _BlockElementStartNotMatched after it, because that would
+            #  simply continue the for loop in
+            #  _BlockElement.find_element_start, which would hence skip the
+            #  next element in the list
+            # Installing this class at the top of INSTALLED_BLOCK_ELEMENTS
+            #  makes this as efficient as continuing the loop, since no other
+            #  elements are uselessly tested
+            _BlockElement.INSTALLED_BLOCK_ELEMENTS.remove(self.__class__)
+            self._rewind_check_lines_buffer()
+        raise _BlockElementStartConsumed()
 
 
 class _BlockElement(_Element):

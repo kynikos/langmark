@@ -29,7 +29,9 @@ META_ELEMENTS = [elements.Header,
 # Additional extension modules should insert their block element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
 #  *before* instantiating the Langmark class
-BLOCK_ELEMENTS = [headings.Heading1,
+BLOCK_ELEMENTS = [elements.HeaderElement,  # HeaderElement uninstalls itself
+                                           #  after the first non-match
+                  headings.Heading1,
                   headings.Heading2,
                   headings.Heading3,
                   headings.Heading4,
