@@ -21,7 +21,8 @@ from .elements import (headings, lists, code, formatting, links)
 # Additional extension modules should insert their meta element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
 #  *before* instantiating the Langmark class
-META_ELEMENTS = [elements.Header]
+META_ELEMENTS = [elements.Header,
+                 links.LinksData]
 
 # The order of the block elements is important: put the most likey elements
 #  first; some elements may rely on the fact that others have been discarded

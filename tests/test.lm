@@ -403,6 +403,14 @@ Text [[link||url]] text.
 Text [[ link||link ]] text.
 Text [[ link || url ]] text.
 
+Text [linkA|id1|urlA] text.
+Text [id1] text.
+Text [linkA|id1] text.
+
+Text [linkB|id2|urlB|TitleB] text.
+Text [id2] text.
+Text [linkB|id2] text.
+
 ===== Title *5 _(test)_*
 
 Text.
