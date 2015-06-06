@@ -142,6 +142,11 @@ x. item4
 &. item1
 &. item2
 
+* * itemA1
+  * itemA2
+* * itemB1
+  * itemB2
+
 == Title 2d
 
 Text.
