@@ -7,14 +7,6 @@ Inspiration languages (read their specification):
 * MediaWiki
 
 
-[id]: http://www.url.com "Title"
-
-
-Text'|sup| text.
-Text:|small| text.
-Text,|sub| text.
-
-
 <html tag>
 
 
@@ -55,6 +47,11 @@ http://plain.link.com/
 
 
 ![smartlink|http://url.com/image.jpg|title]
+
+
+Text'|sup| text.
+Text:|small| text.
+Text,|sub| text.
 
 
 Text ^[footnote-reflink-id] text.
