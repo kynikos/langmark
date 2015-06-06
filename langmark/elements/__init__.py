@@ -873,14 +873,24 @@ class _InlineElement(_Element):
 
     def _handle_inline_end_mark(self, event):
         if self.INLINE_MARK.check_end_mark(event.parsed_text, event.mark):
-            self.children.append(RawText(event.parsed_text))
+            self._post_process_inline(event.parsed_text)
             self.parent.take_inline_control()
         else:
             self.children.append(RawText(''.join((event.parsed_text,
                                                   event.mark.group()))))
 
     def _handle_inline_parse_end(self, event):
-        self.children.append(RawText(event.remainder_text))
+        self._post_process_inline(event.remainder_text)
+
+    def _post_process_inline(self, text):
+        self.children.append(RawText(text))
+        try:
+            self.post_process_inline()
+        except NotImplementedError:
+            pass
+
+    def post_process_inline(self):
+        raise NotImplementedError()
 
 
 class _InlineElementContainingInline(_InlineElement):
@@ -946,15 +956,42 @@ class _InlineElementContainingParameters(_InlineElement):
         if self.INLINE_MARK.check_parameter_mark(event.parsed_text,
                                                  event.mark):
             self.children.append(RawText(event.parsed_text))
-            self.parameters.append(self.children)
-            self.children = []
+            self._finalize_parameter()
         else:
             self.children.append(RawText(''.join((event.parsed_text,
                                                   event.mark.group()))))
 
-    def get_parameters(self):
-        # The last parameter is not appended to self.parameters
-        return self.parameters + [self.children, ]
+    def _finalize_parameter(self):
+        self.parameters.append(_Parameter(self, self.children))
+        self.children = []
+
+    def post_process_inline(self):
+        self._finalize_parameter()
+        self.children = self.parameters
+        self.parameters = []
+        try:
+            self.post_process_parameters()
+        except NotImplementedError:
+            pass
+
+    def post_process_parameters(self):
+        raise NotImplementedError()
+
+
+class _Parameter(_Element):
+    """
+    A parameter element.
+    """
+    def __init__(self, parent, children):
+        _Element.__init__(self)
+        self.set_parent(parent)
+        self.children[:] = children
+
+    def get_raw_text(self):
+        return ''.join(child.get_raw_text() for child in self.children)
+
+    def convert_to_html(self):
+        return ''.join(child.convert_to_html() for child in self.children)
 
 
 class _InlineElementContainingText(_InlineElement):
