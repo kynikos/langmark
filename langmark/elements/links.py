@@ -49,7 +49,7 @@ class LinksData(langmark.elements._MetaDataStorage):
 
 class Link(langmark.elements._InlineElementContainingParameters):
     """
-    A link.::
+    A link::
 
         [id]
         [url]
@@ -106,7 +106,7 @@ class Link(langmark.elements._InlineElementContainingParameters):
 
 class LinkDefinition(langmark.elements._MetaDataElement):
     """
-    A link definition.::
+    A link definition::
 
         [id]: url Title
         [id]: url "Title"

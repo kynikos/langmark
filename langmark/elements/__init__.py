@@ -78,7 +78,7 @@ class _MetaDataStorage:
 
 class Header(_MetaDataStorage):
     """
-    The header of the document, hosting the meta data.::
+    The header of the document, hosting the meta data::
     """
     ATTRIBUTE_NAME = 'header'
 
@@ -414,7 +414,7 @@ class _MetaDataElement(_Element):
 
 class HeaderElement(_MetaDataElement):
     """
-    A generic key/value metadata element.::
+    A generic key/value metadata element::
 
         ::key value
 

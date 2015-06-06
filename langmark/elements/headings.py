@@ -102,7 +102,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
 
 class Heading1(_ComplexHeading):
     """
-    A level-1 heading.::
+    A level-1 heading::
 
         = Title
 
@@ -130,7 +130,7 @@ class Heading1(_ComplexHeading):
 
 class Heading2(_ComplexHeading):
     """
-    A level-2 heading.::
+    A level-2 heading::
 
         == Title
 
@@ -159,7 +159,7 @@ class Heading2(_ComplexHeading):
 
 class Heading3(_SimpleHeading):
     """
-    A level-3 heading.::
+    A level-3 heading::
 
         === Title
 
@@ -173,7 +173,7 @@ class Heading3(_SimpleHeading):
 
 class Heading4(_SimpleHeading):
     """
-    A level-4 heading.::
+    A level-4 heading::
 
         ==== Title
 
@@ -187,7 +187,7 @@ class Heading4(_SimpleHeading):
 
 class Heading5(_SimpleHeading):
     """
-    A level-5 heading.::
+    A level-5 heading::
 
         ===== Title
 
@@ -201,7 +201,7 @@ class Heading5(_SimpleHeading):
 
 class Heading6(_SimpleHeading):
     """
-    A level-6 heading.::
+    A level-6 heading::
 
         ====== Title
 

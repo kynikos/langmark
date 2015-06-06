@@ -21,7 +21,7 @@ import langmark
 
 class Emphasis(langmark.elements._InlineElementContainingInline):
     """
-    Emphasized text (usually rendered with italic formatting).::
+    Emphasized text (usually rendered with italic formatting)::
 
         _emphasized_
     """
@@ -31,7 +31,7 @@ class Emphasis(langmark.elements._InlineElementContainingInline):
 
 class Strong(langmark.elements._InlineElementContainingInline):
     """
-    Important text (usually rendered with bold formatting).::
+    Important text (usually rendered with bold formatting)::
 
         *strong*
     """
@@ -41,7 +41,7 @@ class Strong(langmark.elements._InlineElementContainingInline):
 
 class Superscript(langmark.elements._InlineElementContainingInline):
     """
-    Superscript text.::
+    Superscript text::
 
         ^superscript^
     """
@@ -51,7 +51,7 @@ class Superscript(langmark.elements._InlineElementContainingInline):
 
 class Subscript(langmark.elements._InlineElementContainingInline):
     """
-    Subscript text.::
+    Subscript text::
 
         ;subscript;
     """
@@ -61,7 +61,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
 
 class Small(langmark.elements._InlineElementContainingInline):
     """
-    Small text.::
+    Small text::
 
         :small:
     """
@@ -71,7 +71,7 @@ class Small(langmark.elements._InlineElementContainingInline):
 
 class Strikethrough(langmark.elements._InlineElementContainingInline):
     """
-    Strikethrough text.::
+    Strikethrough text::
 
         ~strikethrough~
     """

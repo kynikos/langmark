@@ -21,7 +21,7 @@ import langmark
 
 class FormattableCode(langmark.elements._InlineElementContainingInline):
     """
-    Inline formattable monospace text.::
+    Inline formattable monospace text::
 
         |code|
     """
@@ -31,7 +31,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
 
 class PlainCode(langmark.elements._InlineElementContainingHtmlText):
     """
-    Inline preformatted monospace text.::
+    Inline preformatted monospace text::
 
         #code#
     """
@@ -41,7 +41,7 @@ class PlainCode(langmark.elements._InlineElementContainingHtmlText):
 
 class PlainText(langmark.elements._InlineElementContainingRawText):
     """
-    Inline plain, unescaped text.::
+    Inline plain, unescaped text::
 
         \text\
     """
@@ -52,7 +52,7 @@ class PlainText(langmark.elements._InlineElementContainingRawText):
 class FormattableCodeBlock(
                     langmark.elements._BlockElementContainingInline_LineMarks):
     """
-    A block of formattable monospace text.::
+    A block of formattable monospace text::
 
         |||
         Formatted code
@@ -64,7 +64,7 @@ class FormattableCodeBlock(
 
 class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
     """
-    A block of preformatted monospace text.::
+    A block of preformatted monospace text::
 
         ###
         Plain code
@@ -76,7 +76,7 @@ class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
 
 class PlainTextBlock(langmark.elements._BlockElementContainingRaw_LineMarks):
     """
-    A block of plain, unescaped text.::
+    A block of plain, unescaped text::
 
         \\\
         Plain text

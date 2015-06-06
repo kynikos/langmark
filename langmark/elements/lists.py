@@ -23,7 +23,7 @@ import langmark
 class UnorderedListItem(
                 langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
     """
-    An unordered list item.::
+    An unordered list item::
 
         * List item
     """
@@ -37,7 +37,7 @@ class UnorderedListItem(
 class NumberedListItem(
                 langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
     """
-    A numbered list item.::
+    A numbered list item::
 
         #. List item
         1. List item
@@ -52,7 +52,7 @@ class NumberedListItem(
 class LatinListItem(
                 langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
     """
-    An alphabetical list item using Latin characters.::
+    An alphabetical list item using Latin characters::
 
         &. List item
         a. List item
