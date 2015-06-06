@@ -398,6 +398,12 @@ class _Element:
     def set_parent(self, element):
         self.parent = element
 
+    def _rewind_check_lines_buffer(self):
+        self.rewind_lines(*_Element.STREAM.lines_buffer)
+
+    def rewind_lines(self, *lines):
+        _Element.STREAM.rewind_lines(*lines)
+
     @staticmethod
     def _trim_last_break(text):
         if text.endswith('\n'):
@@ -474,12 +480,6 @@ class _BlockElement(_Element):
 
     def parse_next_line(self):
         raise NotImplementedError()
-
-    def _rewind_check_lines_buffer(self):
-        self.rewind_lines(*_Element.STREAM.lines_buffer)
-
-    def rewind_lines(self, *lines):
-        _Element.STREAM.rewind_lines(*lines)
 
 
 class _BlockElementContainingBlock(_BlockElement):
