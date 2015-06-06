@@ -103,7 +103,7 @@ class Header(_Meta):
 
     def parse_next_line(self):
         while True:
-            line = _BlockElement.STREAM.read_next_line()
+            line = _Element.STREAM.read_next_line()
             match = self.METADATA.fullmatch(line)
             if match:
                 self.keys[match.group(1)] = match.group(2)
@@ -111,7 +111,7 @@ class Header(_Meta):
             else:
                 # Inserting an emtpy line makes sure that elements starting
                 #  with an empty line, like multiline headings, are recognized
-                _BlockElement.STREAM.rewind_lines('\n', line)
+                _Element.STREAM.rewind_lines('\n', line)
                 break
 
 
@@ -380,6 +380,8 @@ class _Element:
     """
     Base class for document elements.
     """
+    STREAM = None
+
     def __init__(self):
         self.parent = None
         self.children = []
@@ -403,7 +405,6 @@ class _BlockElement(_Element):
     """
     Base class for block elements.
     """
-    STREAM = None
     INSTALLED_BLOCK_ELEMENTS = None
     TEST_START_LINES = None
     TEST_END_LINES = None
@@ -412,7 +413,7 @@ class _BlockElement(_Element):
 
     def __init__(self):
         try:
-            lines = _BlockElement.STREAM.read_next_lines_buffered(
+            lines = _Element.STREAM.read_next_lines_buffered(
                                                         self.TEST_START_LINES)
         except StopIteration:
             # Re-raise the exception, but keep this to keep track of where it
@@ -459,10 +460,10 @@ class _BlockElement(_Element):
         raise NotImplementedError()
 
     def _rewind_check_lines_buffer(self):
-        self.rewind_lines(*_BlockElement.STREAM.lines_buffer)
+        self.rewind_lines(*_Element.STREAM.lines_buffer)
 
     def rewind_lines(self, *lines):
-        _BlockElement.STREAM.rewind_lines(*lines)
+        _Element.STREAM.rewind_lines(*lines)
 
 
 class _BlockElementContainingBlock(_BlockElement):
@@ -651,10 +652,10 @@ class _BlockElementNotContainingBlock(_BlockElement):
 
     def _read_indented_test_end_lines(self, ignore_blank_lines):
         try:
-            lines = _BlockElement.STREAM.read_next_lines_buffered(
+            lines = _Element.STREAM.read_next_lines_buffered(
                                                         self.TEST_END_LINES)
         except StopIteration:
-            lines = _BlockElement.STREAM.lines_buffer
+            lines = _Element.STREAM.lines_buffer
             indented_lines = self._check_and_strip_indentation(lines,
                                                             ignore_blank_lines)
             self._add_raw_content_lines(indented_lines)

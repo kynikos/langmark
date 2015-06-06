@@ -84,7 +84,7 @@ class Langmark:
         # The parameters for parse must reflect the attributes set through
         # argparse by the launcher script
         # TODO: Support passing a string instead of a stream
-        elements._BlockElement.STREAM = elements.Stream(stream)
+        elements._Element.STREAM = elements.Stream(stream)
         for Meta in META_ELEMENTS:
             setattr(self, Meta.ATTRIBUTE_NAME, Meta())
         self.etree = elements.Root()
