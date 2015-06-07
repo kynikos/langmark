@@ -17,8 +17,8 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from langmark.elements import (_MetaDataStorage, RawText)
-from . import (marks, base)
+from langmark.elements import RawText
+from . import (marks, metadata, base)
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -28,14 +28,14 @@ from .exceptions import (_BlockElementStartNotMatched,
                          _EndOfFile)
 
 
-class LinksData(_MetaDataStorage):
+class LinksData(metadata._MetaDataStorage):
     """
     The links data.
     """
     ATTRIBUTE_NAME = 'links'
 
     def __init__(self, langmark_):
-        _MetaDataStorage.__init__(self, langmark_)
+        metadata._MetaDataStorage.__init__(self, langmark_)
         self.id_to_data = {}
 
     def add_id(self, id_, url, title):

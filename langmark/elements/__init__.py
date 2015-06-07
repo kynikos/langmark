@@ -66,27 +66,6 @@ class Stream:
         self.stream = itertools.chain(lines, self.stream)
 
 
-class _MetaDataStorage:
-    """
-    Base class for metadata-storing objects.
-    """
-    ATTRIBUTE_NAME = None
-
-    def __init__(self, langmark):
-        self.langmark = langmark
-
-
-class Header(_MetaDataStorage):
-    """
-    The header of the document, hosting the meta data::
-    """
-    ATTRIBUTE_NAME = 'header'
-
-    def __init__(self, langmark):
-        _MetaDataStorage.__init__(self, langmark)
-        self.keys = {}
-
-
 class RawText:
     def __init__(self, text):
         self.text = text

@@ -16,12 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-from .elements import (base, headings, lists, code, formatting, links)
+from .elements import (metadata, base, headings, lists, code, formatting,
+                       links)
 
 # Additional extension modules should insert their meta element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
 #  *before* instantiating the Langmark class
-META_ELEMENTS = [elements.Header,
+META_ELEMENTS = [metadata.Header,
                  links.LinksData]
 
 # The order of the block elements is important: put the most likey elements
