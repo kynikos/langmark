@@ -18,6 +18,7 @@
 
 import re
 import langmark
+from . import marks
 
 
 class LinksData(langmark.elements._MetaDataStorage):
@@ -59,7 +60,7 @@ class Link(langmark.elements._InlineElementContainingParameters):
         [text|id|url]
         [text|id|url|title]
     """
-    INLINE_MARK = langmark.elements._InlineMarkEscapableEnd('[', ']')
+    INLINE_MARK = marks._InlineMarkEscapableEnd('[', ']')
     HTML_TAGS = ('<a href="{href}">', '<a href="{href}" title="{title}">',
                  '</a>')
 

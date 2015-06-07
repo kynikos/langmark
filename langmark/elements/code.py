@@ -17,6 +17,7 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import langmark
+from . import marks
 
 
 class FormattableCode(langmark.elements._InlineElementContainingInline):
@@ -25,7 +26,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
 
         |code|
     """
-    INLINE_MARK = langmark.elements._InlineMarkEscapable('|')
+    INLINE_MARK = marks._InlineMarkEscapable('|')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -35,7 +36,7 @@ class PlainCode(langmark.elements._InlineElementContainingHtmlText):
 
         #code#
     """
-    INLINE_MARK = langmark.elements._InlineMarkNonEscapable('#')
+    INLINE_MARK = marks._InlineMarkNonEscapable('#')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -45,7 +46,7 @@ class PlainText(langmark.elements._InlineElementContainingRawText):
 
         \text\
     """
-    INLINE_MARK = langmark.elements._InlineMarkNonEscapable('\\')
+    INLINE_MARK = marks._InlineMarkNonEscapable('\\')
     HTML_TAGS = ('<span>', '</span>')
 
 
@@ -58,7 +59,7 @@ class FormattableCodeBlock(
         Formatted code
         |||
     """
-    BLOCK_MARK = langmark.elements.BlockMarkSimple('|')
+    BLOCK_MARK = marks.BlockMarkSimple('|')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -70,7 +71,7 @@ class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
         Plain code
         ###
     """
-    BLOCK_MARK = langmark.elements.BlockMarkSimple('#')
+    BLOCK_MARK = marks.BlockMarkSimple('#')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -82,5 +83,5 @@ class PlainTextBlock(langmark.elements._BlockElementContainingRaw_LineMarks):
         Plain text
         \\\
     """
-    BLOCK_MARK = langmark.elements.BlockMarkSimple('\\')
+    BLOCK_MARK = marks.BlockMarkSimple('\\')
     HTML_TAGS = ('<div>', '</div>')

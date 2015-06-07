@@ -18,6 +18,7 @@
 
 import re
 import langmark
+from . import marks
 
 
 class UnorderedListItem(
@@ -29,7 +30,7 @@ class UnorderedListItem(
     """
     # TODO: For the moment it's impossible to have two separate lists without
     #       other elements between them
-    BLOCK_MARK = langmark.elements.BlockMarkPrefix(r'\*')
+    BLOCK_MARK = marks.BlockMarkPrefix(r'\*')
     HTML_OUTER_TAGS = ('<ul>', '</ul>')
     HTML_TAGS = ('<li>', '</li>')
 
@@ -44,7 +45,7 @@ class NumberedListItem(
     """
     # TODO: For the moment it's impossible to have two separate lists without
     #       other elements between them
-    BLOCK_MARK = langmark.elements.BlockMarkPrefix(r'(?:[0-9]+|#)\.')
+    BLOCK_MARK = marks.BlockMarkPrefix(r'(?:[0-9]+|#)\.')
     HTML_OUTER_TAGS = ('<ol>', '</ol>')
     HTML_TAGS = ('<li>', '</li>')
 
@@ -60,6 +61,6 @@ class LatinListItem(
     # TODO: For the moment it's impossible to have two separate lists without
     #       other elements between them
     # TODO: Let customize the class name
-    BLOCK_MARK = langmark.elements.BlockMarkPrefix(r'[a-zA-Z&]\.')
+    BLOCK_MARK = marks.BlockMarkPrefix(r'[a-zA-Z&]\.')
     HTML_OUTER_TAGS = ('<ol class="langmark-latin">', '</ol>')
     HTML_TAGS = ('<li>', '</li>')
