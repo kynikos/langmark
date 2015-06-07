@@ -1,7 +1,5 @@
 * * See notes in syntax.lm
   * Search for "TODO" in the files
-* Split classes in more modules
-* Use a centralized configuration script
 * While parsing the links, prepare a report of their status (links with missing
   id's, duplicated id's...)
 * * Automatic table of contents
@@ -13,6 +11,8 @@
     Makrdown does.
      Note that currently I'm also using < and > to mark links
   * Optionally do further HTML escapes (see Wembler's escape.py script)
+* Use class factories to reduce the number of tested regular expressions
+  Use a centralized configuration script
 * Markdown compatibility mode
 * Add tests
   * Test headerless and contentless source files

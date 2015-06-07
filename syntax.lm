@@ -49,6 +49,17 @@ http://plain.link.com/
 ![smartlink|http://url.com/image.jpg|title]
 
 
+Horizontal line
+
+
+:#Commented text
+
+
+{image|path}
+{gallery|path}
+{extension}   !{extension}
+
+
 Text'|sup| text.
 Text:|small| text.
 Text,|sub| text.
@@ -91,19 +102,10 @@ code
 code
 !{code}
 
+
 {transclude|page|1=arg|cc=arg}
 {arg|1}
 {arg|cc}
-
-{image|path}
-{gallery|path}
-{extension}   !{extension}
-
-
-Horizontal line
-
-
-:#Commented text
 
 
 'quote' -> ‘quote’
