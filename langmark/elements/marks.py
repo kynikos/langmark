@@ -18,6 +18,13 @@
 
 import re
 import langmark
+from .exceptions import (_BlockElementStartNotMatched,
+                         _BlockElementStartConsumed,
+                         _BlockElementStartMatched,
+                         _BlockElementEndConsumed,
+                         _BlockElementEndNotConsumed,
+                         _InlineElementStartNotMatched,
+                         _EndOfFile)
 
 
 class _BlockMarkFactory:
@@ -107,7 +114,7 @@ class _InlineMarkFactory:
         line_start, pre_space, pre_char = self.prefix_test.search(parsed_text
                                                                     ).groups()
         if pre_char is not None:
-            raise langmark.elements._InlineElementStartNotMatched()
+            raise _InlineElementStartNotMatched()
 
         # There's no need to look for escaped characters: that's already done
         #  by the normal escaping algorithm, and every time a character is
@@ -132,7 +139,7 @@ class _InlineMarkFactory:
                 # ... ** text...
                 return _make_marks_spaced(possible_mark)
             # ...** text...
-            raise langmark.elements._InlineElementStartNotMatched()
+            raise _InlineElementStartNotMatched()
         # ...**text...
         # ... **text...
         return _make_marks_normal(possible_mark)
@@ -166,7 +173,7 @@ class _InlineMarkFactory:
                               escaped_mark=self.escaped_end_char * len(mark)),
                               re.MULTILINE)
         else:
-            raise langmark.elements._InlineElementStartNotMatched()
+            raise _InlineElementStartNotMatched()
 
     def check_parameter_mark(self, parsed_text, parameter_mark):
         try:

@@ -19,6 +19,13 @@
 import re
 import itertools
 import textparser
+from .exceptions import (_BlockElementStartNotMatched,
+                         _BlockElementStartConsumed,
+                         _BlockElementStartMatched,
+                         _BlockElementEndConsumed,
+                         _BlockElementEndNotConsumed,
+                         _InlineElementStartNotMatched,
+                         _EndOfFile)
 
 
 class Configuration:
@@ -103,64 +110,6 @@ class RawText:
         text = self.text.replace('&', '&amp;')
         text = text.replace('<', '&lt;')
         return text
-
-
-class _BlockElementStartNotMatched(Exception):
-    """
-    Internal exception used to communicate to the parent that the parsed line
-    does not correspond to the start of the element.
-    """
-    pass
-
-
-class _BlockElementStartConsumed(Exception):
-    """
-    Internal exception used to communicate to the parent that the parsed line
-    corresponds to the start of the element and has already been used.
-    """
-    pass
-
-
-class _BlockElementStartMatched(Exception):
-    """
-    Internal exception used to communicate to the parent that the parsed line
-    corresponds to the start of a new element.
-    """
-    def __init__(self, element):
-        self.element = element
-
-
-class _BlockElementEndConsumed(Exception):
-    """
-    Internal exception used to communicate the end of the element to its
-    parent. The parsed line has been consumed.
-    """
-    pass
-
-
-class _BlockElementEndNotConsumed(Exception):
-    """
-    Internal exception used to communicate the end of the element to its
-    parent. The parsed line must be consumed by the parent.
-    """
-    def __init__(self, *lines):
-        self.lines = lines
-
-
-class _InlineElementStartNotMatched(Exception):
-    """
-    Internal exception used to communicate to the parent that the parsed line
-    does not correspond to the start of the element.
-    """
-    pass
-
-
-class _EndOfFile(Exception):
-    """
-    Internal exception used to communicate to the parent that the creation of
-    an element has been stopped by the end of file.
-    """
-    pass
 
 
 class _Element:

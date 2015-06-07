@@ -19,6 +19,13 @@
 import re
 import langmark
 from . import marks
+from .exceptions import (_BlockElementStartNotMatched,
+                         _BlockElementStartConsumed,
+                         _BlockElementStartMatched,
+                         _BlockElementEndConsumed,
+                         _BlockElementEndNotConsumed,
+                         _InlineElementStartNotMatched,
+                         _EndOfFile)
 
 
 class LinksData(langmark.elements._MetaDataStorage):
@@ -117,6 +124,6 @@ class LinkDefinition(langmark.elements._MetaDataElement):
         if match:
             self.langmark.links.add_id(match.group(1), match.group(2),
                                        match.group(3))
-            raise langmark.elements._BlockElementStartConsumed()
+            raise _BlockElementStartConsumed()
         else:
-            raise langmark.elements._BlockElementStartNotMatched()
+            raise _BlockElementStartNotMatched()

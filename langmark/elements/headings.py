@@ -18,6 +18,13 @@
 
 import re
 import langmark
+from .exceptions import (_BlockElementStartNotMatched,
+                         _BlockElementStartConsumed,
+                         _BlockElementStartMatched,
+                         _BlockElementEndConsumed,
+                         _BlockElementEndNotConsumed,
+                         _InlineElementStartNotMatched,
+                         _EndOfFile)
 
 # TODO: Implement "sections", i.e. containers of a heading and its subelements
 #       and subheadings. Sections can thus be nested.
@@ -42,14 +49,14 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
     def check_element_start(self, lines):
         match = self.START_MARK.match(lines[0])
         if not match:
-            raise langmark.elements._BlockElementStartNotMatched()
+            raise _BlockElementStartNotMatched()
         return ('', (match.group(1), ))
 
     def _parse_initial_lines(self, lines):
         self._add_raw_first_line(lines[0])
 
     def check_element_end(self, lines):
-        raise langmark.elements._BlockElementEndConsumed()
+        raise _BlockElementEndConsumed()
 
 
 class _ComplexHeading(langmark.elements._BlockElementContainingInline):
@@ -73,22 +80,22 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
         elif langmark.elements.Configuration.BLANK_LINE.fullmatch(lines[0]):
             match2 = self.TITLE_MARK.fullmatch(lines[1])
             if not match2:
-                raise langmark.elements._BlockElementStartNotMatched()
+                raise _BlockElementStartNotMatched()
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
-                raise langmark.elements._BlockElementStartNotMatched()
+                raise _BlockElementStartNotMatched()
             title = match2.group(1)
 
         else:
             match1 = self.START_MARK.fullmatch(lines[0])
             if not match1:
-                raise langmark.elements._BlockElementStartNotMatched()
+                raise _BlockElementStartNotMatched()
             match2 = self.TITLE_MARK.fullmatch(lines[1])
             if not match2:
-                raise langmark.elements._BlockElementStartNotMatched()
+                raise _BlockElementStartNotMatched()
             match3 = self.END_MARK.fullmatch(lines[2])
             if not match3:
-                raise langmark.elements._BlockElementStartNotMatched()
+                raise _BlockElementStartNotMatched()
             title = match2.group(1)
 
         return ('', (title, ))
@@ -97,7 +104,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
         self._add_raw_first_line(lines[0])
 
     def check_element_end(self, lines):
-        raise langmark.elements._BlockElementEndConsumed()
+        raise _BlockElementEndConsumed()
 
 
 class Heading1(_ComplexHeading):
