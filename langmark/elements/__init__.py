@@ -75,6 +75,9 @@ class _MetaDataStorage:
     """
     ATTRIBUTE_NAME = None
 
+    def __init__(self, langmark):
+        self.langmark = langmark
+
 
 class Header(_MetaDataStorage):
     """
@@ -82,7 +85,8 @@ class Header(_MetaDataStorage):
     """
     ATTRIBUTE_NAME = 'header'
 
-    def __init__(self):
+    def __init__(self, langmark):
+        _MetaDataStorage.__init__(self, langmark)
         self.keys = {}
 
 
@@ -359,10 +363,8 @@ class _Element:
     """
     Base class for document elements.
     """
-    DOCUMENT = None
-    STREAM = None
-
-    def __init__(self):
+    def __init__(self, langmark):
+        self.langmark = langmark
         self.parent = None
         self.children = []
 
@@ -370,10 +372,10 @@ class _Element:
         self.parent = element
 
     def _rewind_check_lines_buffer(self):
-        self.rewind_lines(*_Element.STREAM.lines_buffer)
+        self.rewind_lines(*self.langmark.stream.lines_buffer)
 
     def rewind_lines(self, *lines):
-        _Element.STREAM.rewind_lines(*lines)
+        self.langmark.stream.rewind_lines(*lines)
 
     @staticmethod
     def _trim_last_break(text):
@@ -395,9 +397,9 @@ class _MetaDataElement(_Element):
     #       lines)
     METADATA = None
 
-    def __init__(self):
+    def __init__(self, langmark):
         try:
-            line = _Element.STREAM.read_next_lines_buffered(1)[0]
+            line = langmark.stream.read_next_lines_buffered(1)[0]
         except StopIteration:
             # Re-raise the exception, but keep this to keep track of where it
             #  comes from
@@ -405,7 +407,7 @@ class _MetaDataElement(_Element):
             #  instantiated
             raise _EndOfFile()
         else:
-            _Element.__init__(self)
+            _Element.__init__(self, langmark)
             self.process_match(self.METADATA.fullmatch(line))
 
     def process_match(self, match):
@@ -427,7 +429,7 @@ class HeaderElement(_MetaDataElement):
 
     def process_match(self, match):
         if match:
-            _Element.DOCUMENT.header.keys[match.group(1)] = match.group(2)
+            self.langmark.header.keys[match.group(1)] = match.group(2)
         else:
             # This is changing the size of INSTALLED_BLOCK_ELEMENTS, so I can't
             #  raise _BlockElementStartNotMatched after it, because that would
@@ -452,9 +454,9 @@ class _BlockElement(_Element):
     HTML_BREAK = '\n'
     HTML_TAGS = ('<div>', '</div>')
 
-    def __init__(self):
+    def __init__(self, langmark):
         try:
-            lines = _Element.STREAM.read_next_lines_buffered(
+            lines = langmark.stream.read_next_lines_buffered(
                                                         self.TEST_START_LINES)
         except StopIteration:
             # Re-raise the exception, but keep this to keep track of where it
@@ -463,7 +465,7 @@ class _BlockElement(_Element):
             #  instantiated
             raise _EndOfFile()
         else:
-            _Element.__init__(self)
+            _Element.__init__(self, langmark)
             indentation_external, indentation_internal, initial_lines = \
                                                 self._parse_indentation(lines)
             self.indentation_external = self._compute_equivalent_indentation(
@@ -487,7 +489,7 @@ class _BlockElement(_Element):
             try:
                 for Element in self.INSTALLED_BLOCK_ELEMENTS:
                     try:
-                        return Element()
+                        return Element(self.langmark)
                     except (_BlockElementStartNotMatched, _EndOfFile):
                         self._rewind_check_lines_buffer()
                         continue
@@ -525,7 +527,7 @@ class _BlockElementContainingBlock(_BlockElement):
                 # find_element_start must return False also when the text
                 #  would be a Paragraph, so paragraphs (the catch-all elements)
                 #  must be created here
-                element = Paragraph()
+                element = Paragraph(self.langmark)
             except _BlockElementStartNotMatched:
                 # Just discard the consumed lines if really nothing wants them
                 self.parse_next_line()
@@ -624,8 +626,8 @@ class _BlockElementContainingBlock_Prefix_Grouped(
     #       super calls
     HTML_OUTER_TAGS = None
 
-    def __init__(self):
-        _BlockElementContainingBlock_Prefix.__init__(self)
+    def __init__(self, langmark):
+        _BlockElementContainingBlock_Prefix.__init__(self, langmark)
         self.group_item_number = 0
         self.group_item_last = True
 
@@ -680,10 +682,10 @@ class _BlockElementNotContainingBlock(_BlockElement):
     """
     Base class for elements not containing block elements.
     """
-    def __init__(self):
+    def __init__(self, langmark):
         self.rawtext = RawText('')
         self.indentation_content = None
-        _BlockElement.__init__(self)
+        _BlockElement.__init__(self, langmark)
 
     def _parse_indentation(self, lines):
         indentation, initial_lines = self.check_element_start(lines)
@@ -694,10 +696,10 @@ class _BlockElementNotContainingBlock(_BlockElement):
 
     def _read_indented_test_end_lines(self, ignore_blank_lines):
         try:
-            lines = _Element.STREAM.read_next_lines_buffered(
+            lines = self.langmark.stream.read_next_lines_buffered(
                                                         self.TEST_END_LINES)
         except StopIteration:
-            lines = _Element.STREAM.lines_buffer
+            lines = self.langmark.stream.lines_buffer
             indented_lines = self._check_and_strip_indentation(lines,
                                                             ignore_blank_lines)
             self._add_raw_content_lines(indented_lines)
@@ -749,7 +751,8 @@ class _BlockElementContainingInline_Meta(_BlockElementNotContainingBlock):
     """
     def _parse_inline(self):
         inline_parser = textparser.TextParser(self.rawtext.text)
-        dummyelement = BaseInlineElement(self, inline_parser, None, None, None)
+        dummyelement = BaseInlineElement(self.langmark, self, inline_parser,
+                                         None, None, None)
         dummyelement.take_inline_control()
         inline_parser.parse()
         self.children = dummyelement.children
@@ -890,15 +893,15 @@ class _InlineElement(_Element):
     INLINE_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
-    def __init__(self, parent, inline_parser, parsed_text, start_mark,
-                 is_element_start):
+    def __init__(self, langmark, parent, inline_parser, parsed_text,
+                 start_mark, is_element_start):
         self.inline_parser = inline_parser
         self.inline_bindings = self.install_bindings(parsed_text, start_mark,
                                                             is_element_start)
         if self.ENABLE_ESCAPE:
             self.inline_bindings[Configuration.ESCAPE_RE] = \
                                                     self._handle_inline_escape
-        _Element.__init__(self)
+        _Element.__init__(self, langmark)
         self.set_parent(parent)
 
     def install_bindings(self, parsed_text, start_mark, is_element_start):
@@ -952,9 +955,9 @@ class _InlineElementContainingInline(_InlineElement):
 
     def _handle_inline_start_mark(self, event):
         try:
-            element = self.START_MARK_TO_INLINE_ELEMENT[event.regex](self,
-                                        self.inline_parser, event.parsed_text,
-                                        event.mark, not bool(self.children))
+            element = self.START_MARK_TO_INLINE_ELEMENT[event.regex](
+                        self.langmark, self, self.inline_parser,
+                        event.parsed_text, event.mark, not bool(self.children))
         except _InlineElementStartNotMatched:
             self.children.append(RawText(''.join((event.parsed_text,
                                                   event.mark.group()))))
@@ -1003,7 +1006,7 @@ class _InlineElementContainingParameters(_InlineElement):
                                                   event.mark.group()))))
 
     def _finalize_parameter(self):
-        self.parameters.append(_Parameter(self, self.children))
+        self.parameters.append(_Parameter(self.langmark, self, self.children))
         self.children = []
 
     def post_process_inline(self):
@@ -1023,8 +1026,8 @@ class _Parameter(_Element):
     """
     A parameter element.
     """
-    def __init__(self, parent, children):
-        _Element.__init__(self)
+    def __init__(self, langmark, parent, children):
+        _Element.__init__(self, langmark)
         self.set_parent(parent)
         self.children[:] = children
 

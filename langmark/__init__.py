@@ -65,7 +65,6 @@ class Langmark:
     def __init__(self):
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
-        elements._Element.DOCUMENT = self
         elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
         self._install_inline_elements()
 
@@ -89,8 +88,8 @@ class Langmark:
         # The parameters for parse must reflect the attributes set through
         # argparse by the launcher script
         # TODO: Support passing a string instead of a stream
-        elements._Element.STREAM = elements.Stream(stream)
+        self.stream = elements.Stream(stream)
         for Meta in META_ELEMENTS:
-            setattr(self, Meta.ATTRIBUTE_NAME, Meta())
-        self.etree = elements.Root()
+            setattr(self, Meta.ATTRIBUTE_NAME, Meta(self))
+        self.etree = elements.Root(self)
         self.etree.parse_tree()

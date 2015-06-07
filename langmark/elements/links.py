@@ -26,7 +26,8 @@ class LinksData(langmark.elements._MetaDataStorage):
     """
     ATTRIBUTE_NAME = 'links'
 
-    def __init__(self):
+    def __init__(self, langmark_):
+        langmark.elements._MetaDataStorage.__init__(self, langmark_)
         self.id_to_data = {}
 
     def add_id(self, id_, url, title):
@@ -71,8 +72,7 @@ class Link(langmark.elements._InlineElementContainingParameters):
             title = self.children[3].get_raw_text()
         except IndexError:
             title = None
-        langmark.elements._Element.DOCUMENT.links.add_id(
-                                self.children[1].get_raw_text(), url, title)
+        self.langmark.links.add_id(self.children[1].get_raw_text(), url, title)
 
     def convert_to_html(self):
         par1 = self.children[0]
@@ -83,8 +83,7 @@ class Link(langmark.elements._InlineElementContainingParameters):
             id_ = par1.get_raw_text()
             try:
                 href, title = \
-                    langmark.elements._Element.DOCUMENT.links.get_data_html(
-                                                                        id_)
+                    self.langmark.links.get_data_html(id_)
             except ValueError:
                 href = text
                 title = None
@@ -92,8 +91,7 @@ class Link(langmark.elements._InlineElementContainingParameters):
             id_ = par2.get_raw_text()
             try:
                 href, title = \
-                    langmark.elements._Element.DOCUMENT.links.get_data_html(
-                                                                        id_)
+                    self.langmark.links.get_data_html(id_)
             except ValueError:
                 href = par2.convert_to_html()
                 title = None
@@ -116,8 +114,8 @@ class LinkDefinition(langmark.elements._MetaDataElement):
 
     def process_match(self, match):
         if match:
-            langmark.elements._Element.DOCUMENT.links.add_id(
-                                match.group(1), match.group(2), match.group(3))
+            self.langmark.links.add_id(match.group(1), match.group(2),
+                                       match.group(3))
             raise langmark.elements._BlockElementStartConsumed()
         else:
             raise langmark.elements._BlockElementStartNotMatched()
