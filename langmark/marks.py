@@ -17,7 +17,7 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from langmark.elements import Configuration
+from .base import Configuration
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,

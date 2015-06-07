@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-from .elements import (metadata, base, headings, lists, code, formatting,
+from . import (metadata, elements, headings, lists, code, formatting,
                        links)
 
 # Additional extension modules should insert their meta element classes in the
@@ -30,7 +30,7 @@ META_ELEMENTS = [metadata.Header,
 # Additional extension modules should insert their block element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
 #  *before* instantiating the Langmark class
-BLOCK_ELEMENTS = [base.HeaderElement,  # HeaderElement uninstalls itself
+BLOCK_ELEMENTS = [elements.HeaderElement,  # HeaderElement uninstalls itself
                                        #  after the first non-match
                   headings.Heading1,
                   headings.Heading2,
@@ -66,7 +66,7 @@ class Langmark:
     def __init__(self):
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
-        base._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
+        elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
         self._install_inline_elements()
 
     def _install_inline_elements(self):
@@ -82,15 +82,15 @@ class Langmark:
             start_mark = element_to_compiled_mark[Element]
             Element.START_MARK_TO_INLINE_ELEMENT = start_mark_to_element.copy()
             del Element.START_MARK_TO_INLINE_ELEMENT[start_mark]
-        base.BaseInlineElement.START_MARK_TO_INLINE_ELEMENT = \
+        elements.BaseInlineElement.START_MARK_TO_INLINE_ELEMENT = \
                                                 start_mark_to_element.copy()
 
     def parse(self, stream):
         # The parameters for parse must reflect the attributes set through
         # argparse by the launcher script
         # TODO: Support passing a string instead of a stream
-        self.stream = elements.Stream(stream)
+        self.stream = base.Stream(stream)
         for Meta in META_ELEMENTS:
             setattr(self, Meta.ATTRIBUTE_NAME, Meta(self))
-        self.etree = base.Root(self)
+        self.etree = elements.Root(self)
         self.etree.parse_tree()

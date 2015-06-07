@@ -18,7 +18,7 @@
 
 import re
 import textparser
-from langmark.elements import (Configuration, RawText)
+from .base import (Configuration, RawText)
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,

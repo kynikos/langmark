@@ -17,8 +17,8 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from . import base
-from langmark.elements import Configuration
+from . import elements
+from .base import Configuration
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -34,7 +34,7 @@ from .exceptions import (_BlockElementStartNotMatched,
 #       Perhaps implement them only when converting to HTML
 
 
-class _SimpleHeading(base._BlockElementContainingInline):
+class _SimpleHeading(elements._BlockElementContainingInline):
     """
     A block element, containing inline elements, that can only span one line
     and is identified by a prefix.
@@ -60,7 +60,7 @@ class _SimpleHeading(base._BlockElementContainingInline):
         raise _BlockElementEndConsumed()
 
 
-class _ComplexHeading(base._BlockElementContainingInline):
+class _ComplexHeading(elements._BlockElementContainingInline):
     """
     A block element, containing inline elements, that starts with a full-line
     mark and ends with an optional full-line mark.

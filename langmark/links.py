@@ -17,8 +17,8 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from langmark.elements import RawText
-from . import (marks, metadata, base)
+from . import (marks, metadata, elements)
+from .base import RawText
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -56,7 +56,7 @@ class LinksData(metadata._MetaDataStorage):
             raise ValueError
 
 
-class Link(base._InlineElementContainingParameters):
+class Link(elements._InlineElementContainingParameters):
     """
     A link::
 
@@ -110,7 +110,7 @@ class Link(base._InlineElementContainingParameters):
                           self.HTML_TAGS[2]))
 
 
-class LinkDefinition(base._MetaDataElement):
+class LinkDefinition(elements._MetaDataElement):
     """
     A link definition::
 
