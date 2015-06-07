@@ -17,8 +17,8 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import langmark
-from . import marks
+from langmark.elements import (_MetaDataStorage, RawText)
+from . import (marks, base)
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -28,19 +28,19 @@ from .exceptions import (_BlockElementStartNotMatched,
                          _EndOfFile)
 
 
-class LinksData(langmark.elements._MetaDataStorage):
+class LinksData(_MetaDataStorage):
     """
     The links data.
     """
     ATTRIBUTE_NAME = 'links'
 
     def __init__(self, langmark_):
-        langmark.elements._MetaDataStorage.__init__(self, langmark_)
+        _MetaDataStorage.__init__(self, langmark_)
         self.id_to_data = {}
 
     def add_id(self, id_, url, title):
-        self.id_to_data[id_] = (langmark.elements.RawText(url),
-                        langmark.elements.RawText(title) if title else None)
+        self.id_to_data[id_] = (RawText(url),
+                                RawText(title) if title else None)
 
     def get_data_html(self, id_):
         try:
@@ -56,7 +56,7 @@ class LinksData(langmark.elements._MetaDataStorage):
             raise ValueError
 
 
-class Link(langmark.elements._InlineElementContainingParameters):
+class Link(base._InlineElementContainingParameters):
     """
     A link::
 
@@ -110,7 +110,7 @@ class Link(langmark.elements._InlineElementContainingParameters):
                           self.HTML_TAGS[2]))
 
 
-class LinkDefinition(langmark.elements._MetaDataElement):
+class LinkDefinition(base._MetaDataElement):
     """
     A link definition::
 

@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-import langmark
-from . import marks
+from . import (marks, base)
 
 
-class Emphasis(langmark.elements._InlineElementContainingInline):
+class Emphasis(base._InlineElementContainingInline):
     """
     Emphasized text (usually rendered with italic formatting)::
 
@@ -30,7 +29,7 @@ class Emphasis(langmark.elements._InlineElementContainingInline):
     HTML_TAGS = ('<em>', '</em>')
 
 
-class Strong(langmark.elements._InlineElementContainingInline):
+class Strong(base._InlineElementContainingInline):
     """
     Important text (usually rendered with bold formatting)::
 
@@ -40,7 +39,7 @@ class Strong(langmark.elements._InlineElementContainingInline):
     HTML_TAGS = ('<strong>', '</strong>')
 
 
-class Superscript(langmark.elements._InlineElementContainingInline):
+class Superscript(base._InlineElementContainingInline):
     """
     Superscript text::
 
@@ -50,7 +49,7 @@ class Superscript(langmark.elements._InlineElementContainingInline):
     HTML_TAGS = ('<sup>', '</sup>')
 
 
-class Subscript(langmark.elements._InlineElementContainingInline):
+class Subscript(base._InlineElementContainingInline):
     """
     Subscript text::
 
@@ -60,7 +59,7 @@ class Subscript(langmark.elements._InlineElementContainingInline):
     HTML_TAGS = ('<sub>', '</sub>')
 
 
-class Small(langmark.elements._InlineElementContainingInline):
+class Small(base._InlineElementContainingInline):
     """
     Small text::
 
@@ -70,7 +69,7 @@ class Small(langmark.elements._InlineElementContainingInline):
     HTML_TAGS = ('<small>', '</small>')
 
 
-class Strikethrough(langmark.elements._InlineElementContainingInline):
+class Strikethrough(base._InlineElementContainingInline):
     """
     Strikethrough text::
 

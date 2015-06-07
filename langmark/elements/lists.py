@@ -17,12 +17,10 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import langmark
-from . import marks
+from . import (marks, base)
 
 
-class UnorderedListItem(
-                langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
+class UnorderedListItem(base._BlockElementContainingBlock_Prefix_Grouped):
     """
     An unordered list item::
 
@@ -35,8 +33,7 @@ class UnorderedListItem(
     HTML_TAGS = ('<li>', '</li>')
 
 
-class NumberedListItem(
-                langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
+class NumberedListItem(base._BlockElementContainingBlock_Prefix_Grouped):
     """
     A numbered list item::
 
@@ -50,8 +47,7 @@ class NumberedListItem(
     HTML_TAGS = ('<li>', '</li>')
 
 
-class LatinListItem(
-                langmark.elements._BlockElementContainingBlock_Prefix_Grouped):
+class LatinListItem(base._BlockElementContainingBlock_Prefix_Grouped):
     """
     An alphabetical list item using Latin characters::
 

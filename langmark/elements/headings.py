@@ -17,7 +17,8 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import langmark
+from . import base
+from langmark.elements import Configuration
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -33,7 +34,7 @@ from .exceptions import (_BlockElementStartNotMatched,
 #       Perhaps implement them only when converting to HTML
 
 
-class _SimpleHeading(langmark.elements._BlockElementContainingInline):
+class _SimpleHeading(base._BlockElementContainingInline):
     """
     A block element, containing inline elements, that can only span one line
     and is identified by a prefix.
@@ -59,7 +60,7 @@ class _SimpleHeading(langmark.elements._BlockElementContainingInline):
         raise _BlockElementEndConsumed()
 
 
-class _ComplexHeading(langmark.elements._BlockElementContainingInline):
+class _ComplexHeading(base._BlockElementContainingInline):
     """
     A block element, containing inline elements, that starts with a full-line
     mark and ends with an optional full-line mark.
@@ -77,7 +78,7 @@ class _ComplexHeading(langmark.elements._BlockElementContainingInline):
             title = match.group(1)
             self.rewind_lines(lines[1], lines[2])
 
-        elif langmark.elements.Configuration.BLANK_LINE.fullmatch(lines[0]):
+        elif Configuration.BLANK_LINE.fullmatch(lines[0]):
             match2 = self.TITLE_MARK.fullmatch(lines[1])
             if not match2:
                 raise _BlockElementStartNotMatched()

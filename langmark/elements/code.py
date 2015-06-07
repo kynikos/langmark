@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-import langmark
-from . import marks
+from . import (marks, base)
 
 
-class FormattableCode(langmark.elements._InlineElementContainingInline):
+class FormattableCode(base._InlineElementContainingInline):
     """
     Inline formattable monospace text::
 
@@ -30,7 +29,7 @@ class FormattableCode(langmark.elements._InlineElementContainingInline):
     HTML_TAGS = ('<code>', '</code>')
 
 
-class PlainCode(langmark.elements._InlineElementContainingHtmlText):
+class PlainCode(base._InlineElementContainingHtmlText):
     """
     Inline preformatted monospace text::
 
@@ -40,7 +39,7 @@ class PlainCode(langmark.elements._InlineElementContainingHtmlText):
     HTML_TAGS = ('<code>', '</code>')
 
 
-class PlainText(langmark.elements._InlineElementContainingRawText):
+class PlainText(base._InlineElementContainingRawText):
     """
     Inline plain, unescaped text::
 
@@ -50,8 +49,7 @@ class PlainText(langmark.elements._InlineElementContainingRawText):
     HTML_TAGS = ('<span>', '</span>')
 
 
-class FormattableCodeBlock(
-                    langmark.elements._BlockElementContainingInline_LineMarks):
+class FormattableCodeBlock(base._BlockElementContainingInline_LineMarks):
     """
     A block of formattable monospace text::
 
@@ -63,7 +61,7 @@ class FormattableCodeBlock(
     HTML_TAGS = ('<pre>', '</pre>')
 
 
-class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
+class PlainCodeBlock(base._BlockElementContainingText_LineMarks):
     """
     A block of preformatted monospace text::
 
@@ -75,7 +73,7 @@ class PlainCodeBlock(langmark.elements._BlockElementContainingText_LineMarks):
     HTML_TAGS = ('<pre>', '</pre>')
 
 
-class PlainTextBlock(langmark.elements._BlockElementContainingRaw_LineMarks):
+class PlainTextBlock(base._BlockElementContainingRaw_LineMarks):
     """
     A block of plain, unescaped text::
 

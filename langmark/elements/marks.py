@@ -17,7 +17,7 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import langmark
+from langmark.elements import Configuration
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -146,10 +146,8 @@ class _InlineMarkFactory:
 
     def _make_parameter_and_end_marks_normal(self, mark):
         parameter_mark = re.compile(self.PARAMETER_MARK_NORMAL.format(
-          escaped_mark=langmark.elements.Configuration.PARAMETER_CHAR * len(
-                                                                        mark),
-          escaped_char=langmark.elements.Configuration.PARAMETER_CHAR),
-          re.MULTILINE)
+          escaped_mark=Configuration.PARAMETER_CHAR * len(mark),
+          escaped_char=Configuration.PARAMETER_CHAR), re.MULTILINE)
         return (parameter_mark, self._make_end_mark_normal(mark))
 
     def _make_end_mark_normal(self, mark):
@@ -162,9 +160,7 @@ class _InlineMarkFactory:
         # len(mark) is checked in _make_end_mark_spaced
         #if len(mark) > 1:
         parameter_mark = re.compile(self.PARAMETER_MARK_SPACED.format(
-          escaped_mark=langmark.elements.Configuration.PARAMETER_CHAR * len(
-                                                                        mark)),
-          re.MULTILINE)
+          escaped_mark=Configuration.PARAMETER_CHAR * len(mark)), re.MULTILINE)
         return (parameter_mark, self._make_end_mark_spaced(mark))
 
     def _make_end_mark_spaced(self, mark):
@@ -178,8 +174,7 @@ class _InlineMarkFactory:
     def check_parameter_mark(self, parsed_text, parameter_mark):
         try:
             return not parameter_mark.group(1)[0] == \
-                        langmark.elements.Configuration.PARAMETER_CHAR[-1] == \
-                        parsed_text[-1]
+                            Configuration.PARAMETER_CHAR[-1] == parsed_text[-1]
         except IndexError:
             # parsed_text may be an empty string
             return True
@@ -201,8 +196,7 @@ class _InlineMarkEscapable(_InlineMarkFactory):
     Base class for inline mark factories.
     """
     def __init__(self, char):
-        _InlineMarkFactory.__init__(self, char, char,
-                                    langmark.elements.Configuration.MARK_LIMIT)
+        _InlineMarkFactory.__init__(self, char, char, Configuration.MARK_LIMIT)
 
 
 class _InlineMarkNonEscapable(_InlineMarkFactory):
@@ -222,4 +216,4 @@ class _InlineMarkEscapableEnd(_InlineMarkFactory):
     """
     def __init__(self, start_char, end_char):
         _InlineMarkFactory.__init__(self, start_char, end_char,
-                                    langmark.elements.Configuration.MARK_LIMIT)
+                                    Configuration.MARK_LIMIT)
