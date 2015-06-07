@@ -25,7 +25,7 @@ class Emphasis(elements._InlineElementContainingInline):
 
         _emphasized_
     """
-    INLINE_MARK = marks._InlineMarkEscapable('_')
+    INLINE_MARK = marks._InlineMarkEscapableSimple('_')
     HTML_TAGS = ('<em>', '</em>')
 
 
@@ -35,7 +35,7 @@ class Strong(elements._InlineElementContainingInline):
 
         *strong*
     """
-    INLINE_MARK = marks._InlineMarkEscapable('*')
+    INLINE_MARK = marks._InlineMarkEscapableSimple('*')
     HTML_TAGS = ('<strong>', '</strong>')
 
 
@@ -45,7 +45,7 @@ class Superscript(elements._InlineElementContainingInline):
 
         ^superscript^
     """
-    INLINE_MARK = marks._InlineMarkEscapable('^')
+    INLINE_MARK = marks._InlineMarkEscapableSimple('^')
     HTML_TAGS = ('<sup>', '</sup>')
 
 
@@ -55,7 +55,7 @@ class Subscript(elements._InlineElementContainingInline):
 
         ;subscript;
     """
-    INLINE_MARK = marks._InlineMarkEscapable(';')
+    INLINE_MARK = marks._InlineMarkEscapableSimple(';')
     HTML_TAGS = ('<sub>', '</sub>')
 
 
@@ -65,7 +65,7 @@ class Small(elements._InlineElementContainingInline):
 
         :small:
     """
-    INLINE_MARK = marks._InlineMarkEscapable(':')
+    INLINE_MARK = marks._InlineMarkEscapableSimple(':')
     HTML_TAGS = ('<small>', '</small>')
 
 
@@ -75,5 +75,5 @@ class Strikethrough(elements._InlineElementContainingInline):
 
         ~strikethrough~
     """
-    INLINE_MARK = marks._InlineMarkEscapable('~')
+    INLINE_MARK = marks._InlineMarkEscapableSimple('~')
     HTML_TAGS = ('<del>', '</del>')

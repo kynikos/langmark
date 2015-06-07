@@ -68,6 +68,13 @@ class _InlineMarkFactory:
     """
     Base class for inline mark factories.
     """
+    pass
+
+
+class _InlineMarkStartParametersEnd(_InlineMarkFactory):
+    """
+    Base class for inline mark factories.
+    """
     PREFIX_TEST = r'(?:(\n)|([ \t]?)|({escaped_char}))\Z'
     SUFFIX_TEST = r'[{escaped_char} \t]'
     POSSIBLE_MARK = r'({escaped_char}{quantifier})(?!{escaped_char}|$)([ \t])?'
@@ -191,15 +198,16 @@ class _InlineMarkFactory:
         return True
 
 
-class _InlineMarkEscapable(_InlineMarkFactory):
+class _InlineMarkEscapableSimple(_InlineMarkStartParametersEnd):
     """
     Base class for inline mark factories.
     """
     def __init__(self, char):
-        _InlineMarkFactory.__init__(self, char, char, Configuration.MARK_LIMIT)
+        _InlineMarkStartParametersEnd.__init__(self, char, char,
+                                               Configuration.MARK_LIMIT)
 
 
-class _InlineMarkNonEscapable(_InlineMarkFactory):
+class _InlineMarkNonEscapableSimple(_InlineMarkStartParametersEnd):
     """
     Base class for inline mark factories.
 
@@ -207,13 +215,13 @@ class _InlineMarkNonEscapable(_InlineMarkFactory):
     character, allow an indefinite number of characters as a mark.
     """
     def __init__(self, char):
-        _InlineMarkFactory.__init__(self, char, char, None)
+        _InlineMarkStartParametersEnd.__init__(self, char, char, None)
 
 
-class _InlineMarkEscapableEnd(_InlineMarkFactory):
+class _InlineMarkEscapableStartEnd(_InlineMarkStartParametersEnd):
     """
     Base class for inline mark factories.
     """
     def __init__(self, start_char, end_char):
-        _InlineMarkFactory.__init__(self, start_char, end_char,
-                                    Configuration.MARK_LIMIT)
+        _InlineMarkStartParametersEnd.__init__(self, start_char, end_char,
+                                               Configuration.MARK_LIMIT)

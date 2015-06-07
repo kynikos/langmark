@@ -25,7 +25,7 @@ class FormattableCode(elements._InlineElementContainingInline):
 
         |code|
     """
-    INLINE_MARK = marks._InlineMarkEscapable('|')
+    INLINE_MARK = marks._InlineMarkEscapableSimple('|')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -35,7 +35,7 @@ class PlainCode(elements._InlineElementContainingHtmlText):
 
         #code#
     """
-    INLINE_MARK = marks._InlineMarkNonEscapable('#')
+    INLINE_MARK = marks._InlineMarkNonEscapableSimple('#')
     HTML_TAGS = ('<code>', '</code>')
 
 
@@ -45,7 +45,7 @@ class PlainText(elements._InlineElementContainingRawText):
 
         \text\
     """
-    INLINE_MARK = marks._InlineMarkNonEscapable('\\')
+    INLINE_MARK = marks._InlineMarkNonEscapableSimple('\\')
     HTML_TAGS = ('<span>', '</span>')
 
 

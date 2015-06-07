@@ -67,7 +67,7 @@ class Link(elements._InlineElementContainingParameters):
         [text|id|url]
         [text|id|url|title]
     """
-    INLINE_MARK = marks._InlineMarkEscapableEnd('[', ']')
+    INLINE_MARK = marks._InlineMarkEscapableStartEnd('[', ']')
     HTML_TAGS = ('<a href="{href}">', '<a href="{href}" title="{title}">',
                  '</a>')
 
