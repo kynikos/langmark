@@ -71,6 +71,14 @@ class _InlineMarkFactory:
     pass
 
 
+class _InlineMarkSelfClosed(_InlineMarkFactory):
+    """
+    Base class for inline mark factories.
+    """
+    def __init__(self, regex):
+        self.start = re.compile(regex)
+
+
 class _InlineMarkStartParametersEnd(_InlineMarkFactory):
     """
     Base class for inline mark factories.

@@ -16,8 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import (metadata, elements, headings, lists, code, formatting,
-                       links)
+from . import (metadata, base, headings, lists, code, formatting, links, html)
 
 # Additional extension modules should insert their meta element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
@@ -44,7 +43,8 @@ BLOCK_ELEMENTS = [elements.HeaderElement,  # HeaderElement uninstalls itself
                   code.FormattableCodeBlock,
                   code.PlainCodeBlock,
                   code.PlainTextBlock,
-                  links.LinkDefinition]
+                  links.LinkDefinition,
+                  html.HTMLBlockTag]
 
 # The order of the inline elements is instead not important
 # Additional extension modules should insert their inline element classes in
@@ -59,7 +59,8 @@ INLINE_ELEMENTS = [formatting.Emphasis,
                    links.Link,
                    code.FormattableCode,
                    code.PlainCode,
-                   code.PlainText]
+                   code.PlainText,
+                   html.HTMLInlineTag]
 
 
 class Langmark:

@@ -391,6 +391,54 @@ Text ** bold **````` bold ** text.
 
 Text <escap&this>.
 
+Text <span>text</span> text.
+Text <span style="display:inline;">text</span> text.
+<span>Text.</span>
+
+<span>
+Text.
+</span>
+
+<span style="display:inline;">
+Text.
+</span>
+
+<div>
+Text.
+</div>
+
+<div style="display:block;">
+Text.
+</div>
+
+* Item text.
+
+  <div>
+  Text.
+  </div>
+
+  Item text.
+
+Text.
+<div>
+Text.
+</div>
+
+<div>
+Text.
+</div>
+Text.
+
+Text.
+<div>
+Text.
+</div>
+Text.
+
+Text.
+<img src="image" />
+Text.
+
 Text.
 
 ==== Title 4b
@@ -421,6 +469,12 @@ Text [linkE|id5] text.
 [id3]: http://www.url3.com
 [id4]: http://www.url4.com "TitleD"
   [id5]:   http://www.url5.com    TitleE
+
+* Item [linkF|id6] text.
+
+  [id6]: http://www.url6.com TitleF
+
+  Item text.
 
 ===== Title *5 _(test)_*
 
