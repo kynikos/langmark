@@ -47,8 +47,8 @@ class BlockMarkSimple(_BlockMarkFactory):
         escaped_char = re.escape(char[0])
         self.start = re.compile(self.START.format(escaped_char=escaped_char))
 
-    def make_end_mark(self, start_mark):
-        return re.compile(re.escape(start_mark) + self.END)
+    def make_end_mark(self, start_match):
+        return re.compile(re.escape(start_match.group(2)) + self.END)
 
 
 class BlockMarkPrefix(_BlockMarkFactory):

@@ -336,7 +336,7 @@ class _BlockElementNotContainingBlock_LineMarksMixin:
         match = self.BLOCK_MARK.start.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
-        self.end_mark = self.BLOCK_MARK.make_end_mark(match.group(2))
+        self.end_mark = self.BLOCK_MARK.make_end_mark(match)
         return (match.group(1), ())
 
     def _parse_initial_lines(self, lines):
