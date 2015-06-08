@@ -10,20 +10,11 @@ Inspiration languages (read their specification):
 Paragraph line1`
 Paragraph line2
 
-Paragraph line1
- Paragraph line2
 
-
- escape/line-break
+ escape
   code
    code
     indented
-
- Space 1 should allow escaping block elements (hence ignored in rendering) if
-the first line of a paragraph; it should represent a line break if a non-first
-line of a paragraph
- Spaces 2/3 should define code blocks
- Space 4 should nest an indented container
 
 
 > quote

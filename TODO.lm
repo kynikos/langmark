@@ -6,10 +6,7 @@
   * Add a permalink next to headings
 * * Isolate the HTML converting code in a proper class, also preparing for
     different converters like Markdown, MediaWiki...
-  * Make HTML escaping smarter? E.g. only escape & and < inside code tags, or
-    recognize HTML tags and entities, and escape the rest; see also what
-    Makrdown does.
-     Note that currently I'm also using < and > to mark links
+  * Do not escape "&" when used in correct HTML entities?
   * Optionally do further HTML escapes (see Wembler's escape.py script)
 * Use class factories to reduce the number of tested regular expressions
   Use a centralized configuration script
