@@ -83,8 +83,9 @@ class _InlineMarkStartParametersEnd(_InlineMarkFactory):
     """
     Base class for inline mark factories.
     """
-    PREFIX_TEST = r'(?:(\n)|([ \t]?)|({escaped_char}))\Z'
-    SUFFIX_TEST = r'[{escaped_char} \t]'
+    PRE_START_TEST = r'(?:(\n)|([ \t]?)|({escaped_char}))\Z'
+    PRE_END_TEST_NORMAL = r'[{escaped_char} \t]'
+    PRE_END_TEST_SPACED = re.compile(r'\n[ \t]*\Z', re.MULTILINE)
     POSSIBLE_MARK = r'({escaped_char}{quantifier})(?!{escaped_char}|$)([ \t])?'
     # All parameter marks should have the same capturing groups
     PARAMETER_MARK_NORMAL = r'({escaped_mark})(?!{escaped_char})'
@@ -106,10 +107,11 @@ class _InlineMarkStartParametersEnd(_InlineMarkFactory):
         self.start = re.compile(self.POSSIBLE_MARK.format(
                 escaped_char=self.escaped_start_char, quantifier=quantifier),
                 re.MULTILINE)
-        self.prefix_test = re.compile(self.PREFIX_TEST.format(
+        self.pre_start_test = re.compile(self.PRE_START_TEST.format(
                         escaped_char=self.escaped_start_char), re.MULTILINE)
-        self.suffix_test = re.compile(self.SUFFIX_TEST.format(
-                        escaped_char=self.escaped_end_char), re.MULTILINE)
+        self.pre_end_test_normal = re.compile(self.PRE_END_TEST_NORMAL.format(
+                            escaped_char=self.escaped_end_char), re.MULTILINE)
+        self.pre_end_test_spaced = self.PRE_END_TEST_SPACED
 
     def make_parameter_and_end_marks(self, parsed_text, start_mark,
                                      is_element_start):
@@ -126,8 +128,8 @@ class _InlineMarkStartParametersEnd(_InlineMarkFactory):
         # Yes, most of this could be done directly in the regular expression,
         #  but good luck with that... Also remember that Python's standard re
         #  module doesn't support variable-length look-behind...
-        line_start, pre_space, pre_char = self.prefix_test.search(parsed_text
-                                                                    ).groups()
+        line_start, pre_space, pre_char = self.pre_start_test.search(
+                                                        parsed_text).groups()
         if pre_char is not None:
             raise _InlineElementStartNotMatched()
 
@@ -201,8 +203,10 @@ class _InlineMarkStartParametersEnd(_InlineMarkFactory):
             except IndexError:
                 pass
             else:
-                if self.suffix_test.fullmatch(pre_char):
+                if self.pre_end_test_normal.fullmatch(pre_char):
                     return False
+        elif self.pre_end_test_spaced.search(parsed_text):
+            return False
         return True
 
 

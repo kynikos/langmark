@@ -397,7 +397,8 @@ class _BlockElementNotContainingBlock(_BlockElement):
                         self._parse_inline()
                         raise _BlockElementEndNotConsumed(*lines[lN:])
                 except TypeError:
-                    self.indentation_content = indentation
+                    self.indentation_content = min(indentation,
+                                                   self.indentation_external)
                 indented_lines.append(line[self.indentation_content:])
         return indented_lines
 
