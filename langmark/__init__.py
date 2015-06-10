@@ -93,5 +93,5 @@ class Langmark:
         self.stream = base.Stream(stream)
         for Meta in META_ELEMENTS:
             setattr(self, Meta.ATTRIBUTE_NAME, Meta(self))
-        self.etree = elements.Root(self)
+        self.etree = elements.Root(self, None)
         self.etree.parse_tree()

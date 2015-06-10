@@ -32,12 +32,12 @@ class _Element:
     """
     Base class for document elements.
     """
-    def __init__(self, langmark):
+    def __init__(self, langmark, parent):
         self.langmark = langmark
-        self.parent = None
+        self.parent = parent
         self.children = []
 
-    def set_parent(self, element):
+    def reset_parent(self, element):
         self.parent = element
 
     def _rewind_check_lines_buffer(self):
@@ -66,7 +66,7 @@ class _MetaDataElement(_Element):
     #       lines)
     METADATA = None
 
-    def __init__(self, langmark):
+    def __init__(self, langmark, parent):
         try:
             line = langmark.stream.read_next_lines_buffered(1)[0]
         except StopIteration:
@@ -76,7 +76,7 @@ class _MetaDataElement(_Element):
             #  instantiated
             raise _EndOfFile()
         else:
-            _Element.__init__(self, langmark)
+            _Element.__init__(self, langmark, parent)
             self.process_match(self.METADATA.fullmatch(line))
 
     def process_match(self, match):
@@ -123,7 +123,7 @@ class _BlockElement(_Element):
     HTML_BREAK = '\n'
     HTML_TAGS = ('<div>', '</div>')
 
-    def __init__(self, langmark):
+    def __init__(self, langmark, parent):
         try:
             lines = langmark.stream.read_next_lines_buffered(
                                                         self.TEST_START_LINES)
@@ -134,7 +134,7 @@ class _BlockElement(_Element):
             #  instantiated
             raise _EndOfFile()
         else:
-            _Element.__init__(self, langmark)
+            _Element.__init__(self, langmark, parent)
             indentation_external, indentation_internal, initial_lines = \
                                                 self._parse_indentation(lines)
             self.indentation_external = self._compute_equivalent_indentation(
@@ -158,7 +158,7 @@ class _BlockElement(_Element):
             try:
                 for Element in self.INSTALLED_BLOCK_ELEMENTS:
                     try:
-                        return Element(self.langmark)
+                        return Element(self.langmark, self)
                     except (_BlockElementStartNotMatched, _EndOfFile):
                         self._rewind_check_lines_buffer()
                         continue
@@ -196,7 +196,7 @@ class _BlockElementContainingBlock(_BlockElement):
                 # find_element_start must return False also when the text
                 #  would be a Paragraph, so paragraphs (the catch-all elements)
                 #  must be created here
-                element = Paragraph(self.langmark)
+                element = Paragraph(self.langmark, self)
             except _BlockElementStartNotMatched:
                 # Just discard the consumed lines if really nothing wants them
                 self.parse_next_line()
@@ -222,7 +222,7 @@ class _BlockElementContainingBlock(_BlockElement):
                 return
 
     def _add_child(self, element):
-        element.set_parent(self)
+        element.reset_parent(self)
         # _BlockElementContainingBlock_Prefix_Grouped relies on set_parent to
         #  be called *before* appending the element
         self.children.append(element)
@@ -295,13 +295,13 @@ class _BlockElementContainingBlock_Prefix_Grouped(
     #       super calls
     HTML_OUTER_TAGS = None
 
-    def __init__(self, langmark):
-        _BlockElementContainingBlock_Prefix.__init__(self, langmark)
+    def __init__(self, langmark, parent):
+        _BlockElementContainingBlock_Prefix.__init__(self, langmark, parent)
         self.group_item_number = 0
         self.group_item_last = True
 
-    def set_parent(self, element):
-        super(_BlockElementContainingBlock_Prefix_Grouped, self).set_parent(
+    def reset_parent(self, element):
+        super(_BlockElementContainingBlock_Prefix_Grouped, self).reset_parent(
                                                                     element)
         try:
             previous = element.children[-1]
@@ -351,10 +351,10 @@ class _BlockElementNotContainingBlock(_BlockElement):
     """
     Base class for elements not containing block elements.
     """
-    def __init__(self, langmark):
+    def __init__(self, langmark, parent):
         self.rawtext = RawText('')
         self.indentation_content = None
-        _BlockElement.__init__(self, langmark)
+        _BlockElement.__init__(self, langmark, parent)
 
     def _parse_indentation(self, lines):
         indentation, initial_lines = self.check_element_start(lines)
@@ -571,8 +571,7 @@ class _InlineElement(_Element):
         if self.ENABLE_ESCAPE:
             self.inline_bindings[Configuration.ESCAPE_RE] = \
                                                     self._handle_inline_escape
-        _Element.__init__(self, langmark)
-        self.set_parent(parent)
+        _Element.__init__(self, langmark, parent)
 
     def install_bindings(self, parsed_text, start_mark, is_element_start):
         raise NotImplementedError()
@@ -697,8 +696,7 @@ class _Parameter(_Element):
     A parameter element.
     """
     def __init__(self, langmark, parent, children):
-        _Element.__init__(self, langmark)
-        self.set_parent(parent)
+        _Element.__init__(self, langmark, parent)
         self.children[:] = children
 
     def get_raw_text(self):

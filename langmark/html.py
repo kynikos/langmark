@@ -46,8 +46,7 @@ class HTMLInlineTag(elements._Element):
 
     def __init__(self, langmark, parent, inline_parser, parsed_text,
                  start_mark, is_element_start):
-        elements._Element.__init__(self, langmark)
-        self.set_parent(parent)
+        elements._Element.__init__(self, langmark, parent)
         self.children.append(RawText(start_mark.group()))
         self.parent.take_inline_control()
 
