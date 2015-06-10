@@ -7,14 +7,14 @@ Inspiration languages (read their specification):
 * MediaWiki
 
 
-Paragraph line1`
-Paragraph line2
-
-
  escape
   code
    code
     indented
+
+
+Paragraph line1`
+Paragraph line2
 
 
 > quote
