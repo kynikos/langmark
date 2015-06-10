@@ -221,13 +221,15 @@ class _BlockElementContainingBlock(_BlockElement):
         self.children.append(element)
 
     def convert_to_html(self):
+        html = self.HTML_BREAK.join(child.convert_to_html()
+                                    for child in self.children)
         if len(self.children) > 1:
             # TODO: Re-add the indentation before the tags
-            return self.HTML_BREAK.join((self.HTML_TAGS[0],
-                            self.HTML_BREAK.join(child.convert_to_html()
-                            for child in self.children), self.HTML_TAGS[1]))
+            return self.HTML_BREAK.join((self.HTML_TAGS[0], html,
+                                         self.HTML_TAGS[1]))
         else:
-            return self.children[0].convert_to_html().join(self.HTML_TAGS)
+            # self.children should never be empty, but still support the case
+            return html.join(self.HTML_TAGS)
 
 
 class Root(_BlockElementContainingBlock):
