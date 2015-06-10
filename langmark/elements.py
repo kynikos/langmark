@@ -135,12 +135,8 @@ class _BlockElement(_Element):
             raise _EndOfFile()
         else:
             _Element.__init__(self, langmark, parent)
-            indentation_external, indentation_internal, initial_lines = \
-                                                self._parse_indentation(lines)
-            self.indentation_external = self._compute_equivalent_indentation(
-                                                        indentation_external)
-            self.indentation_internal = self.indentation_external + \
-                    self._compute_equivalent_indentation(indentation_internal)
+            self.indentation_external, self.indentation_internal, \
+                                initial_lines = self._parse_indentation(lines)
             self._parse_initial_lines(initial_lines)
 
     def _compute_equivalent_indentation(self, line):
@@ -184,10 +180,7 @@ class _BlockElementContainingBlock(_BlockElement):
     Base class for elements containing block elements.
     """
     def _parse_initial_lines(self, lines):
-        self.rewind_lines(*self._adapt_initial_lines(lines))
-
-    def _adapt_initial_lines(self, lines):
-        raise NotImplementedError()
+        self.rewind_lines(*lines)
 
     def parse_next_line(self):
         element = self.find_element_start()
@@ -253,10 +246,7 @@ class Root(_BlockElementContainingBlock):
             pass
 
     def _parse_indentation(self, lines):
-        return ('', '', lines)
-
-    def _adapt_initial_lines(self, lines):
-        return lines
+        return (0, 0, lines)
 
     def convert_to_html(self):
         return self.HTML_BREAK.join(child.convert_to_html()
@@ -277,12 +267,14 @@ class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
         match = self.BLOCK_MARK.prefix.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
-        return (match.group(1), match.group(2), (match.group(3), ))
-
-    def _adapt_initial_lines(self, lines):
+        external_indentation = self._compute_equivalent_indentation(
+                                                                match.group(1))
+        internal_indentation = external_indentation + \
+                        self._compute_equivalent_indentation(match.group(2))
         # Remove the prefix, otherwise the same block will be parsed
         #  recursively endlessly
-        return (''.join((' ' * self.indentation_internal, lines[0])), )
+        adapted_line = ''.join((' ' * internal_indentation, match.group(3)))
+        return (external_indentation, internal_indentation, (adapted_line, ))
 
 
 class _BlockElementContainingBlock_Prefix_Grouped(
@@ -357,8 +349,9 @@ class _BlockElementNotContainingBlock(_BlockElement):
         _BlockElement.__init__(self, langmark, parent)
 
     def _parse_indentation(self, lines):
-        indentation, initial_lines = self.check_element_start(lines)
-        return (indentation, '', initial_lines)
+        indentationtext, initial_lines = self.check_element_start(lines)
+        indentation = self._compute_equivalent_indentation(indentationtext)
+        return (indentation, indentation, initial_lines)
 
     def _add_raw_first_line(self, line):
         self.rawtext.append(line[self.indentation_external:])
