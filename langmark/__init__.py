@@ -44,7 +44,12 @@ BLOCK_ELEMENTS = [elements.HeaderElement,  # HeaderElement uninstalls itself
                   code.PlainCodeBlock,
                   code.PlainTextBlock,
                   links.LinkDefinition,
-                  html.HTMLBlockTag]
+                  html.HTMLBlockTag,
+                  elements.IndentedContainer]  # It's important that
+                                               #  IndentedContainer comes
+                                               #  *after* the elements that
+                                               #  want to ignore indentation,
+                                               #  for example LinkDefinition
 
 # The order of the inline elements is instead not important
 # Additional extension modules should insert their inline element classes in

@@ -255,6 +255,24 @@ class Root(_BlockElementContainingBlock):
                                     for child in self.children)
 
 
+class IndentedContainer(_BlockElementContainingBlock):
+    """
+    An indented block container.
+    """
+    TEST_START_LINES = 1
+    HTML_TAGS = ('<div class="langmark-indented">', '</div>')
+
+    def _parse_indentation(self, lines):
+        line = lines[0]
+        if Configuration.BLANK_LINE.fullmatch(line):
+            raise _BlockElementStartNotMatched()
+        indentationtext = Configuration.INDENTATION.match(line).group()
+        indentation = self._compute_equivalent_indentation(indentationtext)
+        if indentation - 3 <= self.parent.indentation_internal:
+            raise _BlockElementStartNotMatched()
+        return (self.parent.indentation_internal, indentation, lines)
+
+
 class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
     """
     Base class for block elements identified by a prefix.

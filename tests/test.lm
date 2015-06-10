@@ -161,6 +161,59 @@ Title 1d
 ========
 Text.
 
+Text.
+   Not indented text.
+
+Text.
+    Indented text.
+
+Text.
+    Indented text.
+    Indented text.
+
+Text.
+
+   Not indented text.
+
+Text.
+
+    Indented text.
+
+Text.
+
+    Indented text.
+    Indented text.
+
+Text.
+    Indented text.
+        Double indented text.
+
+Text.
+
+    Indented text.
+
+        Double indented text.
+
+Text.
+
+    Indented text.
+
+    ###
+    code
+    ###
+
+        Double indented text.
+
+        * item 1
+        * item 2
+        blabla
+
+        * item 3
+
+    Some more indented text.
+
+Text.
+
 === Title 3
 
 Aaa _bbb_ ccc.
