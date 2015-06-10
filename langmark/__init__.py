@@ -30,7 +30,7 @@ META_ELEMENTS = [metadata.Header,
 #  list below; they must thus be imported *after* importing langmark, but
 #  *before* instantiating the Langmark class
 BLOCK_ELEMENTS = [elements.HeaderElement,  # HeaderElement uninstalls itself
-                                       #  after the first non-match
+                                           #  after the first non-match
                   headings.Heading1,
                   headings.Heading2,
                   headings.Heading3,
