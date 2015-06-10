@@ -149,6 +149,20 @@ class _BlockElement(_Element):
         indent += len(split[-1])
         return indent
 
+    def _trim_equivalent_indentation(self, indentation, line):
+        # TODO: Move to external library
+        current_indentation = 0
+        for char in line:
+            if char == '\t':
+                rem = current_indentation % Configuration.TAB_LENGTH
+                current_indentation += Configuration.TAB_LENGTH - rem
+            else:
+                current_indentation += 1
+            if current_indentation >= indentation:
+                return ' ' * (current_indentation - indentation - 1) + line[
+                                                                indentation:]
+        return line
+
     def find_element_start(self):
         while True:
             try:
@@ -374,7 +388,8 @@ class _BlockElementNotContainingBlock(_BlockElement):
         return (indentation, indentation, initial_lines)
 
     def _add_raw_first_line(self, line):
-        self.rawtext.append(line[self.indentation_external:])
+        self.rawtext.append(self._trim_equivalent_indentation(
+                                            self.indentation_external, line))
 
     def _read_indented_test_end_lines(self, ignore_blank_lines):
         try:
@@ -400,8 +415,8 @@ class _BlockElementNotContainingBlock(_BlockElement):
                 # Never strip the line break from blank lines
                 # If self.indentation_content hasn't been set yet, it behaves
                 #  like 0 in string slicing
-                indented_lines.append(line[self.indentation_content:-1] +
-                                      line[-1])
+                indented_lines.append(self._trim_equivalent_indentation(
+                            self.indentation_content, line[:-1]) + line[-1])
             else:
                 indentation = self._compute_equivalent_indentation(
                                 Configuration.INDENTATION.match(line).group())
@@ -412,7 +427,8 @@ class _BlockElementNotContainingBlock(_BlockElement):
                 except TypeError:
                     self.indentation_content = min(indentation,
                                                    self.indentation_external)
-                indented_lines.append(line[self.indentation_content:])
+                indented_lines.append(self._trim_equivalent_indentation(
+                                            self.indentation_content, line))
         return indented_lines
 
     def _add_raw_content_lines(self, lines):
