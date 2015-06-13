@@ -16,7 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import (metadata, base, headings, lists, code, formatting, links, html)
+from . import (metadata, base, factories, elements, headings, lists, code,
+               formatting, links, html)
 
 # Additional extension modules should insert their meta element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
@@ -24,32 +25,26 @@ from . import (metadata, base, headings, lists, code, formatting, links, html)
 META_ELEMENTS = [metadata.Header,
                  links.LinksData]
 
-# The order of the block elements is important: put the most likey elements
-#  first; some elements may rely on the fact that others have been discarded
-# Additional extension modules should insert their block element classes in the
-#  list below; they must thus be imported *after* importing langmark, but
-#  *before* instantiating the Langmark class
-BLOCK_ELEMENTS = [elements.HeaderElement,  # HeaderElement uninstalls itself
-                                           #  after the first non-match
-                  headings.Heading1,
-                  headings.Heading2,
-                  headings.Heading3,
-                  headings.Heading4,
-                  headings.Heading5,
-                  headings.Heading6,
-                  lists.UnorderedListItem,
-                  lists.NumberedListItem,
-                  lists.LatinListItem,
-                  code.FormattableCodeBlock,
-                  code.PlainCodeBlock,
-                  code.PlainTextBlock,
-                  links.LinkDefinition,
-                  html.HTMLBlockTag,
-                  elements.IndentedContainer]  # It's important that
-                                               #  IndentedContainer comes
-                                               #  *after* the elements that
-                                               #  want to ignore indentation,
-                                               #  for example LinkDefinition
+# The order of the block element factories is important: put the most likey
+#  elements first; some elements may rely on the fact that others have been
+#  discarded
+# Additional extension modules should insert their block-element factory
+#  classes in the list below; they must thus be imported *after* importing
+#  langmark, but *before* instantiating the Langmark class
+BLOCK_FACTORIES = [factories.HeaderElements(),  # HeaderElements uninstalls
+                                                #  itself after the first
+                                                #  non-match
+                   headings.HeadingElements(),
+                   lists.ListElements(),
+                   code.CodeElements(),
+                   links.LinkDefinitions(),
+                   html.HTMLElements(),
+                   factories.IndentedElements()]  # It's important that
+                                                  #  IndentedElements comes
+                                                  #  *after* the elements that
+                                                  #  want to ignore
+                                                  #  indentation, for example
+                                                  #  LinkDefinition
 
 # The order of the inline elements is instead not important
 # Additional extension modules should insert their inline element classes in
@@ -72,7 +67,8 @@ class Langmark:
     def __init__(self):
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
-        elements._BlockElement.INSTALLED_BLOCK_ELEMENTS = BLOCK_ELEMENTS
+        elements._BlockElement.INSTALLED_BLOCK_FACTORIES = BLOCK_FACTORIES
+        self.paragraph_factory = factories.ParagraphFactory()
         self._install_inline_elements()
 
     def _install_inline_elements(self):
@@ -98,5 +94,5 @@ class Langmark:
         self.stream = base.Stream(stream)
         for Meta in META_ELEMENTS:
             setattr(self, Meta.ATTRIBUTE_NAME, Meta(self))
-        self.etree = elements.Root(self, None)
+        self.etree = elements.Root(self)
         self.etree.parse_tree()

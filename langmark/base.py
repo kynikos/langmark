@@ -18,6 +18,13 @@
 
 import re
 import itertools
+from .exceptions import (_BlockElementStartNotMatched,
+                         _BlockElementStartConsumed,
+                         _BlockElementStartMatched,
+                         _BlockElementEndConsumed,
+                         _BlockElementEndNotConsumed,
+                         _InlineElementStartNotMatched,
+                         _EndOfFile)
 
 
 class Configuration:
@@ -65,6 +72,9 @@ class Stream:
     def rewind_lines(self, *lines):
         self.stream = itertools.chain(lines, self.stream)
 
+    def rewind_buffer(self):
+        self.rewind_lines(*self.lines_buffer)
+
 
 class RawText:
     def __init__(self, text):
@@ -81,3 +91,29 @@ class RawText:
         text = self.text.replace('&', '&amp;')
         text = text.replace('<', '&lt;')
         return text
+
+    @staticmethod
+    def compute_equivalent_indentation(line):
+        # TODO: Move to external library
+        split = line.split('\t')
+        indent = 0
+        for chunk in split[:-1]:
+            indent += len(chunk) // Configuration.TAB_LENGTH + 1
+        indent *= Configuration.TAB_LENGTH
+        indent += len(split[-1])
+        return indent
+
+    @staticmethod
+    def trim_equivalent_indentation(indentation, line):
+        # TODO: Move to external library
+        current_indentation = 0
+        for char in line:
+            if char == '\t':
+                rem = current_indentation % Configuration.TAB_LENGTH
+                current_indentation += Configuration.TAB_LENGTH - rem
+            else:
+                current_indentation += 1
+            if current_indentation >= indentation:
+                return ' ' * (current_indentation - indentation - 1) + line[
+                                                                indentation:]
+        return line

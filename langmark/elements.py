@@ -18,7 +18,8 @@
 
 import re
 import textparser
-from .base import (Configuration, RawText)
+from .base import Configuration, RawText
+from .factories import _ElementFactory, _MetaDataElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -40,9 +41,6 @@ class _Element:
     def reset_parent(self, element):
         self.parent = element
 
-    def _rewind_check_lines_buffer(self):
-        self.rewind_lines(*self.langmark.stream.lines_buffer)
-
     def rewind_lines(self, *lines):
         self.langmark.stream.rewind_lines(*lines)
 
@@ -58,131 +56,36 @@ class _Element:
         raise NotImplementedError()
 
 
-class _MetaDataElement(_Element):
-    """
-    Base class for metadata elements.
-    """
-    # TODO: Support multiline metadata (using indentation for the continuation
-    #       lines)
-    METADATA = None
-
-    def __init__(self, langmark, parent):
-        try:
-            line = langmark.stream.read_next_lines_buffered(1)[0]
-        except StopIteration:
-            # Re-raise the exception, but keep this to keep track of where it
-            #  comes from
-            # Don't just process it here because the element doesn't have to be
-            #  instantiated
-            raise _EndOfFile()
-        else:
-            _Element.__init__(self, langmark, parent)
-            self.process_match(self.METADATA.fullmatch(line))
-
-    def process_match(self, match):
-        raise NotImplementedError()
-
-
-class HeaderElement(_MetaDataElement):
-    """
-    A generic key/value metadata element::
-
-        ::key value
-
-    Spaces between ``::`` and the key are ignored.
-    The key cannot contain spaces.
-    A value string is optional and is considered to start after the first
-    sequence of spaces after the key string.
-    """
-    METADATA = re.compile(r'^\:\:[ \t]*(.+?)(?:[ \t]+(.+?))?[ \t]*\n')
-
-    def process_match(self, match):
-        if match:
-            self.langmark.header.keys[match.group(1)] = match.group(2)
-        else:
-            # This is changing the size of INSTALLED_BLOCK_ELEMENTS, so I can't
-            #  raise _BlockElementStartNotMatched after it, because that would
-            #  simply continue the for loop in
-            #  _BlockElement.find_element_start, which would hence skip the
-            #  next element in the list
-            # Installing this class at the top of INSTALLED_BLOCK_ELEMENTS
-            #  makes this as efficient as continuing the loop, since no other
-            #  elements are uselessly tested
-            _BlockElement.INSTALLED_BLOCK_ELEMENTS.remove(self.__class__)
-            self._rewind_check_lines_buffer()
-        raise _BlockElementStartConsumed()
-
-
 class _BlockElement(_Element):
     """
     Base class for block elements.
     """
-    INSTALLED_BLOCK_ELEMENTS = None
-    TEST_START_LINES = None
+    INSTALLED_BLOCK_FACTORIES = None
     TEST_END_LINES = None
     HTML_BREAK = '\n'
     HTML_TAGS = ('<div>', '</div>')
 
-    def __init__(self, langmark, parent):
-        try:
-            lines = langmark.stream.read_next_lines_buffered(
-                                                        self.TEST_START_LINES)
-        except StopIteration:
-            # Re-raise the exception, but keep this to keep track of where it
-            #  comes from
-            # Don't just process it here because the element doesn't have to be
-            #  instantiated
-            raise _EndOfFile()
-        else:
-            _Element.__init__(self, langmark, parent)
-            self.indentation_external, self.indentation_internal, \
-                                initial_lines = self._parse_indentation(lines)
-            self._parse_initial_lines(initial_lines)
-
-    def _compute_equivalent_indentation(self, line):
-        # TODO: Move to external library
-        split = line.split('\t')
-        indent = 0
-        for chunk in split[:-1]:
-            indent += len(chunk) // Configuration.TAB_LENGTH + 1
-        indent *= Configuration.TAB_LENGTH
-        indent += len(split[-1])
-        return indent
-
-    def _trim_equivalent_indentation(self, indentation, line):
-        # TODO: Move to external library
-        current_indentation = 0
-        for char in line:
-            if char == '\t':
-                rem = current_indentation % Configuration.TAB_LENGTH
-                current_indentation += Configuration.TAB_LENGTH - rem
-            else:
-                current_indentation += 1
-            if current_indentation >= indentation:
-                return ' ' * (current_indentation - indentation - 1) + line[
-                                                                indentation:]
-        return line
+    def __init__(self, langmark, parent, indentation_external,
+                 indentation_internal, initial_lines):
+        _Element.__init__(self, langmark, parent)
+        self.indentation_external = indentation_external
+        self.indentation_internal = indentation_internal
+        self._process_initial_lines(initial_lines)
 
     def find_element_start(self):
         while True:
             try:
-                for Element in self.INSTALLED_BLOCK_ELEMENTS:
-                    try:
-                        return Element(self.langmark, self)
-                    except (_BlockElementStartNotMatched, _EndOfFile):
-                        self._rewind_check_lines_buffer()
-                        continue
-                return False
+                for factory in self.INSTALLED_BLOCK_FACTORIES:
+                    # Note how factory.make_element returns the element
+                    #  by raising _BlockElementStartMatched
+                    factory.make_element(self.langmark, self)
             except _BlockElementStartConsumed:
                 # Restart the for loop from the beginning
                 continue
             else:
                 return False
 
-    def _parse_indentation(self, lines):
-        raise NotImplementedError()
-
-    def _parse_initial_lines(self, lines):
+    def _process_initial_lines(self, lines):
         raise NotImplementedError()
 
     def parse_next_line(self):
@@ -193,17 +96,21 @@ class _BlockElementContainingBlock(_BlockElement):
     """
     Base class for elements containing block elements.
     """
-    def _parse_initial_lines(self, lines):
+    def _process_initial_lines(self, lines):
         self.rewind_lines(*lines)
 
     def parse_next_line(self):
-        element = self.find_element_start()
-        if not element:
+        try:
+            self.find_element_start()
+        except _BlockElementStartMatched as exc:
+            element = exc.element
+        else:
+            # find_element_start must *not* raise _BlockElementStartMatched
+            #  also when the text would be a Paragraph, so paragraphs (the
+            #  catch-all elements) must be created here
             try:
-                # find_element_start must return False also when the text
-                #  would be a Paragraph, so paragraphs (the catch-all elements)
-                #  must be created here
-                element = Paragraph(self.langmark, self)
+                element = self.langmark.paragraph_factory.make_element(
+                                                        self.langmark, self)
             except _BlockElementStartNotMatched:
                 # Just discard the consumed lines if really nothing wants them
                 self.parse_next_line()
@@ -230,7 +137,7 @@ class _BlockElementContainingBlock(_BlockElement):
 
     def _add_child(self, element):
         element.reset_parent(self)
-        # _BlockElementContainingBlock_Prefix_Grouped relies on set_parent to
+        # _BlockElementContainingBlock_PrefixGrouped relies on reset_parent to
         #  be called *before* appending the element
         self.children.append(element)
 
@@ -253,16 +160,16 @@ class Root(_BlockElementContainingBlock):
     The first section can start immediately after the header, or be separated
     by no more than one empty line.
     """
-    TEST_START_LINES = 1
+    def __init__(self, langmark):
+        _BlockElementContainingBlock.__init__(self, langmark, None, 0, 0, ())
 
     def parse_tree(self):
         try:
             self.parse_next_line()
         except _EndOfFile:
+            # _EndOfFile can be raised (and left uncaught) by Paragraph, for
+            #  example if a document ends with a metadata element
             pass
-
-    def _parse_indentation(self, lines):
-        return (0, 0, lines)
 
     def convert_to_html(self):
         return self.HTML_BREAK.join(child.convert_to_html()
@@ -273,46 +180,10 @@ class IndentedContainer(_BlockElementContainingBlock):
     """
     An indented block container.
     """
-    TEST_START_LINES = 1
     HTML_TAGS = ('<div class="langmark-indented">', '</div>')
 
-    def _parse_indentation(self, lines):
-        line = lines[0]
-        if Configuration.BLANK_LINE.fullmatch(line):
-            raise _BlockElementStartNotMatched()
-        indentationtext = Configuration.INDENTATION.match(line).group()
-        indentation = self._compute_equivalent_indentation(indentationtext)
-        if indentation - 3 <= self.parent.indentation_internal:
-            raise _BlockElementStartNotMatched()
-        return (self.parent.indentation_internal, indentation, lines)
 
-
-class _BlockElementContainingBlock_Prefix(_BlockElementContainingBlock):
-    """
-    Base class for block elements identified by a prefix.
-
-    START_MARK's first capturing group will be used as the first line of
-    content.`
-    """
-    TEST_START_LINES = 1
-    BLOCK_MARK = None
-
-    def _parse_indentation(self, lines):
-        match = self.BLOCK_MARK.prefix.fullmatch(lines[0])
-        if not match:
-            raise _BlockElementStartNotMatched()
-        external_indentation = self._compute_equivalent_indentation(
-                                                                match.group(1))
-        internal_indentation = external_indentation + \
-                        self._compute_equivalent_indentation(match.group(2))
-        # Remove the prefix, otherwise the same block will be parsed
-        #  recursively endlessly
-        adapted_line = ''.join((' ' * internal_indentation, match.group(3)))
-        return (external_indentation, internal_indentation, (adapted_line, ))
-
-
-class _BlockElementContainingBlock_Prefix_Grouped(
-                                        _BlockElementContainingBlock_Prefix):
+class _BlockElementContainingBlock_PrefixGrouped(_BlockElementContainingBlock):
     """
     Base class for block elements identified by a prefix that must be grouped
     inside an additional HTML element.
@@ -321,13 +192,13 @@ class _BlockElementContainingBlock_Prefix_Grouped(
     #       super calls
     HTML_OUTER_TAGS = None
 
-    def __init__(self, langmark, parent):
-        _BlockElementContainingBlock_Prefix.__init__(self, langmark, parent)
+    def __init__(self, *args, **kwargs):
+        _BlockElementContainingBlock.__init__(self, *args, **kwargs)
         self.group_item_number = 0
         self.group_item_last = True
 
     def reset_parent(self, element):
-        super(_BlockElementContainingBlock_Prefix_Grouped, self).reset_parent(
+        super(_BlockElementContainingBlock_PrefixGrouped, self).reset_parent(
                                                                     element)
         try:
             previous = element.children[-1]
@@ -340,7 +211,7 @@ class _BlockElementContainingBlock_Prefix_Grouped(
                 previous.group_item_last = False
 
     def convert_to_html(self):
-        html = super(_BlockElementContainingBlock_Prefix_Grouped,
+        html = super(_BlockElementContainingBlock_PrefixGrouped,
                      self).convert_to_html()
         if self.group_item_number == 0:
             html = self.HTML_BREAK.join((self.HTML_OUTER_TAGS[0], html))
@@ -354,18 +225,12 @@ class _BlockElementNotContainingBlock_LineMarksMixin:
     A block element, containing inline elements, that starts and ends with
     full-line marks.
     """
-    TEST_START_LINES = 1
     TEST_END_LINES = 1
-    BLOCK_MARK = None
 
-    def check_element_start(self, lines):
-        match = self.BLOCK_MARK.start.fullmatch(lines[0])
-        if not match:
-            raise _BlockElementStartNotMatched()
-        self.end_mark = self.BLOCK_MARK.make_end_mark(match)
-        return (match.group(1), ())
+    def set_end_mark(self, mark):
+        self.end_mark = mark
 
-    def _parse_initial_lines(self, lines):
+    def _process_initial_lines(self, lines):
         pass
 
     def check_element_end(self, lines):
@@ -377,18 +242,13 @@ class _BlockElementNotContainingBlock(_BlockElement):
     """
     Base class for elements not containing block elements.
     """
-    def __init__(self, langmark, parent):
+    def __init__(self, *args, **kwargs):
         self.rawtext = RawText('')
         self.indentation_content = None
-        _BlockElement.__init__(self, langmark, parent)
-
-    def _parse_indentation(self, lines):
-        indentationtext, initial_lines = self.check_element_start(lines)
-        indentation = self._compute_equivalent_indentation(indentationtext)
-        return (indentation, indentation, initial_lines)
+        _BlockElement.__init__(self, *args, **kwargs)
 
     def _add_raw_first_line(self, line):
-        self.rawtext.append(self._trim_equivalent_indentation(
+        self.rawtext.append(RawText.trim_equivalent_indentation(
                                             self.indentation_external, line))
 
     def _read_indented_test_end_lines(self, ignore_blank_lines):
@@ -415,10 +275,10 @@ class _BlockElementNotContainingBlock(_BlockElement):
                 # Never strip the line break from blank lines
                 # If self.indentation_content hasn't been set yet, it behaves
                 #  like 0 in string slicing
-                indented_lines.append(self._trim_equivalent_indentation(
+                indented_lines.append(RawText.trim_equivalent_indentation(
                             self.indentation_content, line[:-1]) + line[-1])
             else:
-                indentation = self._compute_equivalent_indentation(
+                indentation = RawText.compute_equivalent_indentation(
                                 Configuration.INDENTATION.match(line).group())
                 try:
                     if indentation < self.indentation_content:
@@ -427,15 +287,12 @@ class _BlockElementNotContainingBlock(_BlockElement):
                 except TypeError:
                     self.indentation_content = min(indentation,
                                                    self.indentation_external)
-                indented_lines.append(self._trim_equivalent_indentation(
+                indented_lines.append(RawText.trim_equivalent_indentation(
                                             self.indentation_content, line))
         return indented_lines
 
     def _add_raw_content_lines(self, lines):
         self.rawtext.append(''.join(lines))
-
-    def check_element_start(self, lines):
-        raise NotImplementedError()
 
     def check_element_end(self, lines):
         raise NotImplementedError()
@@ -465,28 +322,23 @@ class Paragraph(_BlockElementContainingInline_Meta):
     empty lines are found, all except the last one are considered part of the
     content.
     """
-    TEST_START_LINES = 1
     TEST_END_LINES = 1
     HTML_TAGS = ('<p>', '</p>')
 
-    def check_element_start(self, lines):
-        line = lines[0]
-        if Configuration.BLANK_LINE.fullmatch(line):
-            raise _BlockElementStartNotMatched()
-        indentation = Configuration.INDENTATION.match(line).group()
-        return (indentation, lines)
-
-    def _parse_initial_lines(self, lines):
+    def _process_initial_lines(self, lines):
         self._add_raw_first_line(lines[0])
 
     def parse_next_line(self):
-        element = self.find_element_start()
-        if element:
+        try:
+            self.find_element_start()
+        except _BlockElementStartMatched:
             self._parse_inline()
-            raise _BlockElementStartMatched(element)
-        lines = self._read_indented_test_end_lines(ignore_blank_lines=False)
-        self._add_raw_content_lines(lines)
-        self.parse_next_line()
+            raise
+        else:
+            lines = self._read_indented_test_end_lines(
+                                                    ignore_blank_lines=False)
+            self._add_raw_content_lines(lines)
+            self.parse_next_line()
 
     # If an inline mark has overlapping matches with an inline mark, **which
     #  should never happen by design**, it's impossible to only escape the

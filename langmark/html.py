@@ -19,6 +19,7 @@
 import re
 from . import (marks, elements)
 from .base import RawText
+from .factories import _ElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -85,22 +86,16 @@ class HTMLBlockTag(elements._BlockElementContainingInline):
         <tag attribute="value" />
     """
     # TODO: Instantiate only for actual HTML block elements (no inline/span)
-    TEST_START_LINES = 1
     TEST_END_LINES = 1
-    BLOCK_MARK = BlockMarkHTML()
-    HTML_TAG_START = '<{tag}>'
-    HTML_TAG_END = '</{tag}>'
 
-    def check_element_start(self, lines):
-        match = self.BLOCK_MARK.start.fullmatch(lines[0])
-        if not match:
-            raise _BlockElementStartNotMatched()
-        self.htlm_tags = (self.HTML_TAG_START.format(tag=match.group(2)),
-                          self.HTML_TAG_END.format(tag=match.group(3)))
-        self.end_mark = self.BLOCK_MARK.make_end_mark(match)
-        return (match.group(1), ())
+    def __init__(self, langmark, parent, indentation_external,
+                 indentation_internal, initial_lines, htlm_tags, end_mark):
+        self.htlm_tags = htlm_tags
+        self.end_mark = end_mark
+        elements._BlockElementContainingInline.__init__(self, langmark, parent,
+                    indentation_external, indentation_internal, initial_lines)
 
-    def _parse_initial_lines(self, lines):
+    def _process_initial_lines(self, lines):
         pass
 
     def check_element_end(self, lines):
@@ -112,3 +107,25 @@ class HTMLBlockTag(elements._BlockElementContainingInline):
         html = self._trim_last_break(''.join(
                         child.convert_to_html() for child in self.children))
         return html.join(self.htlm_tags)
+
+
+class HTMLElements(_ElementFactory):
+    """
+    Factory for HTML elements.
+    """
+    TEST_START_LINES = 1
+    BLOCK_MARK = BlockMarkHTML()
+    HTML_TAG_START = '<{tag}>'
+    HTML_TAG_END = '</{tag}>'
+
+    def _do_make_element(self, langmark, parent, lines):
+        match = self.BLOCK_MARK.start.fullmatch(lines[0])
+        if not match:
+            raise _BlockElementStartNotMatched()
+        htlm_tags = (self.HTML_TAG_START.format(tag=match.group(2)),
+                          self.HTML_TAG_END.format(tag=match.group(3)))
+        end_mark = self.BLOCK_MARK.make_end_mark(match)
+        indentation_external = indentation_internal = \
+                        RawText.compute_equivalent_indentation(match.group(1))
+        return HTMLBlockTag(langmark, parent, indentation_external,
+                            indentation_internal, (), htlm_tags, end_mark)

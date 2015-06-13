@@ -19,6 +19,7 @@
 import re
 from . import (marks, metadata, elements)
 from .base import RawText
+from .factories import _MetaDataElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -110,20 +111,18 @@ class Link(elements._InlineElementContainingParameters):
                           self.HTML_TAGS[2]))
 
 
-class LinkDefinition(elements._MetaDataElement):
+class LinkDefinitions(_MetaDataElementFactory):
     """
-    A link definition::
+    Link definitions::
 
         [id]: url Title
         [id]: url "Title"
     """
+    TEST_START_LINES = 1
     METADATA = re.compile(r'^[ \t]*\[(.+?)\]:[ \t]+(.+?)'
                           r'(?:[ \t]+[\'"](.+?)[\'"])?[ \t]*\n')
 
-    def process_match(self, match):
-        if match:
-            self.langmark.links.add_id(match.group(1), match.group(2),
-                                       match.group(3))
-            raise _BlockElementStartConsumed()
-        else:
+    def process_match(self, langmark, match):
+        if not match:
             raise _BlockElementStartNotMatched()
+        langmark.links.add_id(match.group(1), match.group(2), match.group(3))

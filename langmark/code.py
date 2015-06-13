@@ -17,6 +17,15 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import (marks, elements)
+from .base import RawText
+from .factories import _ElementFactory
+from .exceptions import (_BlockElementStartNotMatched,
+                         _BlockElementStartConsumed,
+                         _BlockElementStartMatched,
+                         _BlockElementEndConsumed,
+                         _BlockElementEndNotConsumed,
+                         _InlineElementStartNotMatched,
+                         _EndOfFile)
 
 
 class FormattableCode(elements._InlineElementContainingInline):
@@ -57,7 +66,6 @@ class FormattableCodeBlock(elements._BlockElementContainingInline_LineMarks):
         Formatted code
         |||
     """
-    BLOCK_MARK = marks.BlockMarkSimple('|')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -69,7 +77,6 @@ class PlainCodeBlock(elements._BlockElementContainingText_LineMarks):
         Plain code
         ###
     """
-    BLOCK_MARK = marks.BlockMarkSimple('#')
     HTML_TAGS = ('<pre>', '</pre>')
 
 
@@ -81,5 +88,32 @@ class PlainTextBlock(elements._BlockElementContainingRaw_LineMarks):
         Plain text
         \\\
     """
-    BLOCK_MARK = marks.BlockMarkSimple('\\')
     HTML_TAGS = ('<div>', '</div>')
+
+
+class CodeElements(_ElementFactory):
+    """
+    Factory for code elements.
+    """
+    TEST_START_LINES = 1
+    ELEMENTS = {
+        FormattableCodeBlock: marks.BlockMarkSimple('|'),
+        PlainCodeBlock: marks.BlockMarkSimple('#'),
+        PlainTextBlock: marks.BlockMarkSimple('\\'),
+    }
+
+    def _do_make_element(self, langmark, parent, lines):
+        for Element in self.ELEMENTS:
+            mark = self.ELEMENTS[Element]
+            match = mark.start.fullmatch(lines[0])
+            if match:
+                break
+        else:
+            raise _BlockElementStartNotMatched()
+        end_mark = mark.make_end_mark(match)
+        indentation_external = indentation_internal = \
+                        RawText.compute_equivalent_indentation(match.group(1))
+        element = Element(langmark, parent, indentation_external,
+                          indentation_internal, ())
+        element.set_end_mark(end_mark)
+        return element

@@ -19,6 +19,7 @@
 import re
 from . import elements
 from .base import Configuration
+from .factories import _ElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -34,81 +35,20 @@ from .exceptions import (_BlockElementStartNotMatched,
 #       Perhaps implement them only when converting to HTML
 
 
-class _SimpleHeading(elements._BlockElementContainingInline):
+class _Heading(elements._BlockElementContainingInline):
     """
-    A block element, containing inline elements, that can only span one line
-    and is identified by a prefix.
-
-    START_MARK's first capturing group will be used as the element content.
+    A block element, containing inline elements.
     """
-    TEST_START_LINES = 1
     TEST_END_LINES = 0
-    START_RE = (r'^\={{{level}}}[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
-                 '[ \t]*\=*[ \t]*\n')
-    START_MARK = None
 
-    def check_element_start(self, lines):
-        match = self.START_MARK.match(lines[0])
-        if not match:
-            raise _BlockElementStartNotMatched()
-        return ('', (match.group(1), ))
-
-    def _parse_initial_lines(self, lines):
+    def _process_initial_lines(self, lines):
         self._add_raw_first_line(lines[0])
 
     def check_element_end(self, lines):
         raise _BlockElementEndConsumed()
 
 
-class _ComplexHeading(elements._BlockElementContainingInline):
-    """
-    A block element, containing inline elements, that starts with a full-line
-    mark and ends with an optional full-line mark.
-    """
-    TEST_START_LINES = 3
-    TEST_END_LINES = 0
-    ONELINE_MARK = None
-    START_MARK = None
-    TITLE_MARK = re.compile(r'^[ \t]*(.+?)[ \t]*\n')
-    END_MARK = None
-
-    def check_element_start(self, lines):
-        match = self.ONELINE_MARK.match(lines[0])
-        if match:
-            title = match.group(1)
-            self.rewind_lines(lines[1], lines[2])
-
-        elif Configuration.BLANK_LINE.fullmatch(lines[0]):
-            match2 = self.TITLE_MARK.fullmatch(lines[1])
-            if not match2:
-                raise _BlockElementStartNotMatched()
-            match3 = self.END_MARK.fullmatch(lines[2])
-            if not match3:
-                raise _BlockElementStartNotMatched()
-            title = match2.group(1)
-
-        else:
-            match1 = self.START_MARK.fullmatch(lines[0])
-            if not match1:
-                raise _BlockElementStartNotMatched()
-            match2 = self.TITLE_MARK.fullmatch(lines[1])
-            if not match2:
-                raise _BlockElementStartNotMatched()
-            match3 = self.END_MARK.fullmatch(lines[2])
-            if not match3:
-                raise _BlockElementStartNotMatched()
-            title = match2.group(1)
-
-        return ('', (title, ))
-
-    def _parse_initial_lines(self, lines):
-        self._add_raw_first_line(lines[0])
-
-    def check_element_end(self, lines):
-        raise _BlockElementEndConsumed()
-
-
-class Heading1(_ComplexHeading):
+class Heading1(_Heading):
     """
     A level-1 heading::
 
@@ -130,13 +70,10 @@ class Heading1(_ComplexHeading):
     start of the line to the line break. The heading must have an empty line
     below itself.
     """
-    ONELINE_MARK = re.compile(_SimpleHeading.START_RE.format(level='1'))
-    START_MARK = re.compile(r'^\={3,}[ \t]*\n')
-    END_MARK = re.compile(r'^\=+[ \t]*\n')
     HTML_TAGS = ('<h1>', '</h1>')
 
 
-class Heading2(_ComplexHeading):
+class Heading2(_Heading):
     """
     A level-2 heading::
 
@@ -159,13 +96,10 @@ class Heading2(_ComplexHeading):
     start of the line to the line break. The heading must have an empty line
     below itself.
     """
-    ONELINE_MARK = re.compile(_SimpleHeading.START_RE.format(level='2'))
-    START_MARK = re.compile(r'^[\=\-]{3,}[ \t]*\n')
-    END_MARK = re.compile(r'^[\=\-]+[ \t]*\n')
     HTML_TAGS = ('<h2>', '</h2>')
 
 
-class Heading3(_SimpleHeading):
+class Heading3(_Heading):
     """
     A level-3 heading::
 
@@ -175,11 +109,10 @@ class Heading3(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='3'))
     HTML_TAGS = ('<h3>', '</h3>')
 
 
-class Heading4(_SimpleHeading):
+class Heading4(_Heading):
     """
     A level-4 heading::
 
@@ -189,11 +122,10 @@ class Heading4(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='4'))
     HTML_TAGS = ('<h4>', '</h4>')
 
 
-class Heading5(_SimpleHeading):
+class Heading5(_Heading):
     """
     A level-5 heading::
 
@@ -203,11 +135,10 @@ class Heading5(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='5'))
     HTML_TAGS = ('<h5>', '</h5>')
 
 
-class Heading6(_SimpleHeading):
+class Heading6(_Heading):
     """
     A level-6 heading::
 
@@ -217,5 +148,62 @@ class Heading6(_SimpleHeading):
     rest of the line is taken literally as the title until the line break. The
     heading must have an empty line below itself.
     """
-    START_MARK = re.compile(_SimpleHeading.START_RE.format(level='6,'))
     HTML_TAGS = ('<h6>', '</h6>')
+
+
+class HeadingElements(_ElementFactory):
+    """
+    Factory for heading elements.
+    """
+    TEST_START_LINES = 3
+    ELEMENTS = (Heading1, Heading2, Heading3, Heading4, Heading5, Heading6)
+    # ONELINE_MARK's second capturing group will be used as the element
+    #  content.
+    ONELINE_MARK = re.compile(r'^(\=+)[ \t]*((?:(?<=[ \t])\=|[^\=]).*?)'
+                              r'[ \t]*\=*[ \t]*\n')
+    START_MARK_1 = re.compile(r'^\={3,}[ \t]*\n')
+    START_MARK_2 = re.compile(r'^[\=\-]{3,}[ \t]*\n')
+    TITLE_MARK = re.compile(r'^[ \t]*(.+?)[ \t]*\n')
+    END_MARK_1 = re.compile(r'^\=+[ \t]*\n')
+    END_MARK_2 = re.compile(r'^[\=\-]+[ \t]*\n')
+
+    def _do_make_element(self, langmark, parent, lines):
+        match = self.ONELINE_MARK.match(lines[0])
+        if match:
+            level = min(len(match.group(1)), 6)
+            Element = self.ELEMENTS[level - 1]
+            title = match.group(2)
+            langmark.stream.rewind_lines(lines[1], lines[2])
+
+        elif Configuration.BLANK_LINE.fullmatch(lines[0]):
+            match2 = self.TITLE_MARK.fullmatch(lines[1])
+            if not match2:
+                raise _BlockElementStartNotMatched()
+            if self.END_MARK_1.fullmatch(lines[2]):
+                Element = Heading1
+            elif self.END_MARK_2.fullmatch(lines[2]):
+                Element = Heading2
+            else:
+                raise _BlockElementStartNotMatched()
+            title = match2.group(1)
+
+        else:
+            if self.START_MARK_1.fullmatch(lines[0]):
+                if self.END_MARK_1.fullmatch(lines[2]):
+                    Element = Heading1
+                elif self.END_MARK_2.fullmatch(lines[2]):
+                    Element = Heading2
+                else:
+                    raise _BlockElementStartNotMatched()
+            elif self.START_MARK_2.fullmatch(lines[0]):
+                if not self.END_MARK_2.fullmatch(lines[2]):
+                    raise _BlockElementStartNotMatched()
+                Element = Heading2
+            else:
+                raise _BlockElementStartNotMatched()
+            match2 = self.TITLE_MARK.fullmatch(lines[1])
+            if not match2:
+                raise _BlockElementStartNotMatched()
+            title = match2.group(1)
+
+        return Element(langmark, parent, 0, 0, (title, ))
