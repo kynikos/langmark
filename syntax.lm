@@ -7,12 +7,6 @@ Inspiration languages (read their specification):
 * MediaWiki
 
 
- escape
-  code
-   code
-    indented
-
-
 Paragraph line1`
 Paragraph line2
 
@@ -21,11 +15,6 @@ Paragraph line2
 > > quote
 >> quote
 > quote
-
-
-. indented
-.. indented
-. indented
 
 
 http://plain.link.com/
@@ -46,6 +35,11 @@ Horizontal line
 {image|path}
 {gallery|path}
 {extension}   !{extension}
+
+
+. indented
+.. indented
+. indented
 
 
 Text'|sup| text.

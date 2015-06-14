@@ -86,6 +86,19 @@ class HTMLBlockTag(elements._BlockElementContainingInline):
         <tag attribute="value" />
     """
     # TODO: Instantiate only for actual HTML block elements (no inline/span)
+    # TODO: Support Langmark block elements inside the tags, for example:
+    #
+    #       <div>
+    #       ###
+    #       code
+    #       ###
+    #       </div>
+    #
+    #       <div>
+    #       * item 1
+    #       * item 2
+    #       </div>
+    #
     TEST_END_LINES = 1
 
     def __init__(self, langmark, parent, indentation_external,

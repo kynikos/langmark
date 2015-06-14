@@ -1,3 +1,6 @@
+* * A line break must be forced at the top of the document (or below the
+    header), otherwise a heading that requires a blank line won't be recognized
+  * Recognize headings also when indented or children of block elements?
 * * See notes in syntax.lm
   * Search for "TODO" in the files
 * While parsing the links, prepare a report of their status (links with missing
