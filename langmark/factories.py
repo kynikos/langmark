@@ -161,5 +161,5 @@ class ParagraphFactory(_BaseFactory):
             indentationtext = Configuration.INDENTATION.match(line).group()
             indentation_external = indentation_internal = \
                         RawText.compute_equivalent_indentation(indentationtext)
-            return langmark.elements.Paragraph(langmark_, self,
+            return langmark.elements.Paragraph(langmark_, parent,
                             indentation_external, indentation_internal, lines)
