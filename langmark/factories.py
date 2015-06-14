@@ -118,6 +118,7 @@ class IndentedElements(_ElementFactory):
     Factory for indented elements.
     """
     TEST_START_LINES = 1
+    INSTALLED_ELEMENTS = None
 
     def _do_make_element(self, langmark_, parent, lines):
         line = lines[0]
@@ -125,10 +126,21 @@ class IndentedElements(_ElementFactory):
             raise _BlockElementStartNotMatched()
         indentationtext = Configuration.INDENTATION.match(line).group()
         indentation = RawText.compute_equivalent_indentation(indentationtext)
-        if indentation - 3 <= parent.indentation_internal:
+        indent_diff = indentation - parent.indentation_internal
+        if indent_diff < 1:
             raise _BlockElementStartNotMatched()
-        return langmark.elements.IndentedContainer(langmark_, parent,
-                            parent.indentation_internal, indentation, lines)
+        try:
+            Element = self.INSTALLED_ELEMENTS[indent_diff - 1]
+        except IndexError:
+            indent_diff = len(self.INSTALLED_ELEMENTS)
+            Element = self.INSTALLED_ELEMENTS[-1]
+        # INSTALLED_ELEMENTS must support None values to ignore particular
+        #  levels of indentation
+        if not Element:
+            raise _BlockElementStartNotMatched()
+        return Element(langmark_, parent,
+                       parent.indentation_internal + indent_diff,
+                       indentation, lines)
 
 
 class ParagraphFactory(_BaseFactory):

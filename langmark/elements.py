@@ -79,6 +79,14 @@ class _BlockElement(_Element):
                     # Note how factory.make_element returns the element
                     #  by raising _BlockElementStartMatched
                     factory.make_element(self.langmark, self)
+                # Elements defined by simple indentation must be found *after*
+                #  those with normal marks, especially because some of the
+                #  latter may want to ignore indentation, like for example
+                #  LinkDefinition
+                # Note how indented_factory.make_element returns the element
+                #  by raising _BlockElementStartMatched
+                self.langmark.indented_factory.make_element(self.langmark,
+                                                            self)
             except _BlockElementStartConsumed:
                 # Restart the for loop from the beginning
                 continue
@@ -235,6 +243,21 @@ class _BlockElementNotContainingBlock_LineMarksMixin:
 
     def check_element_end(self, lines):
         if self.end_mark.fullmatch(lines[0]):
+            raise _BlockElementEndConsumed()
+
+
+class _BlockElementNotContainingBlock_IndentedMixin:
+    """
+    A block element, containing inline elements, whose start and end is defined
+    by indentation.
+    """
+    TEST_END_LINES = 1
+
+    def _process_initial_lines(self, lines):
+        self._add_raw_first_line(lines[0])
+
+    def check_element_end(self, lines):
+        if Configuration.BLANK_LINE.fullmatch(lines[0]):
             raise _BlockElementEndConsumed()
 
 
@@ -397,6 +420,16 @@ class _BlockElementContainingInline_LineMarks(
     pass
 
 
+class _BlockElementContainingInline_Indented(
+                                _BlockElementNotContainingBlock_IndentedMixin,
+                                _BlockElementContainingInline):
+    """
+    A block element, containing inline elements, whose start and end is defined
+    by indentation.
+    """
+    pass
+
+
 class _BlockElementNotContainingInline(_BlockElementNotContainingBlock):
     """
     Base class for elements containing neither inline nor block elements.
@@ -429,6 +462,18 @@ class _BlockElementContainingText_LineMarks(
     """
     A block element, containing plain text, that starts and ends with full-line
     marks.
+    """
+    def convert_to_html(self):
+        return self._trim_last_break(self.rawtext.convert_to_html()).join(
+                                                                self.HTML_TAGS)
+
+
+class _BlockElementContainingText_Indented(
+                                _BlockElementNotContainingBlock_IndentedMixin,
+                                _BlockElementNotContainingInline):
+    """
+    A block element, containing plain text, whose start and end is defined by
+    indentation.
     """
     def convert_to_html(self):
         return self._trim_last_break(self.rawtext.convert_to_html()).join(

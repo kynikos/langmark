@@ -69,6 +69,16 @@ class FormattableCodeBlock(elements._BlockElementContainingInline_LineMarks):
     HTML_TAGS = ('<pre>', '</pre>')
 
 
+class FormattableCodeBlockIndented(
+                            elements._BlockElementContainingInline_Indented):
+    """
+    A block of formattable monospace text::
+
+        Formatted code
+    """
+    HTML_TAGS = ('<pre>', '</pre>')
+
+
 class PlainCodeBlock(elements._BlockElementContainingText_LineMarks):
     """
     A block of preformatted monospace text::
@@ -76,6 +86,15 @@ class PlainCodeBlock(elements._BlockElementContainingText_LineMarks):
         ###
         Plain code
         ###
+    """
+    HTML_TAGS = ('<pre>', '</pre>')
+
+
+class PlainCodeBlockIndented(elements._BlockElementContainingText_Indented):
+    """
+    A block of preformatted monospace text::
+
+        Plain code
     """
     HTML_TAGS = ('<pre>', '</pre>')
 

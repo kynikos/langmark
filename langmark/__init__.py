@@ -38,13 +38,18 @@ BLOCK_FACTORIES = [factories.HeaderElements(),  # HeaderElements uninstalls
                    lists.ListElements(),
                    code.CodeElements(),
                    links.LinkDefinitions(),
-                   html.HTMLElements(),
-                   factories.IndentedElements()]  # It's important that
-                                                  #  IndentedElements comes
-                                                  #  *after* the elements that
-                                                  #  want to ignore
-                                                  #  indentation, for example
-                                                  #  LinkDefinition
+                   html.HTMLElements()]
+
+# The position of indented elements in the following list determines the level
+#  of indentation needed to recognize them; the last element is also used for
+#  greater indentation levels
+# Additional extension modules should insert their indented element classes
+#  in the list below; they must thus be imported *after* importing langmark,
+#  but *before* instantiating the Langmark class
+INDENTED_ELEMENTS = [None,
+                     code.FormattableCodeBlockIndented,
+                     code.PlainCodeBlockIndented,
+                     elements.IndentedContainer]
 
 # The order of the inline elements is instead not important
 # Additional extension modules should insert their inline element classes in
@@ -68,6 +73,8 @@ class Langmark:
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
         elements._BlockElement.INSTALLED_BLOCK_FACTORIES = BLOCK_FACTORIES
+        factories.IndentedElements.INSTALLED_ELEMENTS = INDENTED_ELEMENTS
+        self.indented_factory = factories.IndentedElements()
         self.paragraph_factory = factories.ParagraphFactory()
         self._install_inline_elements()
 
