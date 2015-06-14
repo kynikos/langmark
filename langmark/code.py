@@ -28,7 +28,7 @@ from .exceptions import (_BlockElementStartNotMatched,
                          _EndOfFile)
 
 
-class FormattableCode(elements._InlineElementContainingInline):
+class FormattableCodeInline(elements._InlineElementContainingInline):
     """
     Inline formattable monospace text::
 
@@ -38,7 +38,7 @@ class FormattableCode(elements._InlineElementContainingInline):
     HTML_TAGS = ('<code>', '</code>')
 
 
-class PlainCode(elements._InlineElementContainingHtmlText):
+class PlainCodeInline(elements._InlineElementContainingHtmlText):
     """
     Inline preformatted monospace text::
 
@@ -48,7 +48,7 @@ class PlainCode(elements._InlineElementContainingHtmlText):
     HTML_TAGS = ('<code>', '</code>')
 
 
-class PlainText(elements._InlineElementContainingRawText):
+class PlainTextInline(elements._InlineElementContainingRawText):
     """
     Inline plain, unescaped text::
 

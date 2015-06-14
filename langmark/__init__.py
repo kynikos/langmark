@@ -57,9 +57,9 @@ INLINE_ELEMENTS = [formatting.Emphasis,
                    formatting.Small,
                    formatting.Strikethrough,
                    links.Link,
-                   code.FormattableCode,
-                   code.PlainCode,
-                   code.PlainText,
+                   code.FormattableCodeInline,
+                   code.PlainCodeInline,
+                   code.PlainTextInline,
                    html.HTMLInlineTag]
 
 
