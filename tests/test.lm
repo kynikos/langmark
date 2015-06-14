@@ -31,8 +31,14 @@ Text.
 `=== Not heading
 
 --------
-Title 2a
+Title 2aa
 ========
+
+Text.
+
+=========
+Title 2ab
+---------
 
 Text.
 
@@ -53,7 +59,7 @@ Text.
 * item3a
 item3a continued
 * item3b
-    item3b continued
+   item3b continued
 * item3c
 
 `* not item
@@ -162,7 +168,21 @@ Title 1d
 Text.
 
 Text.
-   Not indented text.
+ Not indented text.
+
+Text
+  form*atted* code
+
+Text
+  form*atted* code
+  form*atted* code
+
+Text
+   pla*in* code
+
+Text
+   pla*in* code
+   pla*in* code
 
 Text.
     Indented text.
@@ -173,7 +193,25 @@ Text.
 
 Text.
 
-   Not indented text.
+ Not indented text.
+
+Text
+
+  form*atted* code
+
+Text
+
+  form*atted* code
+  form*atted* code
+
+Text
+
+   pla*in* code
+
+Text
+
+   pla*in* code
+   pla*in* code
 
 Text.
 
@@ -193,6 +231,17 @@ Text.
     Indented text.
 
         Double indented text.
+
+Text.
+
+    Indented text.
+    Indented text.
+
+    Indented text.
+    Indented text.
+
+    Indented text.
+    Indented text.
 
 Text.
 
@@ -210,7 +259,42 @@ Text.
 
         * item 3
 
+         escaped text
+
+          format*ted* code
+
+           pla*in* code
+
     Some more indented text.
+
+Text.
+
+    Indented.
+Not indented.
+
+Text.
+
+        Double indented.
+  Code
+
+Text.
+
+        Double indented.
+       Code
+
+Text.
+
+      Indented code
+
+Text.
+
+    * list
+
+Text.
+
+    ###
+    code
+    ###
 
 Text.
 
