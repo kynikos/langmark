@@ -19,7 +19,6 @@
 import re
 import textparser
 from .base import Configuration, RawText
-from .factories import _ElementFactory, _MetaDataElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
