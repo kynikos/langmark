@@ -72,6 +72,20 @@ class _BlockElement(_Element):
         self.indentation_internal = indentation_internal
         self._process_initial_lines(initial_lines)
 
+    def _process_initial_lines(self, lines):
+        raise NotImplementedError()
+
+    def parse_next_line(self):
+        raise NotImplementedError()
+
+
+class _BlockElementContainingBlock(_BlockElement):
+    """
+    Base class for elements containing block elements.
+    """
+    def _process_initial_lines(self, lines):
+        self.rewind_lines(*lines)
+
     def find_element_start(self):
         while True:
             try:
@@ -92,20 +106,6 @@ class _BlockElement(_Element):
                 continue
             else:
                 return False
-
-    def _process_initial_lines(self, lines):
-        raise NotImplementedError()
-
-    def parse_next_line(self):
-        raise NotImplementedError()
-
-
-class _BlockElementContainingBlock(_BlockElement):
-    """
-    Base class for elements containing block elements.
-    """
-    def _process_initial_lines(self, lines):
-        self.rewind_lines(*lines)
 
     def parse_next_line(self):
         try:
@@ -353,7 +353,9 @@ class Paragraph(_BlockElementContainingInline_Meta):
 
     def parse_next_line(self):
         try:
-            self.find_element_start()
+            # Use self.parent, otherwise if an element is found it will have
+            #  the Paragraph as its parent
+            self.parent.find_element_start()
         except _BlockElementStartMatched:
             self._parse_inline()
             raise
