@@ -1,4 +1,6 @@
-* * A line break must be forced at the top of the document (or below the
+* * Ignore a leading space in Paragraph lines (use as an escape for block
+    elements)
+  * A line break must be forced at the top of the document (or below the
     header), otherwise a heading that requires a blank line won't be recognized
   * Recognize headings also when indented or children of block elements?
 * * See notes in syntax.lm

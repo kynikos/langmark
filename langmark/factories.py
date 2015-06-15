@@ -186,6 +186,9 @@ class ParagraphFactory(_BaseFactory):
             if Configuration.BLANK_LINE.fullmatch(line):
                 raise _BlockElementStartNotMatched()
             indentationtext = Configuration.INDENTATION.match(line).group()
+            # TODO: The equivalent indentation has already been computed at
+            #       least once in IndentedElements: finding a way to reuse it
+            #       would make things a little faster
             indentation = RawText.compute_equivalent_indentation(
                                                             indentationtext)
             parent = self._find_correct_parent(parent, indentation)
