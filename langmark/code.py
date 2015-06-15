@@ -18,7 +18,7 @@
 
 from . import (marks, elements)
 from .base import RawText
-from .factories import _ElementFactory
+from .factories import _BlockElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -110,7 +110,7 @@ class PlainTextBlock(elements._BlockElementContainingRaw_LineMarks):
     HTML_TAGS = ('<div>', '</div>')
 
 
-class CodeElements(_ElementFactory):
+class CodeElements(_BlockElementFactory):
     """
     Factory for code elements.
     """
@@ -121,7 +121,7 @@ class CodeElements(_ElementFactory):
         PlainTextBlock: marks.BlockMarkSimple('\\'),
     }
 
-    def _do_make_element(self, langmark, parent, lines):
+    def _find_equivalent_indentation(self, langmark_, lines):
         for Element in self.ELEMENTS:
             mark = self.ELEMENTS[Element]
             match = mark.start.fullmatch(lines[0])
@@ -129,10 +129,12 @@ class CodeElements(_ElementFactory):
                 break
         else:
             raise _BlockElementStartNotMatched()
-        end_mark = mark.make_end_mark(match)
-        indentation_external = indentation_internal = \
-                        RawText.compute_equivalent_indentation(match.group(1))
-        element = Element(langmark, parent, indentation_external,
-                          indentation_internal, ())
-        element.set_end_mark(end_mark)
+        indentation = RawText.compute_equivalent_indentation(match.group(1))
+        return (indentation, (match, ), Element)
+
+    def _find_element(self, langmark_, parent, lines, indentation, matches,
+                      Element):
+        mark = self.ELEMENTS[Element]
+        element = Element(langmark_, parent, indentation, indentation, ())
+        element.set_end_mark(mark.make_end_mark(matches[0]))
         return element

@@ -19,7 +19,7 @@
 import re
 from . import elements
 from .base import Configuration
-from .factories import _ElementFactory
+from .factories import _BlockElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -151,7 +151,7 @@ class Heading6(_Heading):
     HTML_TAGS = ('<h6>', '</h6>')
 
 
-class HeadingElements(_ElementFactory):
+class HeadingElements(_BlockElementFactory):
     """
     Factory for heading elements.
     """
@@ -167,13 +167,17 @@ class HeadingElements(_ElementFactory):
     END_MARK_1 = re.compile(r'^\=+[ \t]*\n')
     END_MARK_2 = re.compile(r'^[\=\-]+[ \t]*\n')
 
-    def _do_make_element(self, langmark, parent, lines):
+    def _find_equivalent_indentation(self, langmark_, lines):
+        return (0, (), None)
+
+    def _find_element(self, langmark_, parent, lines, indentation, matches,
+                      Element):
         match = self.ONELINE_MARK.match(lines[0])
         if match:
             level = min(len(match.group(1)), 6)
             Element = self.ELEMENTS[level - 1]
             title = match.group(2)
-            langmark.stream.rewind_lines(lines[1], lines[2])
+            langmark_.stream.rewind_lines(lines[1], lines[2])
 
         elif Configuration.BLANK_LINE.fullmatch(lines[0]):
             match2 = self.TITLE_MARK.fullmatch(lines[1])
@@ -206,4 +210,4 @@ class HeadingElements(_ElementFactory):
                 raise _BlockElementStartNotMatched()
             title = match2.group(1)
 
-        return Element(langmark, parent, 0, 0, (title, ))
+        return Element(langmark_, parent, 0, 0, (title, ))

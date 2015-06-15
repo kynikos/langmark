@@ -19,7 +19,7 @@
 import re
 from . import (marks, elements)
 from .base import RawText
-from .factories import _ElementFactory
+from .factories import _BlockElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -122,7 +122,7 @@ class HTMLBlockTag(elements._BlockElementContainingInline):
         return html.join(self.htlm_tags)
 
 
-class HTMLElements(_ElementFactory):
+class HTMLElements(_BlockElementFactory):
     """
     Factory for HTML elements.
     """
@@ -131,14 +131,18 @@ class HTMLElements(_ElementFactory):
     HTML_TAG_START = '<{tag}>'
     HTML_TAG_END = '</{tag}>'
 
-    def _do_make_element(self, langmark, parent, lines):
+    def _find_equivalent_indentation(self, langmark_, lines):
         match = self.BLOCK_MARK.start.fullmatch(lines[0])
         if not match:
             raise _BlockElementStartNotMatched()
+        indentation = RawText.compute_equivalent_indentation(match.group(1))
+        return (indentation, (match, ), None)
+
+    def _find_element(self, langmark_, parent, lines, indentation, matches,
+                      Element):
+        match = matches[0]
         htlm_tags = (self.HTML_TAG_START.format(tag=match.group(2)),
                           self.HTML_TAG_END.format(tag=match.group(3)))
         end_mark = self.BLOCK_MARK.make_end_mark(match)
-        indentation_external = indentation_internal = \
-                        RawText.compute_equivalent_indentation(match.group(1))
-        return HTMLBlockTag(langmark, parent, indentation_external,
-                            indentation_internal, (), htlm_tags, end_mark)
+        return HTMLBlockTag(langmark_, parent, indentation, indentation, (),
+                            htlm_tags, end_mark)

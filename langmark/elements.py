@@ -38,9 +38,6 @@ class _Element:
         self.parent = parent
         self.children = []
 
-    def reset_parent(self, element):
-        self.parent = element
-
     def rewind_lines(self, *lines):
         self.langmark.stream.rewind_lines(*lines)
 
@@ -83,6 +80,8 @@ class _BlockElementContainingBlock(_BlockElement):
     """
     Base class for elements containing block elements.
     """
+    ALLOW_DEINDENTATION = None
+
     def _process_initial_lines(self, lines):
         self.rewind_lines(*lines)
 
@@ -93,14 +92,6 @@ class _BlockElementContainingBlock(_BlockElement):
                     # Note how factory.make_element returns the element
                     #  by raising _BlockElementStartMatched
                     factory.make_element(self.langmark, self)
-                # Elements defined by simple indentation must be found *after*
-                #  those with normal marks, especially because some of the
-                #  latter may want to ignore indentation, like for example
-                #  LinkDefinition
-                # Note how indented_factory.make_element returns the element
-                #  by raising _BlockElementStartMatched
-                self.langmark.indented_factory.make_element(self.langmark,
-                                                            self)
             except _BlockElementStartConsumed:
                 # Restart the for loop from the beginning
                 continue
@@ -123,31 +114,26 @@ class _BlockElementContainingBlock(_BlockElement):
                 # Just discard the consumed lines if really nothing wants them
                 self.parse_next_line()
                 return
-        self._parse_element(element)
+        # The element's parent may have been set to an ancestor of this object
+        #  (self), so don't use self._parse_element(element)
+        element.parent._parse_element(element)
 
     def _parse_element(self, element):
-        if element.indentation_external < self.indentation_internal:
-            self.parent._parse_element(element)
-        else:
-            self._add_child(element)
-            try:
-                element.parse_next_line()
-            except _BlockElementStartMatched as exc:
-                self._parse_element(exc.element)
-                return
-            except _BlockElementEndConsumed:
-                self.parse_next_line()
-                return
-            except _BlockElementEndNotConsumed as exc:
-                self.rewind_lines(*exc.lines)
-                self.parse_next_line()
-                return
-
-    def _add_child(self, element):
-        element.reset_parent(self)
-        # _BlockElementContainingBlock_PrefixGrouped relies on reset_parent to
-        #  be called *before* appending the element
         self.children.append(element)
+        try:
+            element.parse_next_line()
+        except _BlockElementStartMatched as exc:
+            # The element's parent may have been set to an ancestor of this
+            #  object (self), so don't use self._parse_element(exc.element)
+            exc.element.parent._parse_element(exc.element)
+            return
+        except _BlockElementEndConsumed:
+            self.parse_next_line()
+            return
+        except _BlockElementEndNotConsumed as exc:
+            self.rewind_lines(*exc.lines)
+            self.parse_next_line()
+            return
 
     def convert_to_html(self):
         html = self.HTML_BREAK.join(child.convert_to_html()
@@ -168,8 +154,10 @@ class Root(_BlockElementContainingBlock):
     The first section can start immediately after the header, or be separated
     by no more than one empty line.
     """
-    def __init__(self, langmark):
-        _BlockElementContainingBlock.__init__(self, langmark, None, 0, 0, ())
+    ALLOW_DEINDENTATION = False
+
+    def __init__(self, langmark_):
+        _BlockElementContainingBlock.__init__(self, langmark_, None, 0, 0, ())
 
     def parse_tree(self):
         try:
@@ -188,6 +176,7 @@ class IndentedContainer(_BlockElementContainingBlock):
     """
     An indented block container.
     """
+    ALLOW_DEINDENTATION = False
     HTML_TAGS = ('<div class="langmark-indented">', '</div>')
 
 
@@ -198,18 +187,17 @@ class _BlockElementContainingBlock_PrefixGrouped(_BlockElementContainingBlock):
     """
     # TODO: This class should be made a mixin, but it's hard because of the
     #       super calls
+    ALLOW_DEINDENTATION = True
     HTML_OUTER_TAGS = None
 
-    def __init__(self, *args, **kwargs):
-        _BlockElementContainingBlock.__init__(self, *args, **kwargs)
+    def __init__(self, langmark_, parent, indentation_external,
+                 indentation_internal, initial_lines):
+        _BlockElementContainingBlock.__init__(self, langmark_, parent,
+                    indentation_external, indentation_internal, initial_lines)
         self.group_item_number = 0
         self.group_item_last = True
-
-    def reset_parent(self, element):
-        super(_BlockElementContainingBlock_PrefixGrouped, self).reset_parent(
-                                                                    element)
         try:
-            previous = element.children[-1]
+            previous = parent.children[-1]
         except IndexError:
             # The list could be the first element of the document
             pass
@@ -265,14 +253,17 @@ class _BlockElementNotContainingBlock(_BlockElement):
     """
     Base class for elements not containing block elements.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, langmark_, parent, indentation_external,
+                 indentation_internal, initial_lines):
         self.rawtext = RawText('')
-        self.indentation_content = None
-        _BlockElement.__init__(self, *args, **kwargs)
+        _BlockElement.__init__(self, langmark_, parent, indentation_external,
+                               indentation_internal, initial_lines)
+        self.indentation_content = None if parent.ALLOW_DEINDENTATION \
+                                   else self.indentation_internal
 
     def _add_raw_first_line(self, line):
         self.rawtext.append(RawText.trim_equivalent_indentation(
-                                            self.indentation_external, line))
+                                            self.indentation_internal, line))
 
     def _read_indented_test_end_lines(self, ignore_blank_lines):
         try:

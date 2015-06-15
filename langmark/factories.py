@@ -35,6 +35,11 @@ class _BaseFactory:
     def __init__(self):
         pass
 
+    def _find_correct_parent(self, parent, indentation):
+        while indentation < parent.indentation_internal:
+            parent = parent.parent
+        return parent
+
 
 class _ElementFactory(_BaseFactory):
     """
@@ -113,19 +118,42 @@ class HeaderElements(_MetaDataElementFactory):
             langmark_.stream.rewind_buffer()
 
 
-class IndentedElements(_ElementFactory):
+class _BlockElementFactory(_ElementFactory):
+    """
+    Factory for block elements.
+    """
+    def _do_make_element(self, langmark, parent, lines):
+        indentation, matches, Element = self._find_equivalent_indentation(
+                                                            langmark, lines)
+        parent = self._find_correct_parent(parent, indentation)
+        return self._find_element(langmark, parent, lines, indentation,
+                                  matches, Element)
+
+    def _find_raw_indentation(self, langmark, lines):
+        raise NotImplementedError()
+
+    def _find_element(self, langmark, parent, lines, indentation, matches,
+                      Element):
+        raise NotImplementedError()
+
+
+class IndentedElements(_BlockElementFactory):
     """
     Factory for indented elements.
     """
     TEST_START_LINES = 1
     INSTALLED_ELEMENTS = None
 
-    def _do_make_element(self, langmark_, parent, lines):
+    def _find_equivalent_indentation(self, langmark, lines):
         line = lines[0]
         if Configuration.BLANK_LINE.fullmatch(line):
             raise _BlockElementStartNotMatched()
-        indentationtext = Configuration.INDENTATION.match(line).group()
-        indentation = RawText.compute_equivalent_indentation(indentationtext)
+        indentation = RawText.compute_equivalent_indentation(
+                                Configuration.INDENTATION.match(line).group())
+        return (indentation, (), None)
+
+    def _find_element(self, langmark, parent, lines, indentation, matches,
+                      Element):
         indent_diff = indentation - parent.indentation_internal
         if indent_diff < 1:
             raise _BlockElementStartNotMatched()
@@ -138,9 +166,8 @@ class IndentedElements(_ElementFactory):
         #  levels of indentation
         if not Element:
             raise _BlockElementStartNotMatched()
-        return Element(langmark_, parent,
-                       parent.indentation_internal + indent_diff,
-                       indentation, lines)
+        return Element(langmark, parent, parent.indentation_internal,
+                       parent.indentation_internal + indent_diff, lines)
 
 
 class ParagraphFactory(_BaseFactory):
@@ -159,7 +186,8 @@ class ParagraphFactory(_BaseFactory):
             if Configuration.BLANK_LINE.fullmatch(line):
                 raise _BlockElementStartNotMatched()
             indentationtext = Configuration.INDENTATION.match(line).group()
-            indentation_external = indentation_internal = \
-                        RawText.compute_equivalent_indentation(indentationtext)
-            return langmark.elements.Paragraph(langmark_, parent,
-                            indentation_external, indentation_internal, lines)
+            indentation = RawText.compute_equivalent_indentation(
+                                                            indentationtext)
+            parent = self._find_correct_parent(parent, indentation)
+            return langmark.elements.Paragraph(langmark_, parent, indentation,
+                                               indentation, lines)

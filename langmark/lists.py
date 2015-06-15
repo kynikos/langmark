@@ -19,7 +19,7 @@
 import re
 from . import (marks, elements)
 from .base import RawText
-from .factories import _ElementFactory
+from .factories import _BlockElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -68,7 +68,7 @@ class LatinListItem(elements._BlockElementContainingBlock_PrefixGrouped):
     HTML_TAGS = ('<li>', '</li>')
 
 
-class ListElements(_ElementFactory):
+class ListElements(_BlockElementFactory):
     """
     Factory for list elements.
     """
@@ -79,7 +79,7 @@ class ListElements(_ElementFactory):
         LatinListItem: marks.BlockMarkPrefix(r'[a-zA-Z&]\.'),
     }
 
-    def _do_make_element(self, langmark, parent, lines):
+    def _find_equivalent_indentation(self, langmark_, lines):
         for Element in self.ELEMENTS:
             mark = self.ELEMENTS[Element]
             match = mark.prefix.fullmatch(lines[0])
@@ -87,12 +87,17 @@ class ListElements(_ElementFactory):
                 break
         else:
             raise _BlockElementStartNotMatched()
-        external_indentation = RawText.compute_equivalent_indentation(
-                                                                match.group(1))
+        indentation = RawText.compute_equivalent_indentation(match.group(1))
+        return (indentation, (match, ), Element)
+
+    def _find_element(self, langmark_, parent, lines, indentation, matches,
+                      Element):
+        external_indentation = indentation
+        match = matches[0]
         internal_indentation = external_indentation + \
                         RawText.compute_equivalent_indentation(match.group(2))
         # Remove the prefix, otherwise the same block will be parsed
         #  recursively endlessly
         adapted_line = ''.join((' ' * internal_indentation, match.group(3)))
-        return Element(langmark, parent, external_indentation,
+        return Element(langmark_, parent, external_indentation,
                        internal_indentation, (adapted_line, ))

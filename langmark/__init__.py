@@ -31,13 +31,16 @@ META_ELEMENTS = [metadata.Header,
 # Additional extension modules should insert their block-element factory
 #  classes in the list below; they must thus be imported *after* importing
 #  langmark, but *before* instantiating the Langmark class
-BLOCK_FACTORIES = [factories.HeaderElements(),  # HeaderElements uninstalls
-                                                #  itself after the first
-                                                #  non-match
+BLOCK_FACTORIES = [# HeaderElements uninstalls itself after the first non-match
+                   factories.HeaderElements(),
                    headings.HeadingElements(),
-                   lists.ListElements(),
-                   code.CodeElements(),
                    links.LinkDefinitions(),
+                   # IndentedElements must come *after* factories that want to
+                   #  ignore indentation (e.g. LinkDefinition), but *before*
+                   #  factories whose elements might be inside indented blocks
+                   factories.IndentedElements(),
+                   code.CodeElements(),
+                   lists.ListElements(),
                    html.HTMLElements()]
 
 # The position of indented elements in the following list determines the level
@@ -74,7 +77,6 @@ class Langmark:
         # argparse by the launcher script
         elements._BlockElement.INSTALLED_BLOCK_FACTORIES = BLOCK_FACTORIES
         factories.IndentedElements.INSTALLED_ELEMENTS = INDENTED_ELEMENTS
-        self.indented_factory = factories.IndentedElements()
         self.paragraph_factory = factories.ParagraphFactory()
         self._install_inline_elements()
 
