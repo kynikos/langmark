@@ -47,9 +47,9 @@ class _ElementFactory(_BaseFactory):
     """
     TEST_START_LINES = None
 
-    def make_element(self, langmark, parent):
+    def make_element(self, langmark_, parent):
         try:
-            lines = langmark.stream.read_next_lines_buffered(
+            lines = langmark_.stream.read_next_lines_buffered(
                                                         self.TEST_START_LINES)
         except StopIteration:
             # Don't just process the exception here because other elements may
@@ -60,14 +60,14 @@ class _ElementFactory(_BaseFactory):
             try:
                 # Finding the element is the actual exception in this algorithm
                 # Note how _do_make_element itself can raise other exceptions
-                raise _BlockElementStartMatched(self._do_make_element(langmark,
-                                                                parent, lines))
+                raise _BlockElementStartMatched(self._do_make_element(
+                                                    langmark_, parent, lines))
             except _BlockElementStartNotMatched:
                 pass
-        langmark.stream.rewind_buffer()
+        langmark_.stream.rewind_buffer()
         return False
 
-    def _do_make_element(self, langmark, parent, lines):
+    def _do_make_element(self, langmark_, parent, lines):
         raise NotImplementedError()
 
 
@@ -77,13 +77,13 @@ class _MetaDataElementFactory(_ElementFactory):
     """
     METADATA = None
 
-    def _do_make_element(self, langmark, parent, lines):
+    def _do_make_element(self, langmark_, parent, lines):
         # TODO: Support multiline metadata (using indentation for the
         #       continuation lines)
-        self.process_match(langmark, self.METADATA.fullmatch(lines[0]))
+        self.process_match(langmark_, self.METADATA.fullmatch(lines[0]))
         raise _BlockElementStartConsumed()
 
-    def process_match(self, langmark, match):
+    def process_match(self, langmark_, match):
         raise NotImplementedError()
 
 

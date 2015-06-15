@@ -45,9 +45,9 @@ class HTMLInlineTag(elements._Element):
     INLINE_MARK = marks._InlineMarkSelfClosed(
                                     r'</?[a-zA-Z][a-zA-Z0-9]*(?:\s[^>]*)?>')
 
-    def __init__(self, langmark, parent, inline_parser, parsed_text,
+    def __init__(self, langmark_, parent, inline_parser, parsed_text,
                  start_mark, is_element_start):
-        elements._Element.__init__(self, langmark, parent)
+        elements._Element.__init__(self, langmark_, parent)
         self.children.append(RawText(start_mark.group()))
         self.parent.take_inline_control()
 
@@ -101,12 +101,12 @@ class HTMLBlockTag(elements._BlockElementContainingInline):
     #
     TEST_END_LINES = 1
 
-    def __init__(self, langmark, parent, indentation_external,
+    def __init__(self, langmark_, parent, indentation_external,
                  indentation_internal, initial_lines, htlm_tags, end_mark):
         self.htlm_tags = htlm_tags
         self.end_mark = end_mark
-        elements._BlockElementContainingInline.__init__(self, langmark, parent,
-                    indentation_external, indentation_internal, initial_lines)
+        elements._BlockElementContainingInline.__init__(self, langmark_,
+            parent, indentation_external, indentation_internal, initial_lines)
 
     def _process_initial_lines(self, lines):
         pass

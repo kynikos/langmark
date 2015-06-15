@@ -32,8 +32,8 @@ class _Element:
     """
     Base class for document elements.
     """
-    def __init__(self, langmark, parent):
-        self.langmark = langmark
+    def __init__(self, langmark_, parent):
+        self.langmark = langmark_
         self.parent = parent
         self.children = []
 
@@ -61,9 +61,9 @@ class _BlockElement(_Element):
     HTML_BREAK = '\n'
     HTML_TAGS = ('<div>', '</div>')
 
-    def __init__(self, langmark, parent, indentation_external,
+    def __init__(self, langmark_, parent, indentation_external,
                  indentation_internal, initial_lines):
-        _Element.__init__(self, langmark, parent)
+        _Element.__init__(self, langmark_, parent)
         self.indentation_external = indentation_external
         self.indentation_internal = indentation_internal
         self._process_initial_lines(initial_lines)
@@ -481,7 +481,7 @@ class _InlineElement(_Element):
     INLINE_MARK = None
     HTML_TAGS = ('<span>', '</span>')
 
-    def __init__(self, langmark, parent, inline_parser, parsed_text,
+    def __init__(self, langmark_, parent, inline_parser, parsed_text,
                  start_mark, is_element_start):
         self.inline_parser = inline_parser
         self.inline_bindings = self.install_bindings(parsed_text, start_mark,
@@ -489,7 +489,7 @@ class _InlineElement(_Element):
         if self.ENABLE_ESCAPE:
             self.inline_bindings[Configuration.ESCAPE_RE] = \
                                                     self._handle_inline_escape
-        _Element.__init__(self, langmark, parent)
+        _Element.__init__(self, langmark_, parent)
 
     def install_bindings(self, parsed_text, start_mark, is_element_start):
         raise NotImplementedError()
@@ -613,8 +613,8 @@ class _Parameter(_Element):
     """
     A parameter element.
     """
-    def __init__(self, langmark, parent, children):
-        _Element.__init__(self, langmark, parent)
+    def __init__(self, langmark_, parent, children):
+        _Element.__init__(self, langmark_, parent)
         self.children[:] = children
 
     def get_raw_text(self):
