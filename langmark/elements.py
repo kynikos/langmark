@@ -252,6 +252,7 @@ class _BlockElementNotContainingBlock(_BlockElement):
     """
     Base class for elements not containing block elements.
     """
+    IGNORE_BLANK_LINES = None
     def __init__(self, langmark_, parent, indentation_external,
                  indentation_internal, initial_lines):
         self.rawtext = RawText('')
@@ -264,25 +265,24 @@ class _BlockElementNotContainingBlock(_BlockElement):
         self.rawtext.append(RawText.trim_equivalent_indentation(
                                             self.indentation_internal, line))
 
-    def _read_indented_test_end_lines(self, ignore_blank_lines):
+    def _read_indented_test_end_lines(self):
         try:
             lines = self.langmark.stream.read_next_lines_buffered(
                                                         self.TEST_END_LINES)
         except StopIteration:
             lines = self.langmark.stream.lines_buffer
-            indented_lines = self._check_and_strip_indentation(lines,
-                                                            ignore_blank_lines)
+            indented_lines = self._check_and_strip_indentation(lines)
             self._add_raw_content_lines(indented_lines)
             self._parse_inline()
             raise _EndOfFile()
         else:
-            return self._check_and_strip_indentation(lines, ignore_blank_lines)
+            return self._check_and_strip_indentation(lines)
 
-    def _check_and_strip_indentation(self, lines, ignore_blank_lines):
+    def _check_and_strip_indentation(self, lines):
         indented_lines = []
         for lN, line in enumerate(lines):
             if Configuration.BLANK_LINE.fullmatch(line):
-                if not ignore_blank_lines:
+                if not self.IGNORE_BLANK_LINES:
                     self._parse_inline()
                     raise _BlockElementEndNotConsumed(*lines[lN:])
                 # Never strip the line break from blank lines
@@ -336,6 +336,7 @@ class Paragraph(_BlockElementContainingInline_Meta):
     content.
     """
     TEST_END_LINES = 1
+    IGNORE_BLANK_LINES = False
     HTML_TAGS = ('<p>', '</p>')
 
     def _process_initial_lines(self, lines):
@@ -350,8 +351,7 @@ class Paragraph(_BlockElementContainingInline_Meta):
             self._parse_inline()
             raise
         else:
-            lines = self._read_indented_test_end_lines(
-                                                    ignore_blank_lines=False)
+            lines = self._read_indented_test_end_lines()
             self._add_raw_content_lines(lines)
             self.parse_next_line()
 
@@ -384,8 +384,9 @@ class _BlockElementContainingInline(_BlockElementContainingInline_Meta):
     """
     Base class for elements containing inline elements.
     """
+    IGNORE_BLANK_LINES = True
     def parse_next_line(self):
-        lines = self._read_indented_test_end_lines(ignore_blank_lines=True)
+        lines = self._read_indented_test_end_lines()
         try:
             self.check_element_end(lines)
         except (_BlockElementStartMatched, _BlockElementEndConsumed,
@@ -426,8 +427,9 @@ class _BlockElementNotContainingInline(_BlockElementNotContainingBlock):
     """
     Base class for elements containing neither inline nor block elements.
     """
+    IGNORE_BLANK_LINES = True
     def parse_next_line(self):
-        lines = self._read_indented_test_end_lines(ignore_blank_lines=True)
+        lines = self._read_indented_test_end_lines()
         self.check_element_end(lines)
         self._add_raw_content_lines(lines)
         self.parse_next_line()
