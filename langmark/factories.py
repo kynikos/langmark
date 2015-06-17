@@ -192,5 +192,9 @@ class ParagraphFactory(_BaseFactory):
             indentation = RawText.compute_equivalent_indentation(
                                                             indentationtext)
             parent = self._find_correct_parent(parent, indentation)
-            return langmark.elements.Paragraph(langmark_, parent, indentation,
-                                               indentation, lines)
+            return langmark.elements.Paragraph(langmark_, parent,
+                                            # Don't use 'indentation' here,
+                                            #  because it may contain the
+                                            #  leading escaping space
+                                            parent.indentation_internal,
+                                            parent.indentation_internal, lines)
