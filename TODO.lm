@@ -1,4 +1,3 @@
-* Recognize headings also when indented or children of block elements?
 * * See notes in syntax.lm
   * Search for "TODO" in the files
 * KNOWN BUG (or unexpected behavior): block elements that are children of list
@@ -38,6 +37,7 @@
 * Use class factories to reduce the number of tested regular expressions
   Use a centralized configuration script
 * Markdown compatibility mode
+* Recognize headings also when indented or children of block elements?
 * Add tests
   * Test headerless and contentless source files
 * File extension: .lm .lmk
