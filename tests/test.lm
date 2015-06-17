@@ -75,9 +75,22 @@ item3a continued
   codecode
   ###
 
-* itemA
-itemB *bold* itemBB
-  itemC
+* itemA1
+A line
+  text
+
+* itemA2
+A line
+    code
+
+* itemA3
+A line
+###
+code
+###
+
+* itemB
+  text *bold* itemBB
 
   |||
   code1
@@ -99,7 +112,16 @@ code4
 code5
 ###
 
-  itemD
+  text
+
+* itemC
+ * not item
+  * itemC1
+   * not item
+
+* itemD
+  * itemD1
+ * not item
 
 *   itemE1
     itemE2
@@ -161,6 +183,34 @@ Text.
 ``Text starting with backtick.
 `Es`cap`ing` more backticks here, but not here``.
 Plain code #` should ` allow ` single ` backticks `#.
+
+ ###
+ notcode
+
+Text
+ ###
+ not code
+
+ ###
+ not code
+text.
+
+Text
+ ###
+ not code
+text.
+
+ * not a list
+
+Text
+ * not a list.
+
+ * Not a list
+text.
+
+Text
+ * not a list
+text.
 
 ========
 Title 1d
