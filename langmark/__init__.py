@@ -32,6 +32,9 @@ META_ELEMENTS = [metadata.Header,
 #  classes in the list below; they must thus be imported *after* importing
 #  langmark, but *before* instantiating the Langmark class
 BLOCK_FACTORIES = [# HeaderElements uninstalls itself after the first non-match
+                   #  It also ensures that the content starts with an empty
+                   #  line, thus making it possible to recognize elements that
+                   #  start with an empty line (e.g. headings)
                    factories.HeaderElements(),
                    headings.HeadingElements(),
                    links.LinkDefinitions(),

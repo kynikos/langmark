@@ -1,6 +1,4 @@
-* * A line break must be forced at the top of the document (or below the
-    header), otherwise a heading that requires a blank line won't be recognized
-  * Recognize headings also when indented or children of block elements?
+* Recognize headings also when indented or children of block elements?
 * * See notes in syntax.lm
   * Search for "TODO" in the files
 * KNOWN BUG (or unexpected behavior): block elements that are children of list

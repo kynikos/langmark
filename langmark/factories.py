@@ -116,6 +116,9 @@ class HeaderElements(_MetaDataElementFactory):
             langmark.elements._BlockElementContainingBlock.INSTALLED_BLOCK_FACTORIES.remove(
                                                                         self)
             langmark_.stream.rewind_buffer()
+            # Add an empty line to make it possible to recognize elements that
+            # start with an empty line (e.g. headings)
+            langmark_.stream.rewind_lines('\n')
 
 
 class _BlockElementFactory(_ElementFactory):
