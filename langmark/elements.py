@@ -253,6 +253,8 @@ class _BlockElementNotContainingBlock(_BlockElement):
     Base class for elements not containing block elements.
     """
     IGNORE_BLANK_LINES = None
+    IGNORE_LEADING_SPACE = None
+
     def __init__(self, langmark_, parent, indentation_external,
                  indentation_internal, initial_lines):
         self.rawtext = RawText('')
@@ -262,6 +264,7 @@ class _BlockElementNotContainingBlock(_BlockElement):
                                    else self.indentation_internal
 
     def _add_raw_first_line(self, line):
+        # Paragraph overrides this method
         self.rawtext.append(RawText.trim_equivalent_indentation(
                                             self.indentation_internal, line))
 
@@ -300,8 +303,11 @@ class _BlockElementNotContainingBlock(_BlockElement):
                 except TypeError:
                     self.indentation_content = min(indentation,
                                                    self.indentation_external)
-                indented_lines.append(RawText.trim_equivalent_indentation(
-                                            self.indentation_content, line))
+                indented_line = RawText.trim_equivalent_indentation(
+                                                self.indentation_content, line)
+                if self.IGNORE_LEADING_SPACE and indented_line.startswith(' '):
+                    indented_line = indented_line[1:]
+                indented_lines.append(indented_line)
         return indented_lines
 
     def _add_raw_content_lines(self, lines):
@@ -337,10 +343,19 @@ class Paragraph(_BlockElementContainingInline_Meta):
     """
     TEST_END_LINES = 1
     IGNORE_BLANK_LINES = False
+    IGNORE_LEADING_SPACE = True
     HTML_TAGS = ('<p>', '</p>')
 
     def _process_initial_lines(self, lines):
         self._add_raw_first_line(lines[0])
+
+    def _add_raw_first_line(self, line):
+        # Overrides superclass' method
+        indented_line = RawText.trim_equivalent_indentation(
+                                            self.indentation_internal, line)
+        if indented_line.startswith(' '):
+            indented_line = indented_line[1:]
+        self.rawtext.append(indented_line)
 
     def parse_next_line(self):
         try:
@@ -385,6 +400,8 @@ class _BlockElementContainingInline(_BlockElementContainingInline_Meta):
     Base class for elements containing inline elements.
     """
     IGNORE_BLANK_LINES = True
+    IGNORE_LEADING_SPACE = False
+
     def parse_next_line(self):
         lines = self._read_indented_test_end_lines()
         try:
@@ -428,6 +445,8 @@ class _BlockElementNotContainingInline(_BlockElementNotContainingBlock):
     Base class for elements containing neither inline nor block elements.
     """
     IGNORE_BLANK_LINES = True
+    IGNORE_LEADING_SPACE = False
+
     def parse_next_line(self):
         lines = self._read_indented_test_end_lines()
         self.check_element_end(lines)
