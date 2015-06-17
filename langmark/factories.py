@@ -129,7 +129,7 @@ class _BlockElementFactory(_ElementFactory):
         return self._find_element(langmark, parent, lines, indentation,
                                   matches, Element)
 
-    def _find_raw_indentation(self, langmark, lines):
+    def _find_equivalent_indentation(self, langmark, lines):
         raise NotImplementedError()
 
     def _find_element(self, langmark, parent, lines, indentation, matches,
