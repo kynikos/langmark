@@ -19,7 +19,7 @@
 import re
 from . import (marks, elements)
 from .base import RawText
-from .factories import _BlockElementFactory
+from .factories import _BlockNotIndentedElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -68,7 +68,7 @@ class LatinListItem(elements._BlockElementContainingBlock_PrefixGrouped):
     HTML_TAGS = ('<li>', '</li>')
 
 
-class ListElements(_BlockElementFactory):
+class ListElements(_BlockNotIndentedElementFactory):
     """
     Factory for list elements.
     """
@@ -90,8 +90,8 @@ class ListElements(_BlockElementFactory):
         indentation = RawText.compute_equivalent_indentation(match.group(1))
         return (indentation, (match, ), Element)
 
-    def _find_element(self, langmark_, parent, lines, indentation, matches,
-                      Element):
+    def _do_find_element(self, langmark_, parent, lines, indentation, matches,
+                         Element):
         external_indentation = indentation
         match = matches[0]
         internal_indentation = external_indentation + \

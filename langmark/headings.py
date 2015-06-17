@@ -19,7 +19,7 @@
 import re
 from . import elements
 from .base import Configuration
-from .factories import _BlockElementFactory
+from .factories import _BlockNotIndentedElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -151,7 +151,7 @@ class Heading6(_Heading):
     HTML_TAGS = ('<h6>', '</h6>')
 
 
-class HeadingElements(_BlockElementFactory):
+class HeadingElements(_BlockNotIndentedElementFactory):
     """
     Factory for heading elements.
     """
@@ -170,8 +170,8 @@ class HeadingElements(_BlockElementFactory):
     def _find_equivalent_indentation(self, langmark_, lines):
         return (0, (), None)
 
-    def _find_element(self, langmark_, parent, lines, indentation, matches,
-                      Element):
+    def _do_find_element(self, langmark_, parent, lines, indentation, matches,
+                         Element):
         match = self.ONELINE_MARK.match(lines[0])
         if match:
             level = min(len(match.group(1)), 6)

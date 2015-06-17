@@ -18,7 +18,7 @@
 
 from . import (marks, elements)
 from .base import RawText
-from .factories import _BlockElementFactory
+from .factories import _BlockNotIndentedElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -110,7 +110,7 @@ class PlainTextBlock(elements._BlockElementContainingRaw_LineMarks):
     HTML_TAGS = ('<div>', '</div>')
 
 
-class CodeElements(_BlockElementFactory):
+class CodeElements(_BlockNotIndentedElementFactory):
     """
     Factory for code elements.
     """
@@ -132,8 +132,8 @@ class CodeElements(_BlockElementFactory):
         indentation = RawText.compute_equivalent_indentation(match.group(1))
         return (indentation, (match, ), Element)
 
-    def _find_element(self, langmark_, parent, lines, indentation, matches,
-                      Element):
+    def _do_find_element(self, langmark_, parent, lines, indentation, matches,
+                         Element):
         mark = self.ELEMENTS[Element]
         element = Element(langmark_, parent, indentation, indentation, ())
         element.set_end_mark(mark.make_end_mark(matches[0]))

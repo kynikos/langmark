@@ -19,7 +19,7 @@
 import re
 from . import (marks, elements)
 from .base import RawText
-from .factories import _BlockElementFactory
+from .factories import _BlockNotIndentedElementFactory
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
@@ -122,7 +122,7 @@ class HTMLBlockTag(elements._BlockElementContainingInline):
         return html.join(self.htlm_tags)
 
 
-class HTMLElements(_BlockElementFactory):
+class HTMLElements(_BlockNotIndentedElementFactory):
     """
     Factory for HTML elements.
     """
@@ -138,8 +138,8 @@ class HTMLElements(_BlockElementFactory):
         indentation = RawText.compute_equivalent_indentation(match.group(1))
         return (indentation, (match, ), None)
 
-    def _find_element(self, langmark_, parent, lines, indentation, matches,
-                      Element):
+    def _do_find_element(self, langmark_, parent, lines, indentation, matches,
+                         Element):
         match = matches[0]
         htlm_tags = (self.HTML_TAG_START.format(tag=match.group(2)),
                           self.HTML_TAG_END.format(tag=match.group(3)))
