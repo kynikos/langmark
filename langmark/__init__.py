@@ -75,7 +75,8 @@ class Langmark:
     def __init__(self):
         # The parameters for __init__ must reflect the attributes set through
         # argparse by the launcher script
-        elements._BlockElement.INSTALLED_BLOCK_FACTORIES = BLOCK_FACTORIES
+        elements._BlockElementContainingBlock.INSTALLED_BLOCK_FACTORIES = \
+                                                                BLOCK_FACTORIES
         factories.IndentedElements.INSTALLED_ELEMENTS = INDENTED_ELEMENTS
         self.paragraph_factory = factories.ParagraphFactory()
         self._install_inline_elements()

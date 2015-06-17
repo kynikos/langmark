@@ -113,7 +113,7 @@ class HeaderElements(_MetaDataElementFactory):
             # Installing this class at the top of INSTALLED_BLOCK_FACTORIES
             #  makes this as efficient as continuing the loop, since no other
             #  elements are uselessly tested
-            langmark.elements._BlockElement.INSTALLED_BLOCK_FACTORIES.remove(
+            langmark.elements._BlockElementContainingBlock.INSTALLED_BLOCK_FACTORIES.remove(
                                                                         self)
             langmark_.stream.rewind_buffer()
 

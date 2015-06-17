@@ -56,7 +56,6 @@ class _BlockElement(_Element):
     """
     Base class for block elements.
     """
-    INSTALLED_BLOCK_FACTORIES = None
     TEST_END_LINES = None
     HTML_BREAK = '\n'
     HTML_TAGS = ('<div>', '</div>')
@@ -79,6 +78,7 @@ class _BlockElementContainingBlock(_BlockElement):
     """
     Base class for elements containing block elements.
     """
+    INSTALLED_BLOCK_FACTORIES = None
     ALLOW_DEINDENTATION = None
 
     def _process_initial_lines(self, lines):
