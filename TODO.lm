@@ -19,6 +19,16 @@
     this code is not part of the item
     ###
 
+  However think of a scenario like the following:
+
+    * item
+    text
+    * item
+    text
+    * item
+
+  Are the 3 items siblings or is each a child of the previous item?
+
 * While parsing the links, prepare a report of their status (links with missing
   id's, duplicated id's...)
 * * Automatic table of contents
