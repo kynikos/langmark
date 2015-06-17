@@ -18,6 +18,7 @@
 
 import re
 import textparser
+from . import marks
 from .base import Configuration, RawText
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
@@ -32,6 +33,8 @@ class _Element:
     """
     Base class for document elements.
     """
+    HTML_BREAK = '\n'
+
     def __init__(self, langmark_, parent):
         self.langmark = langmark_
         self.parent = parent
@@ -57,7 +60,6 @@ class _BlockElement(_Element):
     Base class for block elements.
     """
     TEST_END_LINES = None
-    HTML_BREAK = '\n'
     HTML_TAGS = ('<div>', '</div>')
 
     def __init__(self, langmark_, parent, indentation_external,
@@ -675,3 +677,26 @@ class _InlineElementContainingHtmlText(_InlineElementContainingText):
     def convert_to_html(self):
         return ''.join(child.convert_to_html() for child in self.children
                                                         ).join(self.HTML_TAGS)
+
+
+class LineBreak(_Element):
+    """
+    Line break::
+
+        First line`
+        second line.
+    """
+    INLINE_MARK = marks._InlineMarkSelfClosed(r'`\n')
+    # TODO: Allow setting the tag style (<br> or <br/> or <br />) more easily
+    HTML_TAG = '<br />'
+
+    def __init__(self, langmark_, parent, inline_parser, parsed_text,
+                 start_mark, is_element_start):
+        _Element.__init__(self, langmark_, parent)
+        self.parent.take_inline_control()
+
+    def take_inline_control(self):
+        pass
+
+    def convert_to_html(self):
+        return self.HTML_TAG + self.HTML_BREAK

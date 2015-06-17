@@ -71,6 +71,7 @@ INLINE_ELEMENTS = [formatting.Emphasis,
                    code.FormattableCodeInline,
                    code.PlainCodeInline,
                    code.PlainTextInline,
+                   elements.LineBreak,
                    html.HTMLInlineTag]
 
 
