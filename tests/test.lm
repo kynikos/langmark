@@ -56,6 +56,7 @@ Text.
 * item1
 * item2
   item2 continued
+not item
 * item3a
 item3a continued
 * item3b
@@ -77,14 +78,45 @@ item3a continued
 
 * itemA1
 A line
-  text
+ text
 
 * itemA2
 A line
-    code
+  text
 
 * itemA3
 A line
+    code
+
+* itemA4
+A line
+      indented
+
+* itemA5
+A line
+###
+code
+###
+
+* itemA6
+A line
+ ###
+not code
+
+* itemA7
+A line
+  not code
+not code
+
+* itemA8
+A line
+  ###
+code
+###
+
+* itemA9
+A line
+
 ###
 code
 ###
