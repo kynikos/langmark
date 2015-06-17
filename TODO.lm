@@ -1,10 +1,24 @@
-* * Ignore a leading space in Paragraph lines (use as an escape for block
-    elements)
-  * A line break must be forced at the top of the document (or below the
+* * A line break must be forced at the top of the document (or below the
     header), otherwise a heading that requires a blank line won't be recognized
   * Recognize headings also when indented or children of block elements?
 * * See notes in syntax.lm
   * Search for "TODO" in the files
+* KNOWN BUG (or unexpected behavior): block elements that are children of list
+  items must always start at the item's internal indetation, even if no empty
+  line separates them from the content; this is also true for indented block
+  elements. For example:
+
+    * item
+    text
+      this is not code
+        this is an indented code block
+
+    * item
+    text
+    ###
+    this code is not part of the item
+    ###
+
 * While parsing the links, prepare a report of their status (links with missing
   id's, duplicated id's...)
 * * Automatic table of contents
