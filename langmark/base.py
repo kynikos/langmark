@@ -39,7 +39,7 @@ class Configuration:
     #  should never happen by design**, it's impossible to only escape the
     #  block mark leaving the inline mark intact; if an escape character is
     #  added at the beginning of a line, it will always escape both.
-    ESCAPE_RE = re.compile(r'`.')
+    ESCAPE_RE = re.compile(r'`.', re.DOTALL | re.MULTILINE)
     PARAMETER_CHAR = re.escape(r'|')
 
 
