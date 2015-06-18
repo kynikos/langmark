@@ -127,6 +127,14 @@ A line
 code
 ###
 
+*   itemA10
+A line
+  code
+
+*   itemA11
+A line
+      code
+
 * itemB
   text *bold* itemBB
 
