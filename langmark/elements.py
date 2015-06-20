@@ -100,24 +100,34 @@ class _BlockElementContainingBlock(_BlockElement):
                 return False
 
     def parse_next_line(self):
-        try:
-            self.find_element_start()
-        except _BlockElementStartMatched as exc:
-            element = exc.element
-        else:
-            # find_element_start must *not* raise _BlockElementStartMatched
-            #  also when the text would be a Paragraph, so paragraphs (the
-            #  catch-all elements) must be created here
+        # Don't recurse, otherwise it will raise "RuntimeError: maximum
+        #  recursion depth exceeded while calling a Python object" for long
+        #  documents
+        while True:
             try:
-                element = self.langmark.paragraph_factory.make_element(
+                self.find_element_start()
+            except _BlockElementStartMatched as exc:
+                element = exc.element
+            else:
+                # find_element_start must *not* raise _BlockElementStartMatched
+                #  also when the text would be a Paragraph, so paragraphs (the
+                #  catch-all elements) must be created here
+                try:
+                    element = self.langmark.paragraph_factory.make_element(
                                                         self.langmark, self)
-            except _BlockElementStartNotMatched:
-                # Just discard the consumed lines if really nothing wants them
-                self.parse_next_line()
-                return
-        # The element's parent may have been set to an ancestor of this object
-        #  (self), so don't use self._parse_element(element)
-        element.parent._parse_element(element)
+                except _BlockElementStartNotMatched:
+                    # Just discard the consumed lines if really nothing wants
+                    #  them
+                    continue
+                    # Don't recurse, otherwise it will raise "RuntimeError:
+                    #  maximum recursion depth exceeded while calling a Python
+                    #  object" for long documents
+                    #self.parse_next_line()
+                    #return
+            # The element's parent may have been set to an ancestor of this
+            #  object (self), so don't use self._parse_element(element)
+            element.parent._parse_element(element)
+            break
 
     def _parse_element(self, element):
         self.children.append(element)
