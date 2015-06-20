@@ -56,7 +56,7 @@ class BlockMarkPrefix(_BlockMarkFactory):
     A simple sequence of the same character possibly only followed by
     whitespace characters.
     """
-    # Without the space after escaped_char there would be a clash with some
+    # Without the space after 'prefix' there would be a clash with some
     #  inline elements at the start of a line
     PREFIX = r'^([ \t]*)({prefix}[ \t]+)(.*\n)'
 
