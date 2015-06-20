@@ -384,17 +384,21 @@ class Paragraph(_BlockElementContainingInline_Meta):
         self.rawtext.append(indented_line)
 
     def parse_next_line(self):
-        try:
-            # Use self.parent, otherwise if an element is found it will have
-            #  the Paragraph as its parent
-            self.parent.find_element_start()
-        except _BlockElementStartMatched:
-            self._parse_inline()
-            raise
-        else:
-            lines = self._read_indented_test_end_lines()
-            self._add_raw_content_lines(lines)
-            self.parse_next_line()
+        # Don't recurse, otherwise it will raise "RuntimeError: maximum
+        #  recursion depth exceeded while calling a Python object" for long
+        #  documents
+        while True:
+            try:
+                # Use self.parent, otherwise if an element is found it will
+                #  have the Paragraph as its parent
+                self.parent.find_element_start()
+            except _BlockElementStartMatched:
+                self._parse_inline()
+                raise
+            else:
+                lines = self._read_indented_test_end_lines()
+                self._add_raw_content_lines(lines)
+                continue
 
     # If an inline mark has overlapping matches with an inline mark, **which
     #  should never happen by design**, it's impossible to only escape the
@@ -429,16 +433,20 @@ class _BlockElementContainingInline(_BlockElementContainingInline_Meta):
     IGNORE_LEADING_SPACE = False
 
     def parse_next_line(self):
-        lines = self._read_indented_test_end_lines()
-        try:
-            self.check_element_end(lines)
-        except (_BlockElementStartMatched, _BlockElementEndConsumed,
-                _BlockElementEndNotConsumed):
-            self._parse_inline()
-            raise
-        else:
-            self._add_raw_content_lines(lines)
-            self.parse_next_line()
+        # Don't recurse, otherwise it will raise "RuntimeError: maximum
+        #  recursion depth exceeded while calling a Python object" for long
+        #  documents
+        while True:
+            lines = self._read_indented_test_end_lines()
+            try:
+                self.check_element_end(lines)
+            except (_BlockElementStartMatched, _BlockElementEndConsumed,
+                    _BlockElementEndNotConsumed):
+                self._parse_inline()
+                raise
+            else:
+                self._add_raw_content_lines(lines)
+                continue
 
     def convert_to_html(self):
         html = self._trim_last_break(''.join(
@@ -474,10 +482,14 @@ class _BlockElementNotContainingInline(_BlockElementNotContainingBlock):
     IGNORE_LEADING_SPACE = False
 
     def parse_next_line(self):
-        lines = self._read_indented_test_end_lines()
-        self.check_element_end(lines)
-        self._add_raw_content_lines(lines)
-        self.parse_next_line()
+        # Don't recurse, otherwise it will raise "RuntimeError: maximum
+        #  recursion depth exceeded while calling a Python object" for long
+        #  documents
+        while True:
+            lines = self._read_indented_test_end_lines()
+            self.check_element_end(lines)
+            self._add_raw_content_lines(lines)
+            continue
 
     def _parse_inline(self):
         pass
