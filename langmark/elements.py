@@ -253,6 +253,9 @@ class _BlockElementNotContainingBlock_IndentedMixin:
     TEST_END_LINES = 1
 
     def _process_initial_lines(self, lines):
+        # Always prevent deindenting the content, regardless of the parent
+        #  block ALLOW_DEINDENTATION attribute value
+        self.indentation_content = self.indentation_internal
         self._add_raw_first_line(lines[0])
 
     def check_element_end(self, lines):
@@ -270,10 +273,21 @@ class _BlockElementNotContainingBlock(_BlockElement):
     def __init__(self, langmark_, parent, indentation_external,
                  indentation_internal, initial_lines):
         self.rawtext = RawText('')
+        # Initialize indentation_content *before* running the superclass
+        #  constructor, since the indentation_content value must be settable
+        #  also by e.g. _process_initial_lines, like in
+        #  _BlockElementNotContainingBlock_IndentedMixin
+        self.indentation_content = None
         _BlockElement.__init__(self, langmark_, parent, indentation_external,
                                indentation_internal, initial_lines)
-        self.indentation_content = None if parent.ALLOW_DEINDENTATION \
-                                   else self.indentation_internal
+        # Don't set indentation_content to None now because it might have
+        #  already been set while running the superclass constructor, e.g. by
+        #  _process_initial_lines, like in
+        #  _BlockElementNotContainingBlock_IndentedMixin
+        #self.indentation_content = None if parent.ALLOW_DEINDENTATION \
+        #                           else self.indentation_internal
+        if not parent.ALLOW_DEINDENTATION:
+            self.indentation_content = self.indentation_internal
 
     def _add_raw_first_line(self, line):
         # Paragraph overrides this method
