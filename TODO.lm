@@ -40,6 +40,7 @@
 * Recognize headings also when indented or children of block elements?
 * Add tests
   * Test headerless and contentless source files
+  * Test very long and complex files fox maximum recursions (RuntimeError)
 * File extension: .lm .lmk
 * Documentation
   * Review and update all docstrings
