@@ -125,26 +125,32 @@ class _BlockElementContainingBlock(_BlockElement):
                     #self.parse_next_line()
                     #return
             # The element's parent may have been set to an ancestor of this
-            #  object (self), so don't use self._parse_element(element)
-            element.parent._parse_element(element)
-            break
-
-    def _parse_element(self, element):
-        self.children.append(element)
-        try:
-            element.parse_next_line()
-        except _BlockElementStartMatched as exc:
-            # The element's parent may have been set to an ancestor of this
-            #  object (self), so don't use self._parse_element(exc.element)
-            exc.element.parent._parse_element(exc.element)
-            return
-        except _BlockElementEndConsumed:
-            self.parse_next_line()
-            return
-        except _BlockElementEndNotConsumed as exc:
-            self.rewind_lines(*exc.lines)
-            self.parse_next_line()
-            return
+            #  object (self)
+            if element.parent is self:
+                # Use a loop instead of recursing, otherwise it will raise
+                #  "RuntimeError: maximum recursion depth exceeded while
+                #  calling a Python object" for long documents
+                while True:
+                    self.children.append(element)
+                    try:
+                        element.parse_next_line()
+                    except _BlockElementEndConsumed:
+                        break
+                    except _BlockElementEndNotConsumed as exc:
+                        self.rewind_lines(*exc.lines)
+                        break
+                    except _BlockElementStartMatched as exc:
+                        # The element's parent may have been set to an ancestor
+                        #  of this object (self)
+                        if exc.element.parent is self:
+                            element = exc.element
+                            continue
+                        else:
+                            raise
+                    else:
+                        break
+            else:
+                raise _BlockElementStartMatched(element)
 
     def convert_to_html(self):
         html = self.HTML_BREAK.join(child.convert_to_html()
