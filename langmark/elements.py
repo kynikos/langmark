@@ -40,6 +40,15 @@ class _Element:
         self.parent = parent
         self.children = []
 
+    def read_lines(self, N):
+        try:
+            return self.langmark.stream.read_next_lines_buffered(N)
+        except StopIteration:
+            raise _EndOfFile()
+
+    def read_lines_buffer(self):
+        return self.langmark.stream.lines_buffer
+
     def rewind_lines(self, *lines):
         self.langmark.stream.rewind_lines(*lines)
 
@@ -302,14 +311,13 @@ class _BlockElementNotContainingBlock(_BlockElement):
 
     def _read_indented_test_end_lines(self):
         try:
-            lines = self.langmark.stream.read_next_lines_buffered(
-                                                        self.TEST_END_LINES)
-        except StopIteration:
-            lines = self.langmark.stream.lines_buffer
+            lines = self.read_lines(self.TEST_END_LINES)
+        except _EndOfFile:
+            lines = self.read_lines_buffer()
             indented_lines = self._check_and_strip_indentation(lines)
             self._add_raw_content_lines(indented_lines)
             self._parse_inline()
-            raise _EndOfFile()
+            raise
         else:
             return self._check_and_strip_indentation(lines)
 

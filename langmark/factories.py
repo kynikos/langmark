@@ -49,12 +49,11 @@ class _ElementFactory(_BaseFactory):
 
     def make_element(self, langmark_, parent):
         try:
-            lines = langmark_.stream.read_next_lines_buffered(
-                                                        self.TEST_START_LINES)
-        except StopIteration:
+            lines = parent.read_lines(self.TEST_START_LINES)
+        except _EndOfFile:
             # Don't just process the exception here because other elements may
             #  require a lesser number of test start lines, hence not raising
-            #  StopIteration
+            #  _EndOfFile/StopIteration
             pass
         else:
             try:
@@ -195,26 +194,21 @@ class ParagraphFactory(_BaseFactory):
     Paragraph factory class.
     """
     def make_element(self, langmark_, parent):
-        try:
-            lines = langmark_.stream.read_next_lines_buffered(1)
-        except StopIteration:
-            # This can happen for example when a document ends with a
-            #  metadata element
-            raise _EndOfFile()
-        else:
-            line = lines[0]
-            if Configuration.BLANK_LINE.fullmatch(line):
-                raise _BlockElementStartNotMatched()
-            indentationtext = Configuration.INDENTATION.match(line).group()
-            # TODO: The equivalent indentation has already been computed at
-            #       least once in IndentedElements: finding a way to reuse it
-            #       would make things a little faster
-            indentation = RawText.compute_equivalent_indentation(
-                                                            indentationtext)
-            parent = self._find_correct_parent(parent, indentation)
-            return langmark.elements.Paragraph(langmark_, parent,
-                                            # Don't use 'indentation' here,
-                                            #  because it may contain the
-                                            #  leading escaping space
-                                            parent.indentation_internal,
-                                            parent.indentation_internal, lines)
+        # This can raise _EndOfFile for example when a document ends with a
+        #  metadata element, but don't process the exception here
+        lines = parent.read_lines(1)
+        line = lines[0]
+        if Configuration.BLANK_LINE.fullmatch(line):
+            raise _BlockElementStartNotMatched()
+        indentationtext = Configuration.INDENTATION.match(line).group()
+        # TODO: The equivalent indentation has already been computed at
+        #       least once in IndentedElements: finding a way to reuse it
+        #       would make things a little faster
+        indentation = RawText.compute_equivalent_indentation(indentationtext)
+        parent = self._find_correct_parent(parent, indentation)
+        return langmark.elements.Paragraph(langmark_, parent,
+                                           # Don't use 'indentation' here,
+                                           #  because it may contain the
+                                           #  leading escaping space
+                                           parent.indentation_internal,
+                                           parent.indentation_internal, lines)
