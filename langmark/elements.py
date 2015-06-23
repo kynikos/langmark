@@ -90,7 +90,6 @@ class _BlockElementContainingBlock(_BlockElement):
     Base class for elements containing block elements.
     """
     INSTALLED_BLOCK_FACTORIES = None
-    ALLOW_DEINDENTATION = None
 
     def _process_initial_lines(self, lines):
         self.rewind_lines(*lines)
@@ -180,8 +179,6 @@ class Root(_BlockElementContainingBlock):
     The first section can start immediately after the header, or be separated
     by no more than one empty line.
     """
-    ALLOW_DEINDENTATION = False
-
     def __init__(self, langmark_):
         _BlockElementContainingBlock.__init__(self, langmark_, None, 0, 0, ())
 
@@ -202,7 +199,6 @@ class IndentedContainer(_BlockElementContainingBlock):
     """
     An indented block container.
     """
-    ALLOW_DEINDENTATION = False
     HTML_TAGS = ('<div class="langmark-indented">', '</div>')
 
 
@@ -213,7 +209,6 @@ class _BlockElementContainingBlock_PrefixGrouped(_BlockElementContainingBlock):
     """
     # TODO: This class should be made a mixin, but it's hard because of the
     #       super calls
-    ALLOW_DEINDENTATION = True
     HTML_OUTER_TAGS = None
 
     def __init__(self, langmark_, parent, indentation_external,
@@ -268,9 +263,6 @@ class _BlockElementNotContainingBlock_IndentedMixin:
     TEST_END_LINES = 1
 
     def _process_initial_lines(self, lines):
-        # Always prevent deindenting the content, regardless of the parent
-        #  block ALLOW_DEINDENTATION attribute value
-        self.indentation_content = self.indentation_internal
         self._add_raw_first_line(lines[0])
 
     def check_element_end(self, lines):
@@ -285,24 +277,9 @@ class _BlockElementNotContainingBlock(_BlockElement):
     IGNORE_BLANK_LINES = None
     IGNORE_LEADING_SPACE = None
 
-    def __init__(self, langmark_, parent, indentation_external,
-                 indentation_internal, initial_lines):
+    def __init__(self, *args, **kwargs):
         self.rawtext = RawText('')
-        # Initialize indentation_content *before* running the superclass
-        #  constructor, since the indentation_content value must be settable
-        #  also by e.g. _process_initial_lines, like in
-        #  _BlockElementNotContainingBlock_IndentedMixin
-        self.indentation_content = None
-        _BlockElement.__init__(self, langmark_, parent, indentation_external,
-                               indentation_internal, initial_lines)
-        # Don't set indentation_content to None now because it might have
-        #  already been set while running the superclass constructor, e.g. by
-        #  _process_initial_lines, like in
-        #  _BlockElementNotContainingBlock_IndentedMixin
-        #self.indentation_content = None if parent.ALLOW_DEINDENTATION \
-        #                           else self.indentation_internal
-        if not parent.ALLOW_DEINDENTATION:
-            self.indentation_content = self.indentation_internal
+        _BlockElement.__init__(self, *args, **kwargs)
 
     def _add_raw_first_line(self, line):
         # Paragraph overrides this method
@@ -329,22 +306,16 @@ class _BlockElementNotContainingBlock(_BlockElement):
                     self._parse_inline()
                     raise _BlockElementEndNotConsumed(*lines[lN:])
                 # Never strip the line break from blank lines
-                # If self.indentation_content hasn't been set yet, it behaves
-                #  like 0 in string slicing
                 indented_lines.append(RawText.trim_equivalent_indentation(
-                            self.indentation_content, line[:-1]) + line[-1])
+                            self.indentation_internal, line[:-1]) + line[-1])
             else:
                 indentation = RawText.compute_equivalent_indentation(
                                 Configuration.INDENTATION.match(line).group())
-                try:
-                    if indentation < self.indentation_content:
-                        self._parse_inline()
-                        raise _BlockElementEndNotConsumed(*lines[lN:])
-                except TypeError:
-                    self.indentation_content = min(indentation,
-                                                   self.indentation_external)
+                if indentation < self.indentation_internal:
+                    self._parse_inline()
+                    raise _BlockElementEndNotConsumed(*lines[lN:])
                 indented_line = RawText.trim_equivalent_indentation(
-                                                self.indentation_content, line)
+                                            self.indentation_internal, line)
                 if self.IGNORE_LEADING_SPACE and indented_line.startswith(' '):
                     indented_line = indented_line[1:]
                 indented_lines.append(indented_line)

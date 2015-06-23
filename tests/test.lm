@@ -64,7 +64,7 @@ Text.
   item2 continued
 not item
 * item3a
-item3a continued
+not item
 * item3b
    item3b continued
 * item3c
@@ -73,7 +73,7 @@ item3a continued
 
 * item4
   * item5
-  item5 continued
+  item4 continued
   `* not item
 * item6
   ###
@@ -83,57 +83,57 @@ item3a continued
   ###
 
 * itemA1
-A line
- text
+  A line
+   text
 
 * itemA2
-A line
-  text
-
-* itemA3
-A line
+  A line
     code
 
+* itemA3
+  A line
+     code
+
 * itemA4
-A line
+  A line
       indented
 
 * itemA5
-A line
-###
-code
-###
+  A line
+  ###
+  code
+  ###
 
 * itemA6
-A line
- ###
-not code
+  A line
+   ###
+  not code
 
 * itemA7
-A line
+  A line
+   not code
   not code
-not code
 
 * itemA8
-A line
+  A line
   ###
-code
-###
+  code
+  ###
 
 * itemA9
-A line
+  A line
 
 ###
 code
 ###
 
 *   itemA10
-A line
-  code
+    A line
+      code
 
 *   itemA11
-A line
-      code
+    A line
+       code
 
 * itemB
   text *bold* itemBB
@@ -151,23 +151,23 @@ A line
 
   ###
   |||
-code4
-|||
+  code4
+  |||
 
   ###
-code5
-###
+  code5
+  ###
 
   text
 
 * itemC
- * not item
-  * itemC1
    * not item
+  * itemC1
+     * not item
 
 * itemD
   * itemD1
- * not item
+   * not item
 
 *   itemE1
     itemE2
@@ -351,7 +351,7 @@ Text.
 
         * item 1
         * item 2
-        blabla
+          blabla
 
         * item 3
 
