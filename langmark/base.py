@@ -21,6 +21,7 @@ import itertools
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
+                         _BlockElementContinue,
                          _BlockElementEndConsumed,
                          _BlockElementEndNotConsumed,
                          _InlineElementStartNotMatched,

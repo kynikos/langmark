@@ -42,6 +42,16 @@ class _BlockElementStartMatched(Exception):
         self.element = element
 
 
+class _BlockElementContinue(Exception):
+    """
+    Internal exception used to communicate to the parent that the parsed line
+    corresponds to the start of a new element.
+    """
+    def __init__(self, element, lines):
+        self.element = element
+        self.lines = lines
+
+
 class _BlockElementEndConsumed(Exception):
     """
     Internal exception used to communicate the end of the element to its

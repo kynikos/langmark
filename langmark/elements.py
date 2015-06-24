@@ -23,6 +23,7 @@ from .base import Configuration, RawText
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
                          _BlockElementStartMatched,
+                         _BlockElementContinue,
                          _BlockElementEndConsumed,
                          _BlockElementEndNotConsumed,
                          _InlineElementStartNotMatched,
@@ -116,6 +117,12 @@ class _BlockElementContainingBlock(_BlockElement):
                 self.find_element_start()
             except _BlockElementStartMatched as exc:
                 element = exc.element
+            except _BlockElementContinue as exc:
+                if exc.element is self:
+                    self.rewind_lines(*exc.lines)
+                    continue
+                else:
+                    raise
             else:
                 # find_element_start must *not* raise _BlockElementStartMatched
                 #  also when the text would be a Paragraph, so paragraphs (the
@@ -153,6 +160,12 @@ class _BlockElementContainingBlock(_BlockElement):
                         if exc.element.parent is self:
                             element = exc.element
                             continue
+                        else:
+                            raise
+                    except _BlockElementContinue as exc:
+                        if exc.element is self:
+                            self.rewind_lines(*exc.lines)
+                            break
                         else:
                             raise
                     else:
@@ -380,6 +393,13 @@ class Paragraph(_BlockElementContainingInline_Meta):
             except _BlockElementStartMatched:
                 self._parse_inline()
                 raise
+            except _BlockElementContinue as exc:
+                if exc.element is self.parent:
+                    self.rewind_lines(*exc.lines)
+                    continue
+                else:
+                    self._parse_inline()
+                    raise
             else:
                 lines = self._read_indented_test_end_lines()
                 self._add_raw_content_lines(lines)
