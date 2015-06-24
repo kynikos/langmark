@@ -65,6 +65,20 @@ class BlockMarkPrefix(_BlockMarkFactory):
         self.prefix = re.compile(self.PREFIX.format(prefix=regex))
 
 
+class BlockMarkPrefixCompact(_BlockMarkFactory):
+    """
+    A simple character.
+    """
+    # Contrary to BlockMarkPrefix, there's no space after 'prefix', so there
+    #  must not be ambiguity with inline elements at the start of a line
+    PREFIX = r'^([ \t]*)({escaped_char}[ \t]*)(.*\n)'
+
+    def __init__(self, char):
+        # Make sure that char is a single character
+        escaped_char = re.escape(char[0])
+        self.prefix = re.compile(self.PREFIX.format(escaped_char=escaped_char))
+
+
 class _InlineMarkFactory:
     """
     Base class for inline mark factories.

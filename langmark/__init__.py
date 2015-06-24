@@ -17,7 +17,7 @@
 # along with Langmark.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import (metadata, base, factories, elements, headings, lists, code,
-               formatting, links, html)
+               formatting, links, quotes, html)
 
 # Additional extension modules should insert their meta element classes in the
 #  list below; they must thus be imported *after* importing langmark, but
@@ -44,6 +44,7 @@ BLOCK_FACTORIES = [# HeaderElements uninstalls itself after the first non-match
                    factories.IndentedElements(),
                    code.CodeElements(),
                    lists.ListElements(),
+                   quotes.QuoteElements(),
                    html.HTMLElements()]
 
 # The position of indented elements in the following list determines the level

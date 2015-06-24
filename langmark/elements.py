@@ -314,6 +314,14 @@ class _BlockElementNotContainingBlock(_BlockElement):
     def _check_and_strip_indentation(self, lines):
         indented_lines = []
         for lN, line in enumerate(lines):
+            parent = self.parent
+            while parent:
+                try:
+                    line = parent.preprocess_inline(line,
+                                                    self.indentation_internal)
+                    break
+                except AttributeError:
+                    parent = parent.parent
             if Configuration.BLANK_LINE.fullmatch(line):
                 if not self.IGNORE_BLANK_LINES:
                     self._parse_inline()
