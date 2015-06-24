@@ -79,6 +79,19 @@ class BlockMarkPrefixCompact(_BlockMarkFactory):
         self.prefix = re.compile(self.PREFIX.format(escaped_char=escaped_char))
 
 
+class BlockMarkRepeat(_BlockMarkFactory):
+    """
+    A simple sequence of the same character possibly only followed by
+    whitespace characters.
+    """
+    RE = r'^([ \t]*)([{escaped_chars}] ?){{3,}}\2*[{escaped_chars}]?[ \t]*\n'
+
+    def __init__(self, *chars):
+        # Make sure that each char is a single character
+        escaped_chars = '|'.join(re.escape(char[0]) for char in chars)
+        self.mark = re.compile(self.RE.format(escaped_chars=escaped_chars))
+
+
 class _InlineMarkFactory:
     """
     Base class for inline mark factories.

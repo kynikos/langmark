@@ -544,6 +544,30 @@ class _BlockElementContainingText_Indented(
                                                                 self.HTML_TAGS)
 
 
+class HorizontalRule(_BlockElement):
+    """
+    A horizontal rule::
+
+        ---
+        _ _ _
+        ~  ~  ~
+        ===
+        * * *
+        +  +  +
+    """
+    # TODO: Allow setting the tag style (<hr> or <hr/> or <hr />) more easily
+    HTML_TAG = '<hr />'
+
+    def _process_initial_lines(self, lines):
+        pass
+
+    def parse_next_line(self):
+        raise _BlockElementEndConsumed()
+
+    def convert_to_html(self):
+        return self.HTML_TAG
+
+
 class _InlineElement(_Element):
     """
     Base class for inline elements.

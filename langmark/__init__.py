@@ -45,7 +45,8 @@ BLOCK_FACTORIES = [# HeaderElements uninstalls itself after the first non-match
                    code.CodeElements(),
                    lists.ListElements(),
                    quotes.QuoteElements(),
-                   html.HTMLElements()]
+                   html.HTMLElements(),
+                   factories.HorizontalRules()]
 
 # The position of indented elements in the following list determines the level
 #  of indentation needed to recognize them; the last element is also used for

@@ -18,6 +18,7 @@
 
 import re
 import langmark
+from . import marks
 from .base import Configuration, RawText
 from .exceptions import (_BlockElementStartNotMatched,
                          _BlockElementStartConsumed,
@@ -213,3 +214,25 @@ class ParagraphFactory(_BaseFactory):
                                            #  leading escaping space
                                            parent.indentation_internal,
                                            parent.indentation_internal, lines)
+
+
+class HorizontalRules(_BlockNotIndentedElementFactory):
+    """
+    Factory for horizontal rule elements.
+    """
+    TEST_START_LINES = 1
+    # There can't be conflicts with headings if the factory is inserted after
+    #  the headings factory in BLOCK_FACTORIES
+    BLOCK_MARK = marks.BlockMarkRepeat('-', '_', '~', '=', '*', '+')
+
+    def _find_equivalent_indentation(self, langmark_, lines):
+        match = self.BLOCK_MARK.mark.fullmatch(lines[0])
+        if not match:
+            raise _BlockElementStartNotMatched()
+        indentation = RawText.compute_equivalent_indentation(match.group(1))
+        return (indentation, (), None)
+
+    def _do_find_element(self, langmark_, parent, lines, indentation, matches,
+                         Element):
+        return langmark.elements.HorizontalRule(langmark_, parent, indentation,
+                                                indentation, ())
