@@ -178,8 +178,8 @@ class _BlockNotIndentedElementFactory(_BlockElementFactory):
     """
     def _find_element(self, langmark, parent, lines, indentation, matches,
                       Element):
-        indent_diff = indentation - parent.indentation_internal
-        if indent_diff > 0:
+        # This allows escaping with an initial space
+        if indentation > parent.indentation_internal:
             raise _BlockElementStartNotMatched()
         return self._do_find_element(langmark, parent, lines, indentation,
                                      matches, Element)
