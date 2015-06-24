@@ -1,31 +1,5 @@
 * * See notes in syntax.lm
   * Search for "TODO" in the files
-* KNOWN BUG (or unexpected behavior): block elements that are children of list
-  items must always start at the item's internal indetation, even if no empty
-  line separates them from the content; this is also true for indented block
-  elements. For example:
-
-    * item
-    text
-      this is not code
-        this is an indented code block
-
-    * item
-    text
-    ###
-    this code is not part of the item
-    ###
-
-  However think of a scenario like the following:
-
-    * item
-    text
-    * item
-    text
-    * item
-
-  Are the 3 items siblings or is each a child of the previous item?
-
 * While parsing the links, prepare a report of their status (links with missing
   id's, duplicated id's...)
 * * Automatic table of contents
@@ -34,8 +8,20 @@
     different converters like Markdown, MediaWiki...
   * Do not escape "&" when used in correct HTML entities?
   * Optionally do further HTML escapes (see Wembler's escape.py script)
-* Use class factories to reduce the number of tested regular expressions
-  Use a centralized configuration script
+* Block containers must be ended by a double empty line
+  But what happens if there are some nested block containers and only some of
+  them need to be ended? For example:
+
+  * item1
+      * item2
+      * item3
+
+
+      item1's 2-indented code or root's 4-indented text?
+
+* Use a centralized configuration script
+* Parse the indentation of every line only once in a pre-processing loop?
+  It would also avoid the need for rewinding etc.
 * Markdown compatibility mode
 * Recognize headings also when indented or children of block elements?
 * Add tests
