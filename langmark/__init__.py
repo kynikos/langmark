@@ -72,6 +72,8 @@ INLINE_ELEMENTS = [formatting.Emphasis,
                    code.FormattableCodeInline,
                    code.PlainCodeInline,
                    code.PlainTextInline,
+                   # If line breaks are disabled, enable the DOTALL version of
+                   #  base.Configuration.ESCAPE_RE
                    elements.LineBreak,
                    html.HTMLInlineTag]
 
