@@ -758,30 +758,87 @@ Text <strong>bold **`` bold</strong> text.</p>
 ^^^^</pre>
 <h4>Title <strong>4a</strong></h4>
 <p>Text &lt;escap&amp;this>.</p>
-<p>Text <span>text</span> text.
-Text <span style="display:inline;">text</span> text.
-<span>Text.</span></p>
-<span>Text.</span>
-<span style="display:inline;">Text.</span>
-<div>Text.</div>
-<div style="display:block;">Text.</div>
+<p>Text <span>text <strong>bold</strong></span> text.
+Text <span style="display:inline;"><strong>bold</strong> text</span> text.
+<span>Text <strong>bold</strong>.</span></p>
+<span>
+Text *not bold*.
+</span>
+<span>
+<p>Text <strong>bold</strong>.</p>
+</span>
+<span style="display:inline;">
+Text *not bold*.
+</span>
+<span style="display:inline;">
+<p>Text <strong>bold</strong>.</p>
+</span>
+<div>
+Text *not bold*.
+</div>
+<div>
+<p>Text <strong>bold</strong>.</p>
+</div>
+<div style="display:block;">
+Text *not bold*.
+</div>
+<div style="display:block;">
+<p>Text <strong>bold</strong>.</p>
+</div>
+<!doctype html>
+<!-->
+<!-- commented -->
+<!--
+commented text
+-->
 <ul>
 <li>
 <p>Item text.</p>
-<div>Text.</div>
+<div>
+Text *not bold*.
+</div>
+<div>
+<p>Text <strong>bold</strong>.</p>
+</div>
 <p>Item text.</p>
 </li>
 </ul>
-<p>Text.</p>
-<div>Text.</div>
-<div>Text.</div>
-<p>Text.</p>
-<p>Text.</p>
-<div>Text.</div>
-<p>Text.</p>
+<p>Text <strong>bold</strong>.
+<div>
+Text <strong>bold</strong>.
+</div></p>
+<div>
+Text *not bold*.
+</div>
+Text *not bold*.
+<p>Text <strong>bold</strong>.
+<div>
+Text <strong>bold</strong>.
+</div>
+Text <strong>bold</strong>.</p>
+<img src="image" />
+<p><img src="image" /></p>
 <p>Text.
 <img src="image" />
 Text.</p>
+<div>
+###
+not code
+###
+</div>
+<div>
+<pre>code</pre>
+</div>
+<div>
+* not item 1
+* not item 2
+</div>
+<div>
+<ul>
+<li>item 1</li>
+<li>item 2</li>
+</ul>
+</div>
 <p>Text.</p>
 <h4>Title 4b</h4>
 <p>Text.</p>

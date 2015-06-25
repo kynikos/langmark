@@ -98,12 +98,12 @@ class _InlineMarkFactory:
     pass
 
 
-class _InlineMarkSelfClosed(_InlineMarkFactory):
+class _InlineMarkStartOnly(_InlineMarkFactory):
     """
     Mark for inline elements without content.
     """
     def __init__(self, regex):
-        self.start = re.compile(regex)
+        self.start = regex
 
 
 class _InlineMarkStartParametersEnd(_InlineMarkFactory):

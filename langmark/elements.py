@@ -265,10 +265,10 @@ class _BlockElementNotContainingBlock_LineMarksMixin:
             raise _BlockElementEndConsumed()
 
 
-class _BlockElementNotContainingBlock_IndentedMixin:
+class _BlockElementNotContainingBlock_EmptyLineMixin:
     """
-    Mixin class for block elements, containing inline elements, whose start and
-    end are only defined by indentation.
+    Mixin class for block elements, containing inline elements, that end with
+    an empty line.
     """
     TEST_END_LINES = 1
 
@@ -473,7 +473,7 @@ class _BlockElementContainingInline_LineMarks(
 
 
 class _BlockElementContainingInline_Indented(
-                                _BlockElementNotContainingBlock_IndentedMixin,
+                                _BlockElementNotContainingBlock_EmptyLineMixin,
                                 _BlockElementContainingInline):
     """
     A block element, containing inline elements, whose start and end are
@@ -514,6 +514,17 @@ class _BlockElementContainingRaw_LineMarks(
         return self._trim_last_break(self.rawtext.get_raw_text())
 
 
+class _BlockElementContainingRaw_EmptyLine(
+                                _BlockElementNotContainingBlock_EmptyLineMixin,
+                                _BlockElementNotContainingInline):
+    """
+    A block element, containing raw text, that ends with an empty line.
+    marks.
+    """
+    def convert_to_html(self):
+        return self._trim_last_break(self.rawtext.get_raw_text())
+
+
 class _BlockElementContainingText_LineMarks(
                                 _BlockElementNotContainingBlock_LineMarksMixin,
                                 _BlockElementNotContainingInline):
@@ -527,7 +538,7 @@ class _BlockElementContainingText_LineMarks(
 
 
 class _BlockElementContainingText_Indented(
-                                _BlockElementNotContainingBlock_IndentedMixin,
+                                _BlockElementNotContainingBlock_EmptyLineMixin,
                                 _BlockElementNotContainingInline):
     """
     A block element, containing plain text, whose start and end are only
@@ -753,7 +764,7 @@ class LineBreak(_Element):
         First line`
         second line.
     """
-    INLINE_MARK = marks._InlineMarkSelfClosed(r'`\n')
+    INLINE_MARK = marks._InlineMarkStartOnly(re.compile(r'`\n'))
     # TODO: Allow setting the tag style (<br> or <br/> or <br />) more easily
     HTML_TAG = '<br />'
 

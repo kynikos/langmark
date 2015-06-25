@@ -888,53 +888,123 @@ Text ** bold **````` bold ** text.
 
 Text <escap&this>.
 
-Text <span>text</span> text.
-Text <span style="display:inline;">text</span> text.
-<span>Text.</span>
+Text <span>text *bold*</span> text.
+Text <span style="display:inline;">*bold* text</span> text.
+<span>Text *bold*.</span>
 
 <span>
-Text.
+Text *not bold*.
+</span>
+
+<span>
+
+Text *bold*.
+
 </span>
 
 <span style="display:inline;">
-Text.
+Text *not bold*.
+</span>
+
+<span style="display:inline;">
+
+Text *bold*.
+
 </span>
 
 <div>
-Text.
+Text *not bold*.
+</div>
+
+<div>
+
+Text *bold*.
+
 </div>
 
 <div style="display:block;">
-Text.
+Text *not bold*.
 </div>
+
+<div style="display:block;">
+
+Text *bold*.
+
+</div>
+
+<!doctype html>
+
+<!-->
+
+<!-- commented -->
+
+<!--
+commented text
+-->
 
 * Item text.
 
   <div>
-  Text.
+  Text *not bold*.
+  </div>
+
+  <div>
+
+  Text *bold*.
+
   </div>
 
   Item text.
 
-Text.
+Text *bold*.
 <div>
-Text.
+Text *bold*.
 </div>
 
 <div>
-Text.
+Text *not bold*.
 </div>
-Text.
+Text *not bold*.
 
-Text.
+Text *bold*.
 <div>
-Text.
+Text *bold*.
 </div>
-Text.
+Text *bold*.
+
+<img src="image" />
+
+ <img src="image" />
 
 Text.
 <img src="image" />
 Text.
+
+<div>
+###
+not code
+###
+</div>
+
+<div>
+
+###
+code
+###
+
+</div>
+
+<div>
+* not item 1
+* not item 2
+</div>
+
+<div>
+
+* item 1
+* item 2
+
+</div>
 
 Text.
 
