@@ -1,13 +1,20 @@
 * * See notes in syntax.lm
   * Search for "TODO" in the files
-* While parsing the links, prepare a report of their status (links with missing
-  id's, duplicated id's...)
+* Documentation
+  * Review and update all docstrings
+  * Mention dependencies
+* Official file extension: .lm .lmk
+* Add more tests
+  * Test headerless and contentless source files
+  * Test very long and complex files fox maximum recursions (RuntimeError)
 * * Automatic table of contents
   * Add a permalink next to headings
 * * Isolate the HTML converting code in a proper class, also preparing for
     different converters like Markdown, MediaWiki...
   * Do not escape "&" when used in correct HTML entities?
   * Optionally do further HTML escapes (see Wembler's escape.py script)
+* While parsing the links, prepare a report of their status (links with missing
+  id's, duplicated id's...)
 * Block containers must be ended by a double empty line
   But what happens if there are some nested block containers and only some of
   them need to be ended? For example:
@@ -19,19 +26,11 @@
 
       item1's 2-indented code or root's 4-indented text?
 
-* Use a centralized configuration script
 * Parse the indentation of every line only once in a pre-processing loop?
   It would also avoid the need for rewinding etc.
-* Markdown compatibility mode
+* Use a centralized configuration script
 * Recognize headings also when indented or children of block elements?
-* Add tests
-  * Test headerless and contentless source files
-  * Test very long and complex files fox maximum recursions (RuntimeError)
-* File extension: .lm .lmk
-* Documentation
-  * Review and update all docstrings
-  * When inserting html entities ("&...;"), they must be escaped like html tags
-  * Mention dependencies
+* Markdown compatibility mode
 * * Add methods to traverse/modify the etree object
   * Allow inserting an etree into another one
 * Benchmark/compare with other languages/parsers
