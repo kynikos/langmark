@@ -277,7 +277,7 @@ class _BlockElementNotContainingBlock_IndentedMixin:
 
     def check_element_end(self, lines):
         if Configuration.BLANK_LINE.fullmatch(lines[0]):
-            raise _BlockElementEndConsumed()
+            raise _BlockElementEndNotConsumed(*lines)
 
 
 class _BlockElementNotContainingBlock(_BlockElement):
