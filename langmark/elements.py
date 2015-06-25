@@ -511,8 +511,7 @@ class _BlockElementContainingRaw_LineMarks(
     marks.
     """
     def convert_to_html(self):
-        return self._trim_last_break(self.rawtext.get_raw_text()).join(
-                                                                self.HTML_TAGS)
+        return self._trim_last_break(self.rawtext.get_raw_text())
 
 
 class _BlockElementContainingText_LineMarks(

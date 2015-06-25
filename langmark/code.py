@@ -108,7 +108,7 @@ class PlainTextBlock(elements._BlockElementContainingRaw_LineMarks):
         Plain text
         \\\
     """
-    HTML_TAGS = ('<div>', '</div>')
+    pass
 
 
 class CodeElements(_BlockNotIndentedElementFactory):
