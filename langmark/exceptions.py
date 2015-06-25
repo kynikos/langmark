@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -19,24 +19,24 @@
 
 class _BlockElementStartNotMatched(Exception):
     """
-    Internal exception used to communicate to the parent that the parsed line
-    does not correspond to the start of the element.
+    Internal exception used to communicate that the parsed lines do not
+    correspond to the start of the element.
     """
     pass
 
 
 class _BlockElementStartConsumed(Exception):
     """
-    Internal exception used to communicate to the parent that the parsed line
-    corresponds to the start of the element and has already been used.
+    Internal exception used to communicate that the parsed lines correspond to
+    the start of the element and has already been used.
     """
     pass
 
 
 class _BlockElementStartMatched(Exception):
     """
-    Internal exception used to communicate to the parent that the parsed line
-    corresponds to the start of a new element.
+    Internal exception used to communicate that the parsed lines correspond to
+    the start of a new element.
     """
     def __init__(self, element):
         self.element = element
@@ -44,8 +44,8 @@ class _BlockElementStartMatched(Exception):
 
 class _BlockElementContinue(Exception):
     """
-    Internal exception used to communicate to the parent that the parsed line
-    corresponds to the start of a new element.
+    Internal exception used to communicate that the parsed lines do not
+    correspond to the start of a new element, but a change of parent is needed.
     """
     def __init__(self, element, lines):
         self.element = element
@@ -71,8 +71,8 @@ class _BlockElementEndNotConsumed(Exception):
 
 class _InlineElementStartNotMatched(Exception):
     """
-    Internal exception used to communicate to the parent that the parsed line
-    does not correspond to the start of the element.
+    Internal exception used to communicate that the parsed mark does not
+    correspond to the start of an inline element.
     """
     pass
 

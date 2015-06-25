@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -188,9 +188,6 @@ class _BlockElementContainingBlock(_BlockElement):
 class Root(_BlockElementContainingBlock):
     """
     The root element of the tree.
-
-    The first section can start immediately after the header, or be separated
-    by no more than one empty line.
     """
     def __init__(self, langmark_):
         _BlockElementContainingBlock.__init__(self, langmark_, None, 0, 0, ())
@@ -252,8 +249,8 @@ class _BlockElementContainingBlock_PrefixGrouped(_BlockElementContainingBlock):
 
 class _BlockElementNotContainingBlock_LineMarksMixin:
     """
-    A block element, containing inline elements, that starts and ends with
-    full-line marks.
+    Mixin class for block elements, containing inline elements, that start and
+    end with full-line marks.
     """
     TEST_END_LINES = 1
 
@@ -270,8 +267,8 @@ class _BlockElementNotContainingBlock_LineMarksMixin:
 
 class _BlockElementNotContainingBlock_IndentedMixin:
     """
-    A block element, containing inline elements, whose start and end is defined
-    by indentation.
+    Mixin class for block elements, containing inline elements, whose start and
+    end are only defined by indentation.
     """
     TEST_END_LINES = 1
 
@@ -369,9 +366,7 @@ class Paragraph(_BlockElementContainingInline_Meta):
     """
     A paragraph.
 
-    The default container, it ends whenever an empty line is found. If multiple
-    empty lines are found, all except the last one are considered part of the
-    content.
+    The default container, it ends whenever an empty line is found.
     """
     TEST_END_LINES = 1
     IGNORE_BLANK_LINES = False
@@ -481,8 +476,8 @@ class _BlockElementContainingInline_Indented(
                                 _BlockElementNotContainingBlock_IndentedMixin,
                                 _BlockElementContainingInline):
     """
-    A block element, containing inline elements, whose start and end is defined
-    by indentation.
+    A block element, containing inline elements, whose start and end are
+    only defined by indentation.
     """
     pass
 
@@ -536,8 +531,8 @@ class _BlockElementContainingText_Indented(
                                 _BlockElementNotContainingBlock_IndentedMixin,
                                 _BlockElementNotContainingInline):
     """
-    A block element, containing plain text, whose start and end is defined by
-    indentation.
+    A block element, containing plain text, whose start and end are only
+    defined by indentation.
     """
     def convert_to_html(self):
         return self._trim_last_break(self.rawtext.convert_to_html()).join(
@@ -754,7 +749,7 @@ class _InlineElementContainingHtmlText(_InlineElementContainingText):
 
 class LineBreak(_Element):
     """
-    Line break::
+    A line break::
 
         First line`
         second line.

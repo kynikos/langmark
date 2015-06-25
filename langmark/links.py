@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -32,7 +32,7 @@ from .exceptions import (_BlockElementStartNotMatched,
 
 class LinksData(metadata._MetaDataStorage):
     """
-    The links data.
+    Data on the links in the text.
     """
     ATTRIBUTE_NAME = 'links'
 
@@ -114,7 +114,7 @@ class Link(elements._InlineElementContainingParameters):
 
 class LinkDefinitions(_MetaDataElementFactory):
     """
-    Link definitions::
+    Factory for link definitions::
 
         [id]: url Title
         [id]: url "Title"

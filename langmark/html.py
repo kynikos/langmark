@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -61,8 +61,7 @@ class HTMLInlineTag(elements._Element):
 
 class BlockMarkHTML(marks._BlockMarkFactory):
     """
-    A simple sequence of the same character possibly only followed by
-    whitespace characters.
+    Mark for recognizing HTML tags.
     """
     # TODO: Recognize self-closed tags (excluded at the moment)
     START = re.compile(r'^([ \t]*)<(([a-zA-Z][a-zA-Z0-9]*)'

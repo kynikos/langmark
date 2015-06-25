@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -30,7 +30,7 @@ from .exceptions import (_BlockElementStartNotMatched,
 
 class Configuration:
     """
-    Auxiliary regular expressions and other constants.
+    Generic configuration parameters.
     """
     TAB_LENGTH = 4
     MARK_LIMIT = 3
@@ -80,6 +80,9 @@ class Stream:
 
 
 class RawText:
+    """
+    The content of an element.
+    """
     def __init__(self, text):
         self.text = text
 

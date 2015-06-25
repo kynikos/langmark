@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -54,8 +54,7 @@ class BlockMarkSimple(_BlockMarkFactory):
 
 class BlockMarkPrefix(_BlockMarkFactory):
     """
-    A simple sequence of the same character possibly only followed by
-    whitespace characters.
+    An expression that starts content after some whitespace characters.
     """
     # Without the space after 'prefix' there would be a clash with some
     #  inline elements at the start of a line
@@ -67,7 +66,8 @@ class BlockMarkPrefix(_BlockMarkFactory):
 
 class BlockMarkPrefixCompact(_BlockMarkFactory):
     """
-    A simple character.
+    A character after which the content starts, optionally separated by
+    whitespace characters.
     """
     # Contrary to BlockMarkPrefix, there's no space after 'prefix', so there
     #  must not be ambiguity with inline elements at the start of a line
@@ -81,8 +81,7 @@ class BlockMarkPrefixCompact(_BlockMarkFactory):
 
 class BlockMarkRepeat(_BlockMarkFactory):
     """
-    A simple sequence of the same character possibly only followed by
-    whitespace characters.
+    A simple sequence of the same character, optionally alternated with spaces.
     """
     RE = r'^([ \t]*)([{escaped_chars}] ?){{3,}}\2*[{escaped_chars}]?[ \t]*\n'
 
@@ -101,7 +100,7 @@ class _InlineMarkFactory:
 
 class _InlineMarkSelfClosed(_InlineMarkFactory):
     """
-    Base class for inline mark factories.
+    Mark for inline elements without content.
     """
     def __init__(self, regex):
         self.start = re.compile(regex)
@@ -109,7 +108,7 @@ class _InlineMarkSelfClosed(_InlineMarkFactory):
 
 class _InlineMarkStartParametersEnd(_InlineMarkFactory):
     """
-    Base class for inline mark factories.
+    Base class for marks for inline elements with content or parameters.
     """
     PRE_START_TEST = r'(?:(\n)|([ \t]?)|({escaped_char}))\Z'
     PRE_END_TEST_NORMAL = r'[{escaped_char} \t]'
@@ -240,7 +239,8 @@ class _InlineMarkStartParametersEnd(_InlineMarkFactory):
 
 class _InlineMarkEscapableSimple(_InlineMarkStartParametersEnd):
     """
-    Base class for inline mark factories.
+    Mark for inline elements that start and end with the same sequence of
+    characters, also limited in length.
     """
     def __init__(self, char):
         _InlineMarkStartParametersEnd.__init__(self, char, char,
@@ -249,10 +249,11 @@ class _InlineMarkEscapableSimple(_InlineMarkStartParametersEnd):
 
 class _InlineMarkNonEscapableSimple(_InlineMarkStartParametersEnd):
     """
-    Base class for inline mark factories.
+    Mark for inline elements that start and end with the same sequence of
+    characters, without a length limit.
 
-    When it is not possible to escape the mark character with the normal escape
-    character, allow an indefinite number of characters as a mark.
+    This is useful for elements that do not support escaping the mark character
+    in the content.
     """
     def __init__(self, char):
         _InlineMarkStartParametersEnd.__init__(self, char, char, None)
@@ -260,7 +261,8 @@ class _InlineMarkNonEscapableSimple(_InlineMarkStartParametersEnd):
 
 class _InlineMarkEscapableStartEnd(_InlineMarkStartParametersEnd):
     """
-    Base class for inline mark factories.
+    Mark for inline elements that start and end with the same generic
+    expression, also limited in length.
     """
     def __init__(self, start_char, end_char):
         _InlineMarkStartParametersEnd.__init__(self, start_char, end_char,

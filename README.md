@@ -1,4 +1,4 @@
-Langmark - A hypertext markup language with a simple, powerful and extensible
+Langmark is a powerful lightweight markup language with a simple and extensible
 parser.
 
 Langmark is distributed under the terms of the

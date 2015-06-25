@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -23,8 +23,8 @@ from langmark import Langmark
 
 
 def _parse_cli_args():
-    cliparser = argparse.ArgumentParser(description="Langmark parser.",
-                                        add_help=True)
+    cliparser = argparse.ArgumentParser(description="Parser for the Langmark "
+                                        "markup language.", add_help=True)
     cliparser.add_argument('format', choices=['html'], metavar='FORMAT',
                         help='the output format, chosen among [%(choices)s]')
     cliparser.add_argument('source', metavar='SOURCE',

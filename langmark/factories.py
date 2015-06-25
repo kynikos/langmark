@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -45,7 +45,7 @@ class _BaseFactory:
 
 class _ElementFactory(_BaseFactory):
     """
-    Base class for element factories.
+    Base class for content element factories.
     """
     TEST_START_LINES = None
 
@@ -143,7 +143,7 @@ class _BlockElementFactory(_ElementFactory):
 
 class IndentedElements(_BlockElementFactory):
     """
-    Factory for indented elements.
+    Factory for elements based on indentation.
     """
     TEST_START_LINES = 1
     INSTALLED_ELEMENTS = None
@@ -176,7 +176,7 @@ class IndentedElements(_BlockElementFactory):
 
 class _BlockNotIndentedElementFactory(_BlockElementFactory):
     """
-    Factory for non-indented block elements.
+    Factory for elements based on marks.
     """
     def _find_element(self, langmark, parent, lines, indentation, matches,
                       Element):
@@ -193,7 +193,7 @@ class _BlockNotIndentedElementFactory(_BlockElementFactory):
 
 class ParagraphFactory(_BaseFactory):
     """
-    Paragraph factory class.
+    Factory for paragraph elements.
     """
     def make_element(self, langmark_, parent):
         # This can raise _EndOfFile for example when a document ends with a

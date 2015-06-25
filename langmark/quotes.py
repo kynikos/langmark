@@ -1,4 +1,4 @@
-# Langmark - A hypertext markup language with a powerful and extensible parser.
+# Langmark - A powerful and extensible lightweight markup language.
 # Copyright (C) 2015 Dario Giovannetti <dev@dariogiovannetti.net>
 #
 # This file is part of Langmark.
@@ -32,7 +32,10 @@ from .exceptions import (_BlockElementStartNotMatched,
 
 class BlockQuote(elements._BlockElementContainingBlock):
     """
-    An indented block container.
+    A quote block::
+
+        > > quoted text
+        > quoted text
     """
     # TODO: For the moment it's impossible to have two separate quote blocks
     #       without other elements between them
@@ -49,7 +52,7 @@ class BlockQuote(elements._BlockElementContainingBlock):
 
 class QuoteElements(_ElementFactory):
     """
-    Factory for quote elements.
+    Factory for quote block elements.
     """
     TEST_START_LINES = 1
     BLOCK_CHAR = '>'

@@ -1,8 +1,8 @@
 * * See notes in syntax.lm
   * Search for "TODO" in the files
 * Documentation
-  * Review and update all docstrings
-  * Mention dependencies
+  * Write a tutorial
+  * Mention installation dependencies
 * Official file extension: .lm .lmk
 * Add more tests
   * Test headerless and contentless source files
