@@ -7,9 +7,7 @@ Inspiration languages (read their specification):
 * MediaWiki
 
 
-[disguised@email.address]
-
-
+![disguised@email.address]
 ![smartlink|http://url.com/image.jpg|title]
 
 
@@ -27,11 +25,6 @@ http://plain.link.com/
 . indented
 .. indented
 . indented
-
-
-Text'|sup| text.
-Text:|small| text.
-Text,|sub| text.
 
 
 Text ^[footnote-reflink-id] text.
