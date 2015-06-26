@@ -121,7 +121,7 @@ class _InlineMarkStartParametersEnd(_InlineMarkFactory):
     END_MARK_NORMAL = r'(?<!\n)({escaped_mark})(?!{escaped_char})'
     END_MARK_SPACED = r'([ \t]{escaped_mark})(?=[ \t]|$)'
 
-    def __init__(self, start_char, end_char, max_chars):
+    def __init__(self, start_char, end_char, min_chars, max_chars):
         # Make sure that *_char are single characters
         self.escaped_start_char = re.escape(start_char[0])
         self.escaped_end_char = re.escape(end_char[0])
@@ -130,7 +130,17 @@ class _InlineMarkStartParametersEnd(_InlineMarkFactory):
         #  very difficult to implement because the internal text still needs
         #  to be parsed for nested inline elements, and a white space should
         #  cancel all the parsing with an exception
-        quantifier = r'{1,' + str(max_chars) + r'}' if max_chars else r'+'
+        if min_chars > 1:
+            if max_chars:
+                quantifier = r'{' + str(min_chars) + r',' + str(max_chars) + \
+                                                                        r'}'
+            else:
+                quantifier = r'{' + str(min_chars) + r',}'
+        else:
+            if max_chars:
+                quantifier = r'{1,' + str(max_chars) + r'}'
+            else:
+                quantifier = r'+'
         self.start = re.compile(self.POSSIBLE_MARK.format(
                 escaped_char=self.escaped_start_char, quantifier=quantifier),
                 re.MULTILINE)
@@ -243,7 +253,17 @@ class _InlineMarkEscapableSimple(_InlineMarkStartParametersEnd):
     characters, also limited in length.
     """
     def __init__(self, char):
-        _InlineMarkStartParametersEnd.__init__(self, char, char,
+        _InlineMarkStartParametersEnd.__init__(self, char, char, 1,
+                                               Configuration.MARK_LIMIT)
+
+
+class _InlineMarkEscapableSimple2(_InlineMarkStartParametersEnd):
+    """
+    Mark for inline elements that start and end with the same sequence of
+    characters, also limited in length with a minimum of 2 characters.
+    """
+    def __init__(self, char):
+        _InlineMarkStartParametersEnd.__init__(self, char, char, 2,
                                                Configuration.MARK_LIMIT)
 
 
@@ -256,14 +276,14 @@ class _InlineMarkNonEscapableSimple(_InlineMarkStartParametersEnd):
     in the content.
     """
     def __init__(self, char):
-        _InlineMarkStartParametersEnd.__init__(self, char, char, None)
+        _InlineMarkStartParametersEnd.__init__(self, char, char, 1, None)
 
 
 class _InlineMarkEscapableStartEnd(_InlineMarkStartParametersEnd):
     """
-    Mark for inline elements that start and end with the same generic
-    expression, also limited in length.
+    Mark for inline elements that start and end with differences sequences of
+    characters, also limited in length.
     """
     def __init__(self, start_char, end_char):
-        _InlineMarkStartParametersEnd.__init__(self, start_char, end_char,
+        _InlineMarkStartParametersEnd.__init__(self, start_char, end_char, 1,
                                                Configuration.MARK_LIMIT)

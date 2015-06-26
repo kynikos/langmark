@@ -43,9 +43,9 @@ class Superscript(elements._InlineElementContainingInline):
     """
     Superscript text::
 
-        ^superscript^
+        ^^superscript^^
     """
-    INLINE_MARK = marks._InlineMarkEscapableSimple('^')
+    INLINE_MARK = marks._InlineMarkEscapableSimple2('^')
     HTML_TAGS = ('<sup>', '</sup>')
 
 
@@ -53,9 +53,9 @@ class Subscript(elements._InlineElementContainingInline):
     """
     Subscript text::
 
-        ;subscript;
+        ,,subscript,,
     """
-    INLINE_MARK = marks._InlineMarkEscapableSimple(';')
+    INLINE_MARK = marks._InlineMarkEscapableSimple2(',')
     HTML_TAGS = ('<sub>', '</sub>')
 
 
@@ -63,9 +63,9 @@ class Small(elements._InlineElementContainingInline):
     """
     Small text::
 
-        :small:
+        ::small::
     """
-    INLINE_MARK = marks._InlineMarkEscapableSimple(':')
+    INLINE_MARK = marks._InlineMarkEscapableSimple2(':')
     HTML_TAGS = ('<small>', '</small>')
 
 
@@ -73,7 +73,7 @@ class Strikethrough(elements._InlineElementContainingInline):
     """
     Strikethrough text::
 
-        ~strikethrough~
+        ~~strikethrough~~
     """
-    INLINE_MARK = marks._InlineMarkEscapableSimple('~')
+    INLINE_MARK = marks._InlineMarkEscapableSimple2('~')
     HTML_TAGS = ('<del>', '</del>')

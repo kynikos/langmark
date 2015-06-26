@@ -662,17 +662,17 @@ Text.
 
 Aaa _bbb_ ccc.
 Ddd *eee* fff.
-Ggg ^hhh^ iii.
-Jjj ;kkk; lll.
-Jjj :kkk: lll.
-Jjj ~kkk~ lll.
+Ggg ^^hhh^^ iii.
+Jjj ,,kkk,, lll.
+Jjj ::kkk:: lll.
+Jjj ~~kkk~~ lll.
 Jjj |kkk<&>``| lll.
 Jjj #kkk<&>``# lll.
 Jjj \kkk<&>``\ lll.
 Aaa __ _bbb_ __ ccc.
 Ddd ** *eee* ** fff.
 Ggg ^^ ^hhh^ ^^ iii.
-Jjj ;; ;kkk; ;; lll.
+Jjj ,, ,kkk, ,, lll.
 Jjj :: :kkk: :: lll.
 Jjj ~~ ~kkk~ ~~ lll.
 Jjj || |kkk<&>``| || lll.
