@@ -165,8 +165,8 @@ class HeadingElements(_BlockNotIndentedElementFactory):
     START_MARK_1 = re.compile(r'^\={3,}[ \t]*\n')
     START_MARK_2 = re.compile(r'^[\=\-]{3,}[ \t]*\n')
     TITLE_MARK = re.compile(r'^[ \t]*(.+?)[ \t]*\n')
-    END_MARK_1 = re.compile(r'^\=+[ \t]*\n')
-    END_MARK_2 = re.compile(r'^[\=\-]+[ \t]*\n')
+    END_MARK_1 = re.compile(r'^\={3,}[ \t]*\n')
+    END_MARK_2 = re.compile(r'^[\=\-]{3,}[ \t]*\n')
 
     def _find_equivalent_indentation(self, langmark_, lines):
         return (0, (), None)
