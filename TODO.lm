@@ -1,8 +1,5 @@
 * * See notes in SYNTAX_TODO.lm
   * Search for "TODO" in the files
-* Documentation
-  * Write a tutorial
-  * Mention installation dependencies
 * Official file extension: .lm .lmk
 * Add more tests
   * Test headerless and contentless source files

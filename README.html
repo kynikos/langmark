@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Langmark - README</title>
+    <meta charset="utf-8">
+    <style>
+    pre, code {
+        background-color: #ddf;
+    }
+    code {
+        padding: 0.1em;
+    }
+    pre {
+        padding: 0.2em;
+        border: 1px solid #bbd;
+    }
+    div.langmark-indented {
+        margin-left: 2em;
+    }
+    </style>
+</head>
+<body>
+<p>Langmark is a powerful lightweight markup language with a configurable and
+extensible parser. It is mainly inspired by <a href="http://daringfireball.net/projects/markdown/">Markdown</a>, with which it shares
+purpose and philosophy, but also <a href="https://www.mediawiki.org/wiki/Markup_spec">MediaWiki</a> is the inspiration for some
+features.</p>
+<p>Compared to Markdown, Langmark supports more complex content
+layouts, relying on indentation to define nested elements. It also tries to
+prevent the need for extraneous escape characters as much as possible, often
+allowing to use spaces for the same purpose.</p>
+<p>In addition, the parser developed in this project also stores the original
+document in a tree of objects which can be used to easily retrieve and
+manipulate the content programmatically before the conversion to HTML.</p>
+<p>Langmark is distributed under the terms of the
+<a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License v3.0</a> (see LICENSE).</p>
+<h1>Parser</h1>
+<h2>Installation</h2>
+<p>The Langmark parser and HTML converter developed in this project requires
+<a href="https://www.python.org/">Python 3</a> with its standard libraries plus the <a href="https://github.com/kynikos/lib.py.eventdispatcher">eventdispatcher</a> and
+<a href="https://github.com/kynikos/lib.py.textparser">textparser</a> modules.</p>
+<h2>Command-line usage</h2>
+<p>To convert a Langmark file to HTML, run:</p>
+<pre>$ langmark html /path/to/file.lm</pre>
+<p>This will simply print the HTML code in the standard output. You will usually
+want to redirect the output to a file, in order to save it:</p>
+<pre>$ langmark html /path/to/file.lm > /path/to/file.html</pre>
+<p>To read the complete help on commands, run:</p>
+<pre>$ langmark --help</pre>
+<h2>Library usage</h2>
+<p>Import the <code>langmark</code> module in your script:</p>
+<pre>import langmark</pre>
+<p>Optionally configure or extend Langmark (<strong>TODO:</strong> needs expansion):</p>
+<pre>langmark.META_ELEMENTS
+langmark.BLOCK_FACTORIES
+langmark.INDENTED_ELEMENTS
+langmark.INLINE_ELEMENTS</pre>
+<p>Instantiate the <code>Langmark</code> class:</p>
+<pre>doc = Langmark()</pre>
+<p>Open a file and parse it:</p>
+<pre>with open('/path/to/file', 'r') as stream:
+    doc.parse(stream)</pre>
+<p>The elements tree can be accessed from the <code>doc.etree</code> object.</p>
+<p>To convert the document to an HTML string:</p>
+<pre>html = doc.etree.convert_to_html()</pre>
+<h1>Syntax</h1>
+<h2>Metadata</h2>
+<p>Metadata is part of the document text that will not appear in the
+converted output, but instead defines some values that are stored and possibly
+used by other elements.</p>
+<h3>Header</h3>
+<p>Key/value pairs can be defined in the header of the document with the following
+syntax:</p>
+<pre>::key
+::key value
+::  key  value</pre>
+<p>The <code>::</code> mark must be at the start of a line; spaces between <code>::</code> and <code>key</code> are
+allowed; <code>key</code> must be separated
+from <code>value</code> by any number of whitespace characters; <code>key</code> cannot contain
+whitespace characters, as there is no way to escape them; a <code>value</code> is
+optional, and <code>None</code> will be stored if not present; all whitespace characters
+at the end of the line will be ignored.</p>
+<p>As soon as a line that does not qualify as header metadata is found, the header
+is considered terminated, and any later lines in the body that would qualify as
+header metadata will be instead treated as normal text.</p>
+<p>Defining a header makes sense only when using Langmark as a library in a
+script: the key/value pairs can be accessed as strings in a dictionary object
+stored in the <code>doc.header.keys</code> attribute.</p>
+<h3>Link definitions</h3>
+<p>Links can be defined separately from the document body, and given IDs so that
+they can be easily used in the content. The syntax is very similar to Markdown:</p>
+<pre>[ID]: url
+[ID]: url title
+[ID]: url    'title'
+[ID]:    url "title"
+   [ID]: url (title)</pre>
+<p>A link definition must start with the link <code>ID</code> enclosed in square brackets,
+followed by a colon; then the <code>url</code> must come, separated by at least one space;
+optionally a <code>title</code> can be specified, and it will be assumed to start after
+the first sequence of whitespace characters past the <code>url</code>; the <code>title</code> can be
+enclosed in quote, double quote or parentheses. Link definitions can be
+liberally preceded by whitespace characters.</p>
+<h2>Block elements</h2>
+<p>Block elements can contain other block elements or inline elements.</p>
+<h3>Headings</h3>
+<p>Heading elements can be defined with the following syntax:</p>
+<pre>= Heading 1
+== Heading 2
+=== Heading 3
+==== Heading 4
+===== Heading 5
+====== Heading 6</pre>
+<p>Which will generate:</p>
+<pre>&lt;h1>Heading 1&lt;/h1>
+&lt;h2>Heading 2&lt;/h2>
+&lt;h3>Heading 3&lt;/h3>
+&lt;h4>Heading 4&lt;/h4>
+&lt;h5>Heading 5&lt;/h5>
+&lt;h6>Heading 6&lt;/h6></pre>
+<p>The line must start with a sequence of <code>=</code> characters: their number defines the
+level of the heading; any more than 6 will always create an <code>&lt;h6></code> element; the
+heading text can be separated from the <code>=</code> characters by white space, although
+that is not necessary, unless the text has to start with an <code>=</code> sign; the
+text can only contain inline elements; the line can optionally end with a
+sequence of <code>=</code> characters, whose number will not affect the level of the
+heading; the final sequence can be separated from the text by white space,
+although that is not necessary, unless the text has to end with an <code>=</code> sign.</p>
+<p>All the following will create an <code>&lt;h3></code> element:</p>
+<pre>===   Heading=====
+===Heading  =====
+=== =Heading==   ====</pre>
+<p>Level-1 and level-2 headings also have two alternative, multiline syntaxes:</p>
+<pre>Heading 1
+=========</pre>
+<pre>Heading 2
+---------</pre>
+<p>These headings must be preceded by an empty line, unless they appear at the
+start of the document or immediately after the header. The underline for <code>&lt;h1></code>
+elements must be a sequence of at least 3 <code>=</code> characters; the underline for
+<code>&lt;h2></code> elements must be a sequence of at least 3 <code>-</code> or <code>=</code> characters, with at
+least one <code>-</code> character.</p>
+<pre>=========
+Heading 1
+=========</pre>
+<pre>---------
+Heading 2
+=========</pre>
+<p>With this syntax, <code>&lt;h1></code> elements must be overlined and underlined with a
+sequence of at least 3 <code>=</code> characters. <code>&lt;h2></code> elements must be overlined and
+underlined with a sequence of at least 3 <code>-</code> or <code>=</code> characters, with at
+least one <code>-</code> character.</p>
+<p>All types of headings can only contain inline elements.</p>
+<h3>Paragraphs</h3>
+<p>Paragraph elements are created by default, when no other block element is
+matched. Paragraphs are terminated by empty lines. You can write the content
+in several lines, and they will be output as a single one, although line breaks
+will be retained in the HTML source.</p>
+<pre>This is a paragraph.
+<br />
+This is
+a paragraph too.</pre>
+<p>The above will output:</p>
+<pre>&lt;p>This is a paragraph.&lt;/p>
+&lt;p>This is
+a paragraph too.&lt;/p></pre>
+<p>If a paragraph is the only child of its parent, the <code>&lt;p></code> tags will be omitted.</p>
+<h3>Lists</h3>
+<p>Lists can be defined with the following syntax:</p>
+<pre>* item
+* item
+  * item
+    * item
+  * item</pre>
+<p>Which will produce:</p>
+<pre>&lt;ul>
+&lt;li>item&lt;/li>
+&lt;li>
+&lt;p>item&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>item&lt;/p>
+&lt;ul>
+&lt;li>item&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>item&lt;/li>
+&lt;/ul></pre>
+<p>Unordered lists are introduced by <code>*</code> characters; ordered (numbered) lists are
+introduced by a sequence of numbers or a <code>#</code> sign, followed by a <code>.</code>;
+ordered (alphabetical) lists are introduced by 1 letter or a <code>&amp;</code> sign,
+followed by a <code>.</code>. The item text must always be separated by at least one
+space.</p>
+<p>Note that alphabetical lists are actually normal ordered lists with a
+predefined class: <code>&lt;ol class="langmark-latin"></code>. In order to make it an actual
+alphabetical list you will have to give it a <code>list-style-type: lower-alpha</code>
+rule or similar in the CSS code.</p>
+<p>List items can contain any other kind of block and inline elements (except
+headings). The text of an item, and its child elements, must be properly
+indented though, or the item will be terminated:</p>
+<pre>1. This is
+   some item text.
+
+   ###
+   code block
+   ###
+
+   * item
+   * item
+   * item
+
+2. Another item.
+
+     code block by indentation
+
+   a. item
+   b. item
+   c. item
+
+   Some more item text.
+This text is no longer part of the item.</pre>
+<p>Mixing two different kinds of lists at the same level of indentation will
+create two different, subsequent lists. There is however no way (yet) to define
+two subsequent lists of the same kind, without having some other element in
+between.</p>
+<h3>Block quotes</h3>
+<p>Block quotes can be defined with the following syntax:</p>
+<pre>> > > quoted text
+> > > quoted text
+> quoted text
+> quoted text
+> > quoted text
+text</pre>
+<p>Which will output:</p>
+<pre>&lt;blockquote>
+&lt;blockquote>&lt;blockquote>quoted text
+quoted text&lt;/blockquote>&lt;/blockquote>
+&lt;p>quoted text
+quoted text&lt;/p>
+&lt;blockquote>quoted text&lt;/blockquote>
+&lt;/blockquote>
+&lt;p>text&lt;/p></pre>
+<p>Quoted text is introduced by a sequence of <code>></code> characters, whose number define
+the quote level; each character is optionally separated from the others and
+from the quoted text by whitespace characters.</p>
+<p>When increasing the quote level by 1, you can also use the simpler list
+notation:</p>
+<pre>> quoted text
+  > quoted text
+    some more text
+    some more text
+    > quoted text
+      some more text
+> quoted text
+text</pre>
+<p>Just like with lists, block quotes can contain any other kind of block and
+inline elements (except headings). Again, the text of a quote, and its child
+elements, must be properly indented, or the quote will be terminated (and
+possibly a new one started).</p>
+<p>Note that, just like with lists of the same kind, there is no way (yet) to
+define two subsequent block quotes at the same indentatioin level without
+having some other element in between.</p>
+<h3>Formattable code</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>|||
+code
+|||</pre>
+<pre>  code</pre>
+<h3>Plain code</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>###
+code
+###</pre>
+<pre>   code</pre>
+<h3>Indented blocks</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>    indented</pre>
+<h3>HTML tags</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>&lt;tag></pre>
+<h3>Horizontal rules</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>---</pre>
+<pre>_ _ _</pre>
+<pre>~~~</pre>
+<pre>= = =</pre>
+<pre>***</pre>
+<pre>+ + +</pre>
+<h3>Escaping characters</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre> escaped</pre>
+<pre>`escaped</pre>
+<pre>\\\
+escaped
+\\\</pre>
+<h2>Inline elements</h2>
+<p>Inline elements can only contain other inline elements.</p>
+<h3>Bold text</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>*bold*
+**bold**
+***bold***
+*bold * bold*
+** *bold* **
+** ***bold*** **</pre>
+<h3>Italic text</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>_italic_</pre>
+<h3>Superscript text</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>^^superscript^^</pre>
+<h3>Subscript text</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>,,subscript,,</pre>
+<h3>Small text</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>::small::</pre>
+<h3>Strikethrough text</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>~~strikethrough~~</pre>
+<h3>Formattable code</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>|code|</pre>
+<h3>Plain code</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>#code#</pre>
+<h3>Links</h3>
+<p><strong>TODO:</strong> documentation (also mention link definitions).</p>
+<pre>[link]
+[link|url]
+[link|id]
+[link|id|url]
+[link|id|url|title]</pre>
+<h3>HTML tags</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>&lt;tag></pre>
+<h3>Line breaks</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>First line`
+second line.</pre>
+<h3>Escaping characters</h3>
+<p><strong>TODO:</strong> documentation.</p>
+<pre>`*not bold
+\escaped\</pre>
+<h1>Contributions</h1>
+<p>Help from anyone intersted would of course be very much appreciated: currently
+expanding the documentation is the most important task, together with blackbox
+testing, reporting a bug whenever the parser behaves in an unexpected way.</p>
+</body>
+</html>

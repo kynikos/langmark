@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Langmark - README</title>
+    <meta charset="utf-8">
+    <style>
+    pre, code {
+        background-color: #ddf;
+    }
+    code {
+        padding: 0.1em;
+    }
+    pre {
+        padding: 0.2em;
+        border: 1px solid #bbd;
+    }
+    div.langmark-indented {
+        margin-left: 2em;
+    }
+    </style>
+</head>
+<body>
+
+Langmark is a powerful lightweight markup language with a configurable and
+extensible parser. It is mainly inspired by [Markdown], with which it shares
+purpose and philosophy, but also [MediaWiki] is the inspiration for some
+features.
+
+Compared to Markdown, Langmark supports more complex content
+layouts, relying on indentation to define nested elements. It also tries to
+prevent the need for extraneous escape characters as much as possible, often
+allowing to use spaces for the same purpose.
+
+In addition, the parser developed in this project also stores the original
+document in a tree of objects which can be used to easily retrieve and
+manipulate the content programmatically before the conversion to HTML.
+
+Langmark is distributed under the terms of the
+[GNU General Public License v3.0|GPL] (see LICENSE).
+
+  [Markdown]: http://daringfireball.net/projects/markdown/
+  [MediaWiki]: https://www.mediawiki.org/wiki/Markup_spec
+  [GPL]: http://www.gnu.org/copyleft/gpl.html
+
+Parser
+======
+
+Installation
+------------
+
+The Langmark parser and HTML converter developed in this project requires
+[Python 3] with its standard libraries plus the [eventdispatcher] and
+[textparser] modules.
+
+  [Python 3]: https://www.python.org/
+  [eventdispatcher]: https://github.com/kynikos/lib.py.eventdispatcher
+  [textparser]: https://github.com/kynikos/lib.py.textparser
+
+Command-line usage
+------------------
+
+To convert a Langmark file to HTML, run:
+
+   $ langmark html /path/to/file.lm
+
+This will simply print the HTML code in the standard output. You will usually
+want to redirect the output to a file, in order to save it:
+
+   $ langmark html /path/to/file.lm > /path/to/file.html
+
+To read the complete help on commands, run:
+
+   $ langmark --help
+
+Library usage
+-------------
+
+Import the #langmark# module in your script:
+
+   import langmark
+
+Optionally configure or extend Langmark (*TODO:* needs expansion):
+
+   langmark.META_ELEMENTS
+   langmark.BLOCK_FACTORIES
+   langmark.INDENTED_ELEMENTS
+   langmark.INLINE_ELEMENTS
+
+Instantiate the #Langmark# class:
+
+   doc = Langmark()
+
+Open a file and parse it:
+   with open('/path/to/file', 'r') as stream:
+       doc.parse(stream)
+
+The elements tree can be accessed from the #doc.etree# object.
+
+To convert the document to an HTML string:
+   html = doc.etree.convert_to_html()
+
+Syntax
+======
+
+Metadata
+--------
+
+Metadata is part of the document text that will not appear in the
+converted output, but instead defines some values that are stored and possibly
+used by other elements.
+
+=== Header ===
+
+Key/value pairs can be defined in the header of the document with the following
+syntax:
+
+   ::key
+   ::key value
+   ::  key  value
+
+The #::# mark must be at the start of a line; spaces between #::# and #key# are
+allowed; #key# must be separated
+from #value# by any number of whitespace characters; #key# cannot contain
+whitespace characters, as there is no way to escape them; a #value# is
+optional, and #None# will be stored if not present; all whitespace characters
+at the end of the line will be ignored.
+
+As soon as a line that does not qualify as header metadata is found, the header
+is considered terminated, and any later lines in the body that would qualify as
+header metadata will be instead treated as normal text.
+
+Defining a header makes sense only when using Langmark as a library in a
+script: the key/value pairs can be accessed as strings in a dictionary object
+stored in the #doc.header.keys# attribute.
+
+=== Link definitions ===
+
+Links can be defined separately from the document body, and given IDs so that
+they can be easily used in the content. The syntax is very similar to Markdown:
+
+#####################
+[ID]: url
+[ID]: url title
+[ID]: url    'title'
+[ID]:    url "title"
+   [ID]: url (title)
+#####################
+
+A link definition must start with the link #ID# enclosed in square brackets,
+followed by a colon; then the #url# must come, separated by at least one space;
+optionally a #title# can be specified, and it will be assumed to start after
+the first sequence of whitespace characters past the #url#; the #title# can be
+enclosed in quote, double quote or parentheses. Link definitions can be
+liberally preceded by whitespace characters.
+
+Block elements
+--------------
+
+Block elements can contain other block elements or inline elements.
+
+=== Headings ===
+
+Heading elements can be defined with the following syntax:
+
+   = Heading 1
+   == Heading 2
+   === Heading 3
+   ==== Heading 4
+   ===== Heading 5
+   ====== Heading 6
+
+Which will generate:
+
+   <h1>Heading 1</h1>
+   <h2>Heading 2</h2>
+   <h3>Heading 3</h3>
+   <h4>Heading 4</h4>
+   <h5>Heading 5</h5>
+   <h6>Heading 6</h6>
+
+The line must start with a sequence of #=# characters: their number defines the
+level of the heading; any more than 6 will always create an #<h6># element; the
+heading text can be separated from the #=# characters by white space, although
+that is not necessary, unless the text has to start with an #=# sign; the
+text can only contain inline elements; the line can optionally end with a
+sequence of #=# characters, whose number will not affect the level of the
+heading; the final sequence can be separated from the text by white space,
+although that is not necessary, unless the text has to end with an #=# sign.
+
+All the following will create an #<h3># element:
+
+   ===   Heading=====
+   ===Heading  =====
+   === =Heading==   ====
+
+Level-1 and level-2 headings also have two alternative, multiline syntaxes:
+
+   Heading 1
+   =========
+
+   Heading 2
+   ---------
+
+These headings must be preceded by an empty line, unless they appear at the
+start of the document or immediately after the header. The underline for #<h1>#
+elements must be a sequence of at least 3 #=# characters; the underline for
+#<h2># elements must be a sequence of at least 3 #-# or #=# characters, with at
+least one #-# character.
+
+   =========
+   Heading 1
+   =========
+
+   ---------
+   Heading 2
+   =========
+
+With this syntax, #<h1># elements must be overlined and underlined with a
+sequence of at least 3 #=# characters. #<h2># elements must be overlined and
+underlined with a sequence of at least 3 #-# or #=# characters, with at
+least one #-# character.
+
+All types of headings can only contain inline elements.
+
+=== Paragraphs ===
+
+Paragraph elements are created by default, when no other block element is
+matched. Paragraphs are terminated by empty lines. You can write the content
+in several lines, and they will be output as a single one, although line breaks
+will be retained in the HTML source.
+
+  This is a paragraph.
+  `
+  This is
+  a paragraph too.
+
+The above will output:
+
+   <p>This is a paragraph.</p>
+   <p>This is
+   a paragraph too.</p>
+
+If a paragraph is the only child of its parent, the #<p># tags will be omitted.
+
+=== Lists ===
+
+Lists can be defined with the following syntax:
+
+   * item
+   * item
+     * item
+       * item
+     * item
+
+Which will produce:
+
+   <ul>
+   <li>item</li>
+   <li>
+   <p>item</p>
+   <ul>
+   <li>
+   <p>item</p>
+   <ul>
+   <li>item</li>
+   </ul>
+   </li>
+   <li>item</li>
+   </ul>
+
+Unordered lists are introduced by #*# characters; ordered (numbered) lists are
+introduced by a sequence of numbers or a ## # ## sign, followed by a #.#;
+ordered (alphabetical) lists are introduced by 1 letter or a #&# sign,
+followed by a #.#. The item text must always be separated by at least one
+space.
+
+Note that alphabetical lists are actually normal ordered lists with a
+predefined class: #<ol class="langmark-latin">#. In order to make it an actual
+alphabetical list you will have to give it a #list-style-type: lower-alpha#
+rule or similar in the CSS code.
+
+List items can contain any other kind of block and inline elements (except
+headings). The text of an item, and its child elements, must be properly
+indented though, or the item will be terminated:
+
+###################################################
+1. This is
+   some item text.
+
+   ###
+   code block
+   ###
+
+   * item
+   * item
+   * item
+
+2. Another item.
+
+     code block by indentation
+
+   a. item
+   b. item
+   c. item
+
+   Some more item text.
+This text is no longer part of the item.
+###################################################
+
+Mixing two different kinds of lists at the same level of indentation will
+create two different, subsequent lists. There is however no way (yet) to define
+two subsequent lists of the same kind, without having some other element in
+between.
+
+=== Block quotes ===
+
+Block quotes can be defined with the following syntax:
+
+   > > > quoted text
+   > > > quoted text
+   > quoted text
+   > quoted text
+   > > quoted text
+   text
+
+Which will output:
+
+   <blockquote>
+   <blockquote><blockquote>quoted text
+   quoted text</blockquote></blockquote>
+   <p>quoted text
+   quoted text</p>
+   <blockquote>quoted text</blockquote>
+   </blockquote>
+   <p>text</p>
+
+Quoted text is introduced by a sequence of #># characters, whose number define
+the quote level; each character is optionally separated from the others and
+from the quoted text by whitespace characters.
+
+When increasing the quote level by 1, you can also use the simpler list
+notation:
+
+   > quoted text
+     > quoted text
+       some more text
+       some more text
+       > quoted text
+         some more text
+   > quoted text
+   text
+
+Just like with lists, block quotes can contain any other kind of block and
+inline elements (except headings). Again, the text of a quote, and its child
+elements, must be properly indented, or the quote will be terminated (and
+possibly a new one started).
+
+Note that, just like with lists of the same kind, there is no way (yet) to
+define two subsequent block quotes at the same indentatioin level without
+having some other element in between.
+
+=== Formattable code ===
+
+**TODO:** documentation.
+
+   |||
+   code
+   |||
+
+
+  `  code
+
+=== Plain code ===
+
+**TODO:** documentation.
+
+   ###
+   code
+   ###
+
+
+  `   code
+
+=== Indented blocks ===
+
+**TODO:** documentation.
+
+  `    indented
+
+=== HTML tags ===
+
+**TODO:** documentation.
+
+  `<tag>
+
+=== Horizontal rules ===
+
+**TODO:** documentation.
+
+   ---
+
+   _ _ _
+
+   ~~~
+
+   = = =
+
+   ***
+
+   + + +
+
+=== Escaping characters ===
+
+**TODO:** documentation.
+
+  ` escaped
+
+  ``escaped
+
+   \\\
+   escaped
+   \\\
+
+Inline elements
+---------------
+
+Inline elements can only contain other inline elements.
+
+=== Bold text ===
+
+**TODO:** documentation.
+
+   *bold*
+   **bold**
+   ***bold***
+   *bold * bold*
+   ** *bold* **
+   ** ***bold*** **
+
+=== Italic text ===
+
+**TODO:** documentation.
+
+   _italic_
+
+=== Superscript text ===
+
+**TODO:** documentation.
+
+   ^^superscript^^
+
+=== Subscript text ===
+
+**TODO:** documentation.
+
+   ,,subscript,,
+
+=== Small text ===
+
+**TODO:** documentation.
+
+   ::small::
+
+=== Strikethrough text ===
+
+**TODO:** documentation.
+
+   ~~strikethrough~~
+
+=== Formattable code ===
+
+**TODO:** documentation.
+
+   |code|
+
+=== Plain code ===
+
+**TODO:** documentation.
+
+   #code#
+
+=== Links ===
+
+**TODO:** documentation (also mention link definitions).
+
+   [link]
+   [link|url]
+   [link|id]
+   [link|id|url]
+   [link|id|url|title]
+
+=== HTML tags ===
+
+**TODO:** documentation.
+
+   <tag>
+
+=== Line breaks ===
+
+**TODO:** documentation.
+
+   First line`
+   second line.
+
+=== Escaping characters ===
+
+**TODO:** documentation.
+
+   `*not bold
+   \escaped\
+
+Contributions
+=============
+
+Help from anyone intersted would of course be very much appreciated: currently
+expanding the documentation is the most important task, together with blackbox
+testing, reporting a bug whenever the parser behaves in an unexpected way.
+
+</body>
+</html>
