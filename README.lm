@@ -35,6 +35,9 @@ In addition, the parser developed in this project also stores the original
 document in a tree of objects which can be used to easily retrieve and
 manipulate the content programmatically before the conversion to HTML.
 
+The Langmark project is hosted on GitHub at
+[https://github.com/kynikos/langmark/].
+
 Langmark is distributed under the terms of the
 [GNU General Public License v3.0|GPL] (see LICENSE).
 
