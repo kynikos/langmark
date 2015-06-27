@@ -121,9 +121,11 @@ class LinkDefinitions(_MetaDataElementFactory):
     """
     TEST_START_LINES = 1
     METADATA = re.compile(r'^[ \t]*\[(.+?)\]:[ \t]+(.+?)'
-                          r'(?:[ \t]+[\'"](.+?)[\'"])?[ \t]*\n')
+                          r'(?:[ \t]+(?:\'(.+?)\'|"(.+?)"|\((.+?)\)|(.+?)))?'
+                          r'[ \t]*\n')
 
     def process_match(self, langmark_, match):
         if not match:
             raise _BlockElementStartNotMatched()
-        langmark_.links.add_id(match.group(1), match.group(2), match.group(3))
+        langmark_.links.add_id(match.group(1), match.group(2), match.group(3)
+                        or match.group(4) or match.group(5) or match.group(6))

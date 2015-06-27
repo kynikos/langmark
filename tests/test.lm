@@ -1043,6 +1043,20 @@ Text [linkE|id5] text.
 
   Item text.
 
+Text [linkG|id7] text.
+Text [linkH|id8] text.
+Text [linkI|id9] text.
+Text [linkJ|id10] text.
+Text [linkK|id11] text.
+
+[id7]: http://www.url7.com TitleG with spaces
+[id8]: http://www.url8.com 'TitleH with spaces'
+[id9]: http://www.url9.com "TitleI with spaces"
+[id10]: http://www.url10.com (TitleJ with spaces)
+[id11]: http://www.url11.com (TitleK with spaces'
+
+Text [linkL|id12|urlL|TitleL with spaces] text.
+
 ===== Title *5 _(test)_*
 
 Text.
