@@ -44,6 +44,9 @@ whenever the parser behaves in an unexpected way.</p>
 <a href="https://www.python.org/">Python 3</a> with its standard libraries plus the <a href="https://github.com/kynikos/lib.py.eventdispatcher">eventdispatcher</a> and
 <a href="https://github.com/kynikos/lib.py.textparser">textparser</a> modules.</p>
 <h2>Command-line usage</h2>
+<p><strong>TODO:</strong> currently no executable is installed in <code>/usr/bin</code> automatically: the
+script to be run is <code>langmark_.py</code> (note the underscore) in the root folder of
+the project.</p>
 <p>To convert a Langmark file to HTML, run:</p>
 <pre>$ langmark html /path/to/file.lm</pre>
 <p>This will simply print the HTML code in the standard output. You will usually
@@ -156,7 +159,8 @@ least one <code>-</code> character.</p>
 <p>All types of headings can only contain inline elements.</p>
 <h3>Paragraphs</h3>
 <p>Paragraph elements are created by default, when no other block element is
-matched. Paragraphs are terminated by empty lines. You can write the content
+matched. Paragraphs are terminated by empty lines or when another block element
+is found. You can write the content
 in several lines, and they will be output as a single one, although line breaks
 will be retained in the HTML source.</p>
 <pre>This is a paragraph.
@@ -167,7 +171,8 @@ a paragraph too.</pre>
 <pre>&lt;p>This is a paragraph.&lt;/p>
 &lt;p>This is
 a paragraph too.&lt;/p></pre>
-<p>If a paragraph is the only child of its parent, the <code>&lt;p></code> tags will be omitted.</p>
+<p>Paragraphs can only contain inline elements. If a paragraph is the only child
+of its parent, the <code>&lt;p></code> tags will be omitted.</p>
 <h3>Lists</h3>
 <p>Lists can be defined with the following syntax:</p>
 <pre>* item
@@ -243,7 +248,7 @@ quoted text&lt;/p>
 &lt;blockquote>quoted text&lt;/blockquote>
 &lt;/blockquote>
 &lt;p>text&lt;/p></pre>
-<p>Quoted text is introduced by a sequence of <code>></code> characters, whose number define
+<p>Quoted text is introduced by a sequence of <code>></code> characters, whose number defines
 the quote level; each character is optionally separated from the others and
 from the quoted text by whitespace characters.</p>
 <p>When increasing the quote level by 1, you can also use the simpler list
@@ -261,7 +266,7 @@ inline elements (except headings). Again, the text of a quote, and its child
 elements, must be properly indented, or the quote will be terminated (and
 possibly a new one started).</p>
 <p>Note that, just like with lists of the same kind, there is no way (yet) to
-define two subsequent block quotes at the same indentatioin level without
+define two subsequent block quotes at the same indentation level without
 having some other element in between.</p>
 <h3>Formattable code</h3>
 <p><strong>TODO:</strong> documentation.</p>

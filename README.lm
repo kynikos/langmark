@@ -66,6 +66,10 @@ The Langmark parser and HTML converter developed in this project requires
 Command-line usage
 ------------------
 
+**TODO:** currently no executable is installed in #/usr/bin# automatically: the
+script to be run is #langmark_.py# (note the underscore) in the root folder of
+the project.
+
 To convert a Langmark file to HTML, run:
 
    $ langmark html /path/to/file.lm
@@ -232,7 +236,8 @@ All types of headings can only contain inline elements.
 === Paragraphs ===
 
 Paragraph elements are created by default, when no other block element is
-matched. Paragraphs are terminated by empty lines. You can write the content
+matched. Paragraphs are terminated by empty lines or when another block element
+is found. You can write the content
 in several lines, and they will be output as a single one, although line breaks
 will be retained in the HTML source.
 
@@ -247,7 +252,8 @@ The above will output:
    <p>This is
    a paragraph too.</p>
 
-If a paragraph is the only child of its parent, the #<p># tags will be omitted.
+Paragraphs can only contain inline elements. If a paragraph is the only child
+of its parent, the #<p># tags will be omitted.
 
 === Lists ===
 
@@ -341,7 +347,7 @@ Which will output:
    </blockquote>
    <p>text</p>
 
-Quoted text is introduced by a sequence of #># characters, whose number define
+Quoted text is introduced by a sequence of #># characters, whose number defines
 the quote level; each character is optionally separated from the others and
 from the quoted text by whitespace characters.
 
@@ -363,7 +369,7 @@ elements, must be properly indented, or the quote will be terminated (and
 possibly a new one started).
 
 Note that, just like with lists of the same kind, there is no way (yet) to
-define two subsequent block quotes at the same indentatioin level without
+define two subsequent block quotes at the same indentation level without
 having some other element in between.
 
 === Formattable code ===
