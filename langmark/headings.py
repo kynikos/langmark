@@ -34,6 +34,20 @@ from .exceptions import (_BlockElementStartNotMatched,
 #       Make it possible to disable them.
 #       In HTML sections should be enclosed in <div> tags
 #       Perhaps implement them only when converting to HTML
+#       Also give a way to end a section without starting another, e.g.:
+#
+#       == Parent ==
+#
+#       Parent text.
+#
+#       === Child ===
+#
+#       Child text.
+#
+#       =============
+#
+#       Continued parent text.
+#
 
 
 class _Heading(elements._BlockElementContainingInline):
